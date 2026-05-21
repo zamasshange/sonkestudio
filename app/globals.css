@@ -188,11 +188,11 @@
     --hero-d-x: 38%;
     --hero-d-y: 82%;
     background:
-      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 24%), rgba(15, 69, 148, 0.98), transparent 34%),
-      radial-gradient(circle at var(--hero-b-x, 50%) var(--hero-b-y, 44%), rgba(42, 177, 191, 0.72), transparent 36%),
-      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 28%), rgba(244, 166, 70, 0.82), transparent 36%),
-      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 82%), rgba(219, 101, 154, 0.5), transparent 36%),
-      linear-gradient(112deg, #081b52 0%, #126f92 52%, #c86f18 100%);
+      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 24%), rgba(59, 130, 246, 0.9), transparent 34%),
+      radial-gradient(circle at var(--hero-b-x, 50%) var(--hero-b-y, 44%), rgba(99, 102, 241, 0.75), transparent 36%),
+      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 28%), rgba(168, 85, 247, 0.8), transparent 36%),
+      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 82%), rgba(236, 72, 153, 0.5), transparent 36%),
+      linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #4c1d95 100%);
     background-size: 220% 220%;
     animation: sonke-hero-field 8s ease-in-out infinite alternate;
   }
@@ -200,10 +200,10 @@
   .sonke-hero-field::before {
     animation: sonke-hero-wash 7s ease-in-out infinite alternate;
     background:
-      radial-gradient(circle at 8% 70%, rgba(67, 92, 255, 0.78), transparent 34%),
-      radial-gradient(circle at 42% 28%, rgba(62, 218, 244, 0.66), transparent 34%),
-      radial-gradient(circle at 70% 62%, rgba(255, 91, 184, 0.5), transparent 34%),
-      radial-gradient(circle at 96% 18%, rgba(255, 175, 42, 0.74), transparent 36%);
+      radial-gradient(circle at 8% 70%, rgba(59, 130, 246, 0.75), transparent 34%),
+      radial-gradient(circle at 42% 28%, rgba(99, 102, 241, 0.7), transparent 34%),
+      radial-gradient(circle at 70% 62%, rgba(168, 85, 247, 0.6), transparent 34%),
+      radial-gradient(circle at 96% 18%, rgba(236, 72, 153, 0.5), transparent 36%);
     background-size: 210% 210%;
     content: '';
     inset: -24%;

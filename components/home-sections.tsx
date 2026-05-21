@@ -99,7 +99,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 export function HeroSection() {
   return (
-    <section className="bg-background px-5 pb-8 pt-28 sm:px-8 lg:pt-32">
+    <section className="bg-background px-5 pb-6 pt-16 sm:px-8 lg:pt-20">
       <motion.div
         variants={container}
         initial="hidden"
@@ -174,7 +174,7 @@ export function HeroSection() {
 
         <motion.div
           variants={item}
-          className="sonke-hero-field relative mt-4 min-h-[500px] overflow-hidden rounded-[1.2rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] lg:min-h-[620px]"
+          className="sonke-hero-field relative mt-4 min-h-[380px] overflow-hidden rounded-[1.2rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] lg:min-h-[480px]"
         >
           <div className="sonke-hero-mesh absolute inset-0" />
           <motion.div
@@ -189,7 +189,7 @@ export function HeroSection() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground/45 via-foreground/10 to-foreground/15" />
 
-          <div className="relative z-10 flex min-h-[500px] flex-col justify-between p-5 sm:p-7 lg:min-h-[620px]">
+          <div className="relative z-10 flex min-h-[380px] flex-col justify-between p-5 sm:p-7 lg:min-h-[480px]">
             <div className="pointer-events-none absolute right-5 top-10 hidden sm:block lg:right-8">
               <div className="flex flex-col gap-2">
                 {[
@@ -210,7 +210,7 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="max-w-[900px] pt-12 sm:pt-20 lg:pt-36">
+            <div className="max-w-[900px] pt-8 sm:pt-12 lg:pt-16">
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -229,7 +229,7 @@ export function HeroSection() {
                   />
                 ))}
               </motion.div>
-              <h2 className="max-w-[900px] text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+              <h2 className="max-w-[900px] text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
                 <span className="block">Work faster with</span>
                 <span className="sonke-rotating-line mt-1 block h-[1.2em] overflow-hidden text-background">
                   <span className="sonke-rotating-stack block">
@@ -259,7 +259,7 @@ export function HeroSection() {
                 hidden: {},
                 visible: { transition: { delayChildren: 1.02, staggerChildren: 0.07 } },
               }}
-              className="grid gap-3 pt-8 sm:grid-cols-2 lg:grid-cols-5"
+              className="grid gap-3 pt-5 sm:grid-cols-2 lg:grid-cols-5"
             >
               {heroTools.map((tool, index) => {
                 const Icon = tool!.icon
