@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Lenovo\\\\Downloads\\\\hello-there\" -Name)",
+      "Bash(Select-Object -First 20)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm dev *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/ai -H \"Content-Type: application/json\" -d '{\"messages\":[{\"role\":\"user\",\"content\":\"Hello, test the API\"}]}')",
+      "Bash(curl *)",
+      "WebFetch(domain:openrouter.ai)"
+    ]
+  }
+}
