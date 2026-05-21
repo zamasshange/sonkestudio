@@ -180,21 +180,53 @@
 
   .sonke-hero-field {
     background:
-      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 22%), rgba(18, 66, 154, 0.98), transparent 34%),
-      radial-gradient(circle at var(--hero-b-x, 54%) var(--hero-b-y, 38%), rgba(34, 165, 185, 0.82), transparent 32%),
-      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 30%), rgba(247, 167, 66, 0.92), transparent 34%),
-      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 78%), rgba(220, 91, 148, 0.68), transparent 34%),
-      linear-gradient(110deg, #08225f 0%, #137da1 45%, #d56f13 100%);
-    background-size: 175% 175%;
-    animation: sonke-hero-field 11s ease-in-out infinite alternate;
+      radial-gradient(circle at 18% 24%, rgba(15, 69, 148, 0.98), transparent 32%),
+      radial-gradient(circle at 50% 44%, rgba(42, 177, 191, 0.72), transparent 35%),
+      radial-gradient(circle at 82% 28%, rgba(244, 166, 70, 0.82), transparent 34%),
+      radial-gradient(circle at 42% 82%, rgba(219, 101, 154, 0.5), transparent 34%),
+      linear-gradient(112deg, #081b52 0%, #126f92 52%, #c86f18 100%);
+    background-size: cover;
   }
 
   .sonke-hero-mesh {
     background-image:
-      linear-gradient(rgba(255,255,255,.11) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.11) 1px, transparent 1px);
-    background-size: 46px 46px;
-    mask-image: linear-gradient(90deg, rgba(0,0,0,.8), rgba(0,0,0,.15));
+      radial-gradient(circle at 18% 20%, rgba(255,255,255,.16), transparent 24%),
+      radial-gradient(circle at 78% 22%, rgba(255,255,255,.12), transparent 22%),
+      radial-gradient(circle at 58% 84%, rgba(255,255,255,.1), transparent 28%);
+    opacity: 0.78;
+    mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
+  }
+
+  .sonke-type-line {
+    animation: sonke-type-reveal 0.82s steps(var(--chars)) forwards;
+    animation-delay: var(--typing-delay);
+    clip-path: inset(0 100% 0 0);
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+    width: max-content;
+  }
+
+  .sonke-type-line::after {
+    animation: sonke-caret-move 0.82s steps(var(--chars)) forwards;
+    animation-delay: var(--caret-delay);
+    background: currentColor;
+    bottom: 0.1em;
+    content: '';
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0.12em;
+    width: 3px;
+  }
+
+  .sonke-type-line-final::after {
+    animation:
+      sonke-caret-move-final 0.82s steps(var(--chars)) forwards,
+      sonke-caret-blink 0.72s step-end infinite;
+    animation-delay: var(--caret-delay), calc(var(--caret-delay) + 0.82s);
   }
 
   /* Avoora-style button */
@@ -273,6 +305,42 @@
     --hero-d-y: 64%;
     filter: saturate(1.05) hue-rotate(4deg);
   }
+}
+
+@keyframes sonke-type-reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes sonke-caret-move {
+  0% {
+    left: 0;
+    opacity: 1;
+  }
+  99% {
+    left: 100%;
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes sonke-caret-move-final {
+  0% {
+    left: 0;
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 1;
+  }
+}
+
+@keyframes sonke-caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 @keyframes float-medium {

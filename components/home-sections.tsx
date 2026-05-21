@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { ArrowRight, Check, Code2, FileText, GraduationCap, PenTool, Search, Sparkles, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { categories, featuredTools, tools, trendingTools } from '@/lib/tools-data'
@@ -67,6 +67,8 @@ const heroLines = [
   ['polish,', 'and', 'ship', 'without'],
   ['opening', 'ten', 'tabs.'],
 ]
+
+const heroTypedLines = heroLines.map((line) => line.join(' '))
 
 const heroTileVisuals = [
   'from-cyan-500 via-blue-500 to-primary',
@@ -181,18 +183,14 @@ export function HeroSection() {
         >
           <div className="sonke-hero-mesh absolute inset-0" />
           <motion.div
-            className="absolute inset-y-0 left-[-20%] w-[55%] skew-x-[-16deg] bg-white/12"
-            animate={{ x: ['0%', '165%', '0%'] }}
-            transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute left-[42%] top-[-18%] h-72 w-72 rounded-full bg-white/18 blur-3xl"
+            animate={{ scale: [1, 1.08, 1], opacity: [0.22, 0.34, 0.22] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
-            className="absolute inset-0 opacity-40"
-            style={{
-              background:
-                'linear-gradient(115deg, rgba(255,255,255,.08), transparent 18%, rgba(255,255,255,.22) 42%, transparent 64%, rgba(255,255,255,.1))',
-            }}
-            animate={{ x: ['-35%', '35%', '-35%'] }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute bottom-[-22%] right-[8%] h-80 w-80 rounded-full bg-primary/25 blur-3xl"
+            animate={{ scale: [1.05, 0.96, 1.05], opacity: [0.28, 0.18, 0.28] }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground/45 via-foreground/10 to-foreground/15" />
 
@@ -236,25 +234,21 @@ export function HeroSection() {
                   />
                 ))}
               </motion.div>
-              <h2 className="max-w-[780px] text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
-                {heroLines.map((line, lineIndex) => (
-                  <span key={line.join(' ')} className="block">
-                    {line.map((word, wordIndex) => (
-                      <span key={word} className="mr-3 inline-block overflow-hidden align-bottom sm:mr-4">
-                        <motion.span
-                          className="inline-block"
-                          initial={{ y: '112%', rotate: 2, opacity: 0 }}
-                          animate={{ y: '0%', rotate: 0, opacity: 1 }}
-                          transition={{
-                            delay: 0.42 + lineIndex * 0.14 + wordIndex * 0.045,
-                            duration: 0.78,
-                            ease: [0.16, 1, 0.3, 1],
-                          }}
-                        >
-                          {word}
-                        </motion.span>
-                      </span>
-                    ))}
+              <h2 className="max-w-[780px] text-2xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
+                {heroTypedLines.map((line, lineIndex) => (
+                  <span
+                    key={line}
+                    className={`sonke-type-line ${lineIndex === heroTypedLines.length - 1 ? 'sonke-type-line-final' : ''}`}
+                    style={
+                      {
+                        '--chars': line.length,
+                        '--typing-delay': `${0.42 + lineIndex * 0.92}s`,
+                        '--caret-delay': `${0.42 + lineIndex * 0.92}s`,
+                        '--caret-end': `${1.24 + lineIndex * 0.92}s`,
+                      } as CSSProperties
+                    }
+                  >
+                    {line}
                   </span>
                 ))}
               </h2>
@@ -322,21 +316,66 @@ export function HeroSection() {
 }
 
 export function LogoMarquee() {
-  const labels = ['AI Writing', 'PDF Tools', 'Student Desk', 'Developer Lab', 'Business Ops', 'Creator Studio', 'Everyday Utilities']
+  const marqueeItems = categories.map((category) => ({
+    ...category,
+    count: tools.filter((tool) => tool.category === category.id).length,
+  }))
+  const secondLane = [...marqueeItems.slice(3), ...marqueeItems.slice(0, 3)]
 
   return (
-    <section className="overflow-hidden border-y border-border bg-white py-7">
-      <motion.div
-        className="flex w-max gap-4"
-        animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-      >
-        {[...labels, ...labels].map((label, index) => (
-          <div key={`${label}-${index}`} className="flex min-w-[230px] items-center justify-center rounded-md border border-border bg-background px-8 py-4 text-lg font-semibold text-foreground">
-            {label}
-          </div>
-        ))}
-      </motion.div>
+    <section className="relative overflow-hidden border-y border-border bg-white py-5">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-24 bg-gradient-to-r from-white to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-24 bg-gradient-to-l from-white to-transparent" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,.04)_1px,transparent_1px),linear-gradient(0deg,rgba(15,23,42,.035)_1px,transparent_1px)] bg-[size:42px_42px]" />
+      <div className="relative z-10 space-y-3">
+        <motion.div
+          className="flex w-max gap-3"
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        >
+          {[...marqueeItems, ...marqueeItems].map((category, index) => {
+            const Icon = category.icon
+            return (
+              <Link
+                key={`${category.id}-${index}`}
+                href={`/tools?category=${category.id}`}
+                className="group flex min-w-[310px] items-center gap-4 rounded-md border border-border bg-background/95 px-4 py-3 text-foreground shadow-[0_16px_45px_-42px_rgba(15,23,42,0.8)] transition hover:border-primary/40 hover:bg-white"
+              >
+                <span className={`inline-flex h-12 w-12 items-center justify-center rounded-sm ${category.gradient}`}>
+                  <Icon className="h-6 w-6 text-foreground transition group-hover:scale-110" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-lg font-semibold">{category.name}</span>
+                  <span className="mt-1 block text-xs font-semibold uppercase text-muted-foreground">{category.count} tools ready</span>
+                </span>
+                <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+              </Link>
+            )
+          })}
+        </motion.div>
+
+        <div className="flex items-center gap-3">
+          <motion.div
+            className="flex w-max gap-3"
+            animate={{ x: ['-50%', '0%'] }}
+            transition={{ duration: 34, repeat: Infinity, ease: 'linear' }}
+          >
+            {[...secondLane, ...secondLane].map((category, index) => {
+              const Icon = category.icon
+              return (
+                <Link
+                  key={`${category.id}-reverse-${index}`}
+                  href={`/tools?category=${category.id}`}
+                  className="group flex min-w-[260px] items-center gap-3 rounded-md border border-border bg-white px-4 py-3 text-foreground transition hover:border-primary/40 hover:bg-background"
+                >
+                  <Icon className="h-5 w-5 shrink-0 text-primary transition group-hover:rotate-6" />
+                  <span className="truncate text-sm font-semibold">{category.description}</span>
+                </Link>
+              )
+            })}
+          </motion.div>
+        </div>
+      </div>
     </section>
   )
 }
@@ -543,25 +582,37 @@ export function ServicesSection() {
 
 export function FeaturedWorkSection() {
   const featured = trendingTools.slice(0, 4)
+  const workspaceNotes = [
+    { prompt: 'Make this sound more natural', output: 'Clearer tone, tighter phrasing, ready to paste.' },
+    { prompt: 'Rewrite for a sharper angle', output: 'Three alternate versions with different emphasis.' },
+    { prompt: 'Turn rough notes into an email', output: 'Polished subject, opener, body, and CTA.' },
+    { prompt: 'Fix the messy draft', output: 'Grammar, flow, and readability cleaned up.' },
+  ]
 
   return (
-    <section id="featured" className="bg-white px-5 py-24 sm:px-8">
+    <section id="featured" className="overflow-hidden bg-white px-5 py-20 sm:px-8 lg:py-24">
       <div className="mx-auto max-w-[1720px]">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+        <div className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div className="max-w-5xl">
             <SectionLabel>Featured tools</SectionLabel>
-            <h2 className="mt-6 max-w-4xl text-5xl font-semibold leading-tight text-foreground sm:text-7xl">
-              Popular workspaces, tuned for the task in front of you.
+            <h2 className="mt-6 text-4xl font-semibold leading-tight text-foreground sm:text-6xl lg:text-7xl">
+              Popular workspaces that feel ready before you open them.
             </h2>
           </div>
-          <Link href="/tools" className="inline-flex items-center gap-3 text-lg font-semibold text-foreground">
-            View all tools <ArrowRight className="h-5 w-5" />
-          </Link>
+          <div className="lg:justify-self-end">
+            <p className="max-w-lg text-base leading-7 text-muted-foreground sm:text-lg">
+              Each tool is built around one job: add the context, get the output, copy it, and keep moving.
+            </p>
+            <Link href="/tools" className="mt-6 inline-flex items-center gap-3 rounded-sm bg-foreground px-6 py-3.5 text-base font-semibold text-background transition hover:bg-primary">
+              View all tools <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-16 grid gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 lg:grid-cols-4">
           {featured.map((tool, index) => {
             const Icon = tool.icon
+            const note = workspaceNotes[index % workspaceNotes.length]
             return (
               <motion.div
                 key={tool.id}
@@ -571,26 +622,57 @@ export function FeaturedWorkSection() {
                 transition={{ duration: 0.6, delay: index * 0.08 }}
                 whileHover={{ y: -8 }}
               >
-              <Link href={tool.href} className="group block overflow-hidden rounded-md border border-border bg-background">
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={[imageBank.serviceA, imageBank.serviceB, imageBank.serviceC, imageBank.serviceD][index]}
-                    alt={tool.name}
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-foreground/25" />
-                  <div className="absolute left-5 top-5 rounded-sm bg-white px-3 py-2 text-sm font-semibold text-foreground">CASE {String(index + 1).padStart(2, '0')}</div>
-                </div>
-                <div className="p-6">
-                  <Icon className="h-6 w-6 text-primary" style={{ color: tool.iconColor }} />
-                  <h3 className="mt-5 text-2xl font-semibold text-foreground">{tool.name}</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{tool.description}</p>
-                  <div className="mt-8 flex items-center justify-between border-t border-border pt-5 text-sm font-semibold">
-                    Open tool
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                <Link href={tool.href} className={`group block min-h-[520px] overflow-hidden rounded-lg border border-border ${index === 0 ? 'bg-foreground text-background' : 'bg-background text-foreground'} transition hover:border-primary/40 hover:shadow-[0_30px_80px_-55px_rgba(15,23,42,0.8)]`}>
+                  <div className={`relative p-5 ${index === 0 ? 'border-background/15' : 'border-border'} border-b`}>
+                    <div className="flex items-start justify-between gap-4">
+                      <span
+                        className={`inline-flex h-12 w-12 items-center justify-center ${tool.iconColor ? '' : 'rounded-sm border border-black/5 bg-white'}`}
+                        style={{ background: tool.iconColor ? undefined : tool.iconBg, color: tool.iconColor }}
+                      >
+                        <Icon className={tool.iconColor ? 'h-8 w-8' : 'h-6 w-6'} />
+                      </span>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${index === 0 ? 'bg-background/10 text-background/70' : 'bg-white text-muted-foreground'}`}>
+                        Workspace 0{index + 1}
+                      </span>
+                    </div>
+                    <h3 className="mt-8 text-3xl font-semibold leading-tight">{tool.name}</h3>
+                    <p className={`mt-3 min-h-[48px] text-sm leading-6 ${index === 0 ? 'text-background/68' : 'text-muted-foreground'}`}>{tool.description}</p>
                   </div>
-                </div>
-              </Link>
+
+                  <div className="p-5">
+                    <div className={`rounded-md border p-4 ${index === 0 ? 'border-background/15 bg-background/8' : 'border-border bg-white'}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={`text-xs font-semibold uppercase ${index === 0 ? 'text-background/58' : 'text-muted-foreground'}`}>Input</span>
+                        <Sparkles className="h-4 w-4 text-primary" />
+                      </div>
+                      <p className={`mt-4 text-base font-semibold leading-6 ${index === 0 ? 'text-background' : 'text-foreground'}`}>{note.prompt}</p>
+                    </div>
+
+                    <div className={`mt-3 rounded-md border p-4 ${index === 0 ? 'border-background/15 bg-background text-foreground' : 'border-border bg-white'}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-semibold uppercase text-muted-foreground">Output</span>
+                        <span className="h-2 w-2 rounded-full bg-primary" />
+                      </div>
+                      <p className="mt-4 text-sm leading-6 text-muted-foreground">{note.output}</p>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {tool.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className={`rounded-full border px-3 py-1 text-xs font-semibold ${index === 0 ? 'border-background/20 text-background/70' : 'border-border bg-white text-muted-foreground'}`}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className={`mt-7 flex items-center justify-between border-t pt-5 text-sm font-semibold ${index === 0 ? 'border-background/15' : 'border-border'}`}>
+                      <span>{tool.usageCount ? `${Math.round(tool.usageCount / 1000)}k uses` : 'Open workspace'}</span>
+                      <span className="inline-flex items-center gap-2">
+                        Open
+                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
               </motion.div>
             )
           })}
