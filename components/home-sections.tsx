@@ -178,12 +178,12 @@ export function HeroSection() {
         >
           <div className="sonke-hero-mesh absolute inset-0" />
           <motion.div
-            className="absolute left-[42%] top-[-18%] h-72 w-72 rounded-full bg-white/18 blur-3xl"
+            className="absolute left-[42%] top-[-18%] h-56 w-56 rounded-full bg-blue-400/25 blur-3xl"
             animate={{ scale: [1, 1.08, 1], opacity: [0.22, 0.34, 0.22] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
-            className="absolute bottom-[-22%] right-[8%] h-80 w-80 rounded-full bg-primary/25 blur-3xl"
+            className="absolute bottom-[-22%] right-[8%] h-64 w-64 rounded-full bg-violet-500/25 blur-3xl"
             animate={{ scale: [1.05, 0.96, 1.05], opacity: [0.28, 0.18, 0.28] }}
             transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
           />

@@ -7,7 +7,9 @@
       "Bash(pnpm dev *)",
       "Bash(curl -s -X POST http://localhost:3000/api/ai -H \"Content-Type: application/json\" -d '{\"messages\":[{\"role\":\"user\",\"content\":\"Hello, test the API\"}]}')",
       "Bash(curl *)",
-      "WebFetch(domain:openrouter.ai)"
+      "WebFetch(domain:openrouter.ai)",
+      "Bash(npm run *)",
+      "Bash(taskkill *)"
     ]
   }
 }
