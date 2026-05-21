@@ -27,7 +27,7 @@ export function ToolWorkspaceHero({
     : undefined
 
   return (
-    <section className="px-5 pb-8 pt-28 sm:px-8">
+    <section className="px-5 pb-6 pt-24 sm:px-8">
       <div className="mx-auto max-w-[1720px]">
         <Link href={backHref} className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
           <ArrowLeft className="h-4 w-4" />
@@ -35,7 +35,7 @@ export function ToolWorkspaceHero({
         </Link>
 
         <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
-          <div className="relative overflow-hidden rounded-[1.2rem] border border-border bg-white p-7 sm:p-10">
+          <div className="relative overflow-hidden rounded-[1.2rem] border border-border bg-white p-6 sm:p-8">
             <div className="absolute right-8 top-8 max-w-[48%] truncate text-[5rem] font-semibold uppercase leading-none text-muted/60 sm:text-[8rem]">
               {marker}
             </div>
@@ -44,13 +44,13 @@ export function ToolWorkspaceHero({
                 <span className="h-2.5 w-2.5 bg-primary" />
                 {label}
               </p>
-              <h1 className="mt-5 max-w-4xl text-5xl font-semibold leading-none text-foreground sm:text-7xl">
+              <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-none text-foreground sm:text-6xl">
                 {tool.name}
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
+              <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
                 {tool.description}
               </p>
-              <div className="mt-8 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
                 {tool.tags.slice(0, 4).map((tag) => (
                   <span key={tag} className="rounded-sm border border-border bg-background px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
                     {tag}
@@ -60,7 +60,7 @@ export function ToolWorkspaceHero({
             </div>
           </div>
 
-          <div className="sonke-hero-field relative min-h-[260px] overflow-hidden rounded-[1.2rem] border border-border p-6 text-background">
+          <div className="sonke-hero-field relative min-h-[220px] overflow-hidden rounded-[1.2rem] border border-border p-6 text-background">
             <div className="sonke-hero-mesh absolute inset-0" />
             <div className="relative z-10 flex h-full flex-col justify-between">
               <div className="flex items-center justify-between">

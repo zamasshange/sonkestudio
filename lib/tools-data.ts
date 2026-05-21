@@ -257,6 +257,36 @@ export const featuredTools = tools.filter(t => t.featured)
 export const trendingTools = tools.filter(t => t.trending)
 export const newTools = tools.filter(t => t.new)
 
+export const southAfricaPriorityToolIds = [
+  'currency-converter',
+  'timezone-converter',
+  'ai-humanizer',
+  'ai-email',
+  'ai-paraphraser',
+  'ai-grammar',
+  'pdf-to-word',
+  'word-to-pdf',
+  'qr-generator',
+  'math-solver',
+  'homework-explainer',
+  'cv-generator',
+  'biz-resume',
+  'caption-generator',
+  'json-formatter',
+  'explain-code',
+]
+
+const lowIntentPopularIds = new Set(['random-generator', 'fake-data', 'uuid-generator'])
+
+export const southAfricaPopularTools = [
+  ...southAfricaPriorityToolIds
+    .map((id) => tools.find((tool) => tool.id === id))
+    .filter((tool): tool is Tool => Boolean(tool)),
+  ...tools
+    .filter((tool) => !southAfricaPriorityToolIds.includes(tool.id) && !lowIntentPopularIds.has(tool.id))
+    .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)),
+]
+
 export function getToolsByCategory(categoryId: string): Tool[] {
   return tools.filter(t => t.category === categoryId)
 }

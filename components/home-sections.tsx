@@ -3,10 +3,10 @@
 import Image from 'next/image'
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { ArrowRight, Check, Code2, FileText, GraduationCap, PenTool, Search, Sparkles, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { categories, featuredTools, tools, trendingTools } from '@/lib/tools-data'
+import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
 import faviconImage from '@/app/images/favicon.png'
 import { SiInstagram, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
@@ -50,25 +50,20 @@ const item: Variants = {
 const heroTools = Array.from(
   new Map(
     [
-      featuredTools[0],
-      trendingTools[0],
-      tools.find((tool) => tool.id === 'timezone-converter'),
-      tools.find((tool) => tool.id === 'currency-converter'),
-      tools.find((tool) => tool.id === 'flashcard-generator'),
-      tools.find((tool) => tool.id === 'qr-generator'),
+      ...southAfricaPopularTools.slice(0, 5),
     ]
       .filter(Boolean)
       .map((tool) => [tool!.id, tool!]),
   ).values(),
 ).slice(0, 5)
 
-const heroLines = [
-  ['Build,', 'convert,', 'explain,'],
-  ['polish,', 'and', 'ship', 'without'],
-  ['opening', 'ten', 'tabs.'],
+const heroRotatingTasks = [
+  'AI writing tools',
+  'PDF cleanup',
+  'student helpers',
+  'creator workflows',
+  'developer fixes',
 ]
-
-const heroTypedLines = heroLines.map((line) => line.join(' '))
 
 const heroTileVisuals = [
   'from-cyan-500 via-blue-500 to-primary',
@@ -104,7 +99,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 export function HeroSection() {
   return (
-    <section className="bg-background px-5 pb-10 pt-36 sm:px-8 lg:pt-40">
+    <section className="bg-background px-5 pb-8 pt-28 sm:px-8 lg:pt-32">
       <motion.div
         variants={container}
         initial="hidden"
@@ -119,7 +114,7 @@ export function HeroSection() {
             >
               Free AI toolbox for real work
             </motion.p>
-            <h1 className="max-w-[1120px] overflow-hidden text-[3.5rem] font-semibold leading-none text-foreground sm:text-[5.5rem] lg:text-[7.6rem]">
+            <h1 className="max-w-[1120px] overflow-hidden text-[3.5rem] font-semibold leading-none text-foreground sm:text-[5.5rem] lg:text-[7.2rem]">
               <motion.span
                 className="block"
                 initial={{ y: '105%', opacity: 0 }}
@@ -179,7 +174,7 @@ export function HeroSection() {
 
         <motion.div
           variants={item}
-          className="sonke-hero-field relative mt-4 min-h-[430px] overflow-hidden rounded-[1.2rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] lg:min-h-[455px]"
+          className="sonke-hero-field relative mt-4 min-h-[500px] overflow-hidden rounded-[1.2rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] lg:min-h-[620px]"
         >
           <div className="sonke-hero-mesh absolute inset-0" />
           <motion.div
@@ -194,7 +189,7 @@ export function HeroSection() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground/45 via-foreground/10 to-foreground/15" />
 
-          <div className="relative z-10 flex min-h-[430px] flex-col justify-between p-5 sm:p-7 lg:min-h-[455px]">
+          <div className="relative z-10 flex min-h-[500px] flex-col justify-between p-5 sm:p-7 lg:min-h-[620px]">
             <div className="pointer-events-none absolute right-5 top-10 hidden sm:block lg:right-8">
               <div className="flex flex-col gap-2">
                 {[
@@ -215,7 +210,7 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="max-w-[760px] pt-16 sm:pt-20 lg:pt-24">
+            <div className="max-w-[900px] pt-12 sm:pt-20 lg:pt-36">
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -234,23 +229,18 @@ export function HeroSection() {
                   />
                 ))}
               </motion.div>
-              <h2 className="max-w-[780px] text-2xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
-                {heroTypedLines.map((line, lineIndex) => (
-                  <span
-                    key={line}
-                    className={`sonke-type-line ${lineIndex === heroTypedLines.length - 1 ? 'sonke-type-line-final' : ''}`}
-                    style={
-                      {
-                        '--chars': line.length,
-                        '--typing-delay': `${0.42 + lineIndex * 0.92}s`,
-                        '--caret-delay': `${0.42 + lineIndex * 0.92}s`,
-                        '--caret-end': `${1.24 + lineIndex * 0.92}s`,
-                      } as CSSProperties
-                    }
-                  >
-                    {line}
+              <h2 className="max-w-[900px] text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+                <span className="block">Work faster with</span>
+                <span className="sonke-rotating-line mt-1 block h-[1.2em] overflow-hidden text-background">
+                  <span className="sonke-rotating-stack block">
+                    {heroRotatingTasks.map((task) => (
+                      <span key={task} className="block h-[1.2em]">
+                        {task}
+                      </span>
+                    ))}
+                    <span className="block h-[1.2em]">{heroRotatingTasks[0]}</span>
                   </span>
-                ))}
+                </span>
               </h2>
               <motion.p
                 initial={{ opacity: 0, y: 18 }}
@@ -258,7 +248,7 @@ export function HeroSection() {
                 transition={{ delay: 0.9, duration: 0.65, ease: 'easeOut' }}
                 className="mt-3 max-w-2xl text-sm leading-6 text-background/80 sm:text-base"
               >
-                SONKE brings practical AI tools, document utilities, student helpers, and developer workspaces into one fast, friendly system.
+                The right workspace appears when the job changes.
               </motion.p>
             </div>
 
@@ -269,7 +259,7 @@ export function HeroSection() {
                 hidden: {},
                 visible: { transition: { delayChildren: 1.02, staggerChildren: 0.07 } },
               }}
-              className="grid gap-3 pt-6 sm:grid-cols-2 lg:grid-cols-5"
+              className="grid gap-3 pt-8 sm:grid-cols-2 lg:grid-cols-5"
             >
               {heroTools.map((tool, index) => {
                 const Icon = tool!.icon
@@ -283,7 +273,7 @@ export function HeroSection() {
                   >
                     <Link
                       href={tool!.href}
-                      className="group grid h-[78px] grid-cols-[86px_1fr] items-center overflow-hidden rounded-md border border-background/35 bg-background/78 p-2 text-foreground backdrop-blur-xl transition hover:-translate-y-1 hover:bg-background"
+                      className="group grid h-[70px] grid-cols-[78px_1fr] items-center overflow-hidden rounded-md border border-background/35 bg-background/78 p-2 text-foreground backdrop-blur-xl transition hover:-translate-y-1 hover:bg-background"
                     >
                       <div className={`relative h-full overflow-hidden rounded-sm bg-gradient-to-r ${heroTileVisuals[index % heroTileVisuals.length]}`}>
                         <div className="absolute inset-0 opacity-45 [background-image:linear-gradient(90deg,rgba(255,255,255,.55)_0_16%,transparent_16%_30%,rgba(15,23,42,.22)_30%_43%,transparent_43%_56%,rgba(255,255,255,.35)_56%_70%,transparent_70%)]" />
@@ -385,7 +375,7 @@ export function ServicesSection() {
     ...category,
     image: [imageBank.serviceA, imageBank.serviceB, imageBank.serviceC, imageBank.serviceD][index % 4],
   }))
-  const previewTools = tools.slice(0, 6)
+  const previewTools = southAfricaPopularTools.slice(0, 6)
 
   return (
     <section id="services" className="bg-background px-5 py-20 sm:px-8 lg:py-24">
@@ -581,7 +571,7 @@ export function ServicesSection() {
 }
 
 export function FeaturedWorkSection() {
-  const featured = trendingTools.slice(0, 4)
+  const featured = southAfricaPopularTools.slice(0, 4)
   const workspaceNotes = [
     { prompt: 'Make this sound more natural', output: 'Clearer tone, tighter phrasing, ready to paste.' },
     { prompt: 'Rewrite for a sharper angle', output: 'Three alternate versions with different emphasis.' },

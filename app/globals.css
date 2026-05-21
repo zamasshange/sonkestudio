@@ -179,13 +179,38 @@
   }
 
   .sonke-hero-field {
+    --hero-a-x: 14%;
+    --hero-a-y: 18%;
+    --hero-b-x: 46%;
+    --hero-b-y: 36%;
+    --hero-c-x: 86%;
+    --hero-c-y: 28%;
+    --hero-d-x: 38%;
+    --hero-d-y: 82%;
     background:
-      radial-gradient(circle at 18% 24%, rgba(15, 69, 148, 0.98), transparent 32%),
-      radial-gradient(circle at 50% 44%, rgba(42, 177, 191, 0.72), transparent 35%),
-      radial-gradient(circle at 82% 28%, rgba(244, 166, 70, 0.82), transparent 34%),
-      radial-gradient(circle at 42% 82%, rgba(219, 101, 154, 0.5), transparent 34%),
+      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 24%), rgba(15, 69, 148, 0.98), transparent 34%),
+      radial-gradient(circle at var(--hero-b-x, 50%) var(--hero-b-y, 44%), rgba(42, 177, 191, 0.72), transparent 36%),
+      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 28%), rgba(244, 166, 70, 0.82), transparent 36%),
+      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 82%), rgba(219, 101, 154, 0.5), transparent 36%),
       linear-gradient(112deg, #081b52 0%, #126f92 52%, #c86f18 100%);
-    background-size: cover;
+    background-size: 220% 220%;
+    animation: sonke-hero-field 8s ease-in-out infinite alternate;
+  }
+
+  .sonke-hero-field::before {
+    animation: sonke-hero-wash 7s ease-in-out infinite alternate;
+    background:
+      radial-gradient(circle at 8% 70%, rgba(67, 92, 255, 0.78), transparent 34%),
+      radial-gradient(circle at 42% 28%, rgba(62, 218, 244, 0.66), transparent 34%),
+      radial-gradient(circle at 70% 62%, rgba(255, 91, 184, 0.5), transparent 34%),
+      radial-gradient(circle at 96% 18%, rgba(255, 175, 42, 0.74), transparent 36%);
+    background-size: 210% 210%;
+    content: '';
+    inset: -24%;
+    mix-blend-mode: screen;
+    opacity: 0.95;
+    position: absolute;
+    transform: translate3d(0, 0, 0);
   }
 
   .sonke-hero-mesh {
@@ -227,6 +252,10 @@
       sonke-caret-move-final 0.82s steps(var(--chars)) forwards,
       sonke-caret-blink 0.72s step-end infinite;
     animation-delay: var(--caret-delay), calc(var(--caret-delay) + 0.82s);
+  }
+
+  .sonke-rotating-stack {
+    animation: sonke-task-rotate 7.5s cubic-bezier(0.76, 0, 0.24, 1) infinite;
   }
 
   /* Avoora-style button */
@@ -305,6 +334,38 @@
     --hero-d-y: 64%;
     filter: saturate(1.05) hue-rotate(4deg);
   }
+}
+
+@keyframes sonke-hero-wash {
+  0% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) saturate(1);
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+  35% {
+    background-position: 55% 25%;
+    filter: hue-rotate(-12deg) saturate(1.18);
+    transform: translate3d(3%, 2%, 0) scale(1.04);
+  }
+  70% {
+    background-position: 88% 75%;
+    filter: hue-rotate(10deg) saturate(1.08);
+    transform: translate3d(-2%, 4%, 0) scale(1.02);
+  }
+  100% {
+    background-position: 100% 50%;
+    filter: hue-rotate(18deg) saturate(1.16);
+    transform: translate3d(4%, -3%, 0) scale(1.05);
+  }
+}
+
+@keyframes sonke-task-rotate {
+  0%, 14% { transform: translateY(0); }
+  20%, 34% { transform: translateY(-1.2em); }
+  40%, 54% { transform: translateY(-2.4em); }
+  60%, 74% { transform: translateY(-3.6em); }
+  80%, 94% { transform: translateY(-4.8em); }
+  100% { transform: translateY(-6em); }
 }
 
 @keyframes sonke-type-reveal {

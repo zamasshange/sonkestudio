@@ -402,25 +402,25 @@ Use the selected context to shape the result. If any context is blank, make a se
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background text-foreground">
-      <section className="px-5 pb-8 pt-28 sm:px-8">
+      <section className="px-5 pb-6 pt-24 sm:px-8">
         <div className="mx-auto max-w-[1720px]">
           <Link href={backHref} className="mb-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="w-4 h-4" />
             Back to Tools
           </Link>
           <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
-            <div className="relative overflow-hidden rounded-[1.2rem] border border-border bg-white p-7 sm:p-10">
+            <div className="relative overflow-hidden rounded-[1.2rem] border border-border bg-white p-6 sm:p-8">
               <div className="absolute right-8 top-8 text-[8rem] font-semibold leading-none text-muted/60">AI</div>
               <div className="relative z-10">
                 <p className="flex items-center gap-3 text-sm font-semibold uppercase text-muted-foreground">
                   <span className="h-2.5 w-2.5 bg-primary" />
                   AI writing workspace
                 </p>
-                <h1 className="mt-5 max-w-4xl text-5xl font-semibold leading-none text-foreground sm:text-7xl">{tool.name}</h1>
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">{tool.description}</p>
+                <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-none text-foreground sm:text-6xl">{tool.name}</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{tool.description}</p>
               </div>
             </div>
-            <div className="sonke-hero-field relative min-h-[260px] overflow-hidden rounded-[1.2rem] border border-border p-6 text-background">
+            <div className="sonke-hero-field relative min-h-[220px] overflow-hidden rounded-[1.2rem] border border-border p-6 text-background">
               <div className="sonke-hero-mesh absolute inset-0" />
               <div className="relative z-10 flex h-full flex-col justify-between">
                 <div className="flex items-center justify-between">
@@ -449,18 +449,36 @@ Use the selected context to shape the result. If any context is blank, make a se
           <main className="space-y-6">
             <section className="rounded-md border border-border bg-white p-6 avoora-soft-shadow">
               {/* Brief input and Settings are visible together to aid discoverability */}
-              <div className="flex flex-col">
-                <div className="m-0 pt-6">
+              <div className="sticky top-24 z-20 -mx-6 -mt-6 mb-6 flex flex-col gap-3 border-b border-border bg-white/95 p-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Ready to generate</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedMode} / {selectedTone} / {input.length} characters
+                  </p>
+                </div>
+                <Button onClick={() => processText()} disabled={!input.trim() || loading} className="rounded-sm bg-primary text-primary-foreground gap-2 px-6">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                  Transform text
+                </Button>
+              </div>
+              <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+                <div className="m-0">
                   <label className="grid gap-2 text-sm font-medium text-foreground">
                     {writingProfile.briefLabel}
                     <Textarea
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder={writingProfile.placeholder}
-                      className="min-h-[360px] resize-none rounded-sm border border-border bg-background p-5 font-mono text-sm"
+                      className="min-h-[360px] resize-none rounded-sm border border-border bg-background p-5 font-mono text-sm xl:min-h-[430px]"
                     />
                   </label>
-                  <div className="mt-3 text-xs text-muted-foreground">{input.length} characters</div>
+                  <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-xs text-muted-foreground">{input.length} characters</div>
+                    <Button onClick={() => processText()} disabled={!input.trim() || loading} className="rounded-sm bg-primary text-primary-foreground gap-2 px-6">
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                      Transform text
+                    </Button>
+                  </div>
 
                   <div className="mt-6">
                     <p className="text-sm font-semibold text-foreground">Quick examples</p>
@@ -478,11 +496,19 @@ Use the selected context to shape the result. If any context is blank, make a se
                   </div>
                 </div>
 
-                <div className="m-0 pt-6">
-                  <div className="grid gap-6 xl:grid-cols-[1fr_1fr_1.2fr]">
+                <aside className="m-0 rounded-md border border-border bg-background p-4 xl:sticky xl:top-28 xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Settings</p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">{selectedMode} / {selectedTone}</p>
+                    </div>
+                    <Sparkles className="h-5 w-5 text-muted-foreground" />
+                  </div>
+
+                  <div className="mt-5 grid gap-5">
                     <div>
                       <p className="text-sm font-semibold text-foreground">Tone</p>
-                      <div className="mt-3 grid gap-2">
+                      <div className="mt-3 grid grid-cols-2 gap-2">
                         {toneOptions.map((tone) => (
                           <button
                             key={tone.id}
@@ -502,7 +528,7 @@ Use the selected context to shape the result. If any context is blank, make a se
 
                     <div>
                       <p className="text-sm font-semibold text-foreground">Mode</p>
-                      <div className="mt-3 grid gap-2">
+                      <div className="mt-3 grid grid-cols-2 gap-2">
                         {modeOptions.map((mode) => (
                           <button
                             key={mode.id}
@@ -549,16 +575,8 @@ Use the selected context to shape the result. If any context is blank, make a se
                       </div>
                     </div>
                   </div>
-                </div>
+                </aside>
               </div>
-
-              <div className="mt-6 flex justify-end">
-                <Button onClick={() => processText()} disabled={!input.trim() || loading} className="rounded-sm bg-primary text-primary-foreground gap-2 px-6">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-                  Transform text
-                </Button>
-              </div>
-
               {error && (
                 <div className="mt-4 rounded-sm border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                   {error}

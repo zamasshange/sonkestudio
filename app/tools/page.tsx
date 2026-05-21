@@ -15,6 +15,7 @@ import {
   getToolsByCategory,
   newTools,
   searchTools,
+  southAfricaPopularTools,
   Tool,
   tools,
   trendingTools,
@@ -42,7 +43,7 @@ const grid: Variants = {
   visible: { transition: { staggerChildren: 0.045 } },
 }
 
-const trendingSearches = ['AI Humanizer', 'Time Zone', 'QR Generator', 'JSON Formatter', 'Math Solver']
+const trendingSearches = ['Currency Converter', 'Time Zone', 'AI Humanizer', 'PDF to Word', 'CV Generator']
 
 function dedupeTools(input: Tool[]) {
   return Array.from(new Map(input.map((tool) => [tool.id, tool])).values())
@@ -246,7 +247,7 @@ export default function ToolsPage() {
     return result
   }, [activeCategory, searchQuery])
 
-  const leadTools = dedupeTools([...featuredTools, ...trendingTools]).slice(0, 6)
+  const leadTools = dedupeTools([...southAfricaPopularTools, ...featuredTools, ...trendingTools]).slice(0, 8)
   const activeCategoryName = categories.find((category) => category.id === activeCategory)?.name
 
   return (
@@ -388,9 +389,9 @@ export default function ToolsPage() {
         <div className="mx-auto max-w-[1720px]">
           <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <SectionLabel>{searchQuery || activeCategory ? 'Filtered results' : 'Featured workspaces'}</SectionLabel>
+              <SectionLabel>{searchQuery || activeCategory ? 'Filtered results' : 'Popular in South Africa'}</SectionLabel>
               <h2 className="mt-5 text-5xl font-semibold leading-tight sm:text-7xl">
-                {searchQuery || activeCategory ? `${filteredTools.length} result${filteredTools.length === 1 ? '' : 's'}` : 'Start with what is popular.'}
+                {searchQuery || activeCategory ? `${filteredTools.length} result${filteredTools.length === 1 ? '' : 's'}` : 'Start with the tools people actually need.'}
               </h2>
               {activeCategoryName && <p className="mt-4 text-lg text-muted-foreground">Showing {activeCategoryName}</p>}
             </div>
