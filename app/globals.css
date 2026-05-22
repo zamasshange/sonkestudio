@@ -467,3 +467,39 @@
 .cl-footer {
   background: transparent !important;
 }
+
+/* Clerk UserProfile — /account (minimal overrides; let Clerk handle row layout) */
+.sonke-clerk-profile {
+  width: 100%;
+}
+
+.sonke-clerk-profile .cl-rootBox,
+.sonke-clerk-profile .cl-cardBox,
+.sonke-clerk-profile .cl-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.sonke-clerk-profile .cl-navbar {
+  border-right: 1px solid var(--border) !important;
+  background: var(--background) !important;
+}
+
+.sonke-clerk-profile .cl-pageScrollBox {
+  min-width: 0 !important;
+  padding: 1rem 1.25rem !important;
+}
+
+.sonke-clerk-profile .cl-profileSection {
+  border-bottom: 1px solid var(--border) !important;
+  padding: 1.25rem 0 !important;
+  margin-bottom: 1.25rem !important;
+}
+
+.sonke-clerk-profile .cl-profileSectionPrimaryButton {
+  position: relative !important;
+  inset: auto !important;
+}

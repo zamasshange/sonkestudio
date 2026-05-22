@@ -11,7 +11,7 @@ import {
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen bg-background overflow-hidden">
+    <main className="relative min-h-screen overflow-x-hidden bg-background">
       <Navbar />
       
       {/* Avoora-inspired Hero */}

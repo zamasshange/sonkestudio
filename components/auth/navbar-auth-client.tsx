@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
-import { ArrowRight, LayoutGrid } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 
@@ -16,25 +16,23 @@ export function NavbarAuthClient() {
 
   if (isSignedIn) {
     return (
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2">
         {hasDesk && (
           <Link
             href="/tools?desk=1"
-            className="hidden items-center gap-2 border border-border bg-white px-3 py-2 text-xs font-semibold uppercase text-foreground transition hover:border-primary/50 sm:inline-flex"
+            className="inline-flex max-w-[9.5rem] items-center gap-2 whitespace-nowrap rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-semibold uppercase leading-none tracking-wide text-foreground transition hover:border-primary/40 sm:max-w-none sm:px-3.5 sm:text-xs"
+            title={persona ? `${persona.label} workspace` : 'My desk'}
           >
-            <LayoutGrid className="h-3.5 w-3.5 text-primary" />
-            My desk
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+            <span className="truncate">
+              {persona ? `${persona.label}` : 'My desk'}
+            </span>
           </Link>
-        )}
-        {persona && (
-          <span className="hidden rounded-sm border border-primary/20 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold uppercase text-primary md:inline">
-            {persona.label}
-          </span>
         )}
         <UserButton
           appearance={{
             elements: {
-              avatarBox: 'h-9 w-9 border border-border rounded-sm sm:h-10 sm:w-10',
+              avatarBox: 'h-9 w-9 rounded-full border border-border sm:h-10 sm:w-10',
             },
           }}
           userProfileUrl="/account"

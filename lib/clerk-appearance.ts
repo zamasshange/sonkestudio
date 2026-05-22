@@ -28,12 +28,32 @@ export const sonkeClerkAppearance: Appearance = {
     formButtonPrimary:
       'bg-primary text-primary-foreground hover:bg-foreground rounded-sm h-11 text-sm font-semibold normal-case',
     footerActionLink: 'text-primary font-semibold hover:text-foreground',
-    identityPreviewEditButton: 'text-primary',
+    identityPreviewEditButton: 'text-primary font-semibold shrink-0',
     formFieldAction: 'text-primary font-semibold',
     otpCodeFieldInput: 'border border-border rounded-sm',
     alertText: 'text-sm',
     navbar: 'hidden',
     footer: 'bg-transparent',
     footerAction: 'justify-center py-4',
+  },
+}
+
+export const sonkeClerkProfileAppearance: Appearance = {
+  variables: {
+    ...sonkeClerkAppearance.variables,
+  },
+  elements: {
+    ...sonkeClerkAppearance.elements,
+    rootBox: 'w-full',
+    cardBox: 'w-full shadow-none',
+    card: 'w-full shadow-none border-0 bg-transparent',
+    navbar: 'w-full shrink-0',
+    navbarButton: 'text-sm font-semibold',
+    pageScrollBox: 'w-full flex-1 min-w-0',
+    page: 'w-full',
+    profilePage: 'w-full',
+    profileSection: 'w-full',
+    profileSectionPrimaryButton: 'text-primary font-semibold text-sm shrink-0',
+    scrollBox: 'w-full',
   },
 }

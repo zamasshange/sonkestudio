@@ -108,17 +108,20 @@ export function HeroSection() {
         animate="visible"
         className="mx-auto max-w-[1820px]"
       >
-        <motion.div variants={item} className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
-          <div className="min-w-0 flex-1">
+        <motion.div
+          variants={item}
+          className="flex flex-col gap-6 sm:gap-8 min-[1440px]:flex-row min-[1440px]:items-end min-[1440px]:justify-between min-[1440px]:gap-10"
+        >
+          <div className="min-w-0 flex-1 min-[1440px]:max-w-[calc(100%-26rem)] min-[1440px]:pr-6">
             <motion.p
               variants={item}
               className="mb-2 text-sm font-semibold uppercase text-muted-foreground"
             >
               Free AI toolbox for real work
             </motion.p>
-            <h1 className="max-w-[1120px] overflow-hidden text-[3.5rem] font-semibold leading-none text-foreground sm:text-[5.5rem] lg:text-[7.2rem]">
+            <h1 className="max-w-full overflow-hidden font-semibold leading-none text-foreground">
               <motion.span
-                className="block"
+                className="block text-[clamp(2.5rem,8vw,4.5rem)] sm:text-[clamp(3rem,7vw,5rem)] lg:text-[clamp(3.5rem,6vw,5.5rem)] min-[1440px]:text-[clamp(3.5rem,4.5vw,6rem)]"
                 initial={{ y: '105%', opacity: 0 }}
                 animate={{ y: '0%', opacity: 1 }}
                 transition={{ delay: 0.16, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
@@ -128,12 +131,12 @@ export function HeroSection() {
             </h1>
           </div>
 
-          <motion.div
-            variants={item}
-            whileHover={{ y: -6, rotate: -0.4 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[452px] overflow-hidden rounded-lg border border-border bg-white p-3 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.7)] lg:w-[452px] lg:min-w-[452px]"
-          >
+            <motion.div
+              variants={item}
+              whileHover={{ y: -6, rotate: -0.4 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full shrink-0 overflow-hidden rounded-lg border border-border bg-white p-3 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.7)] sm:max-w-[360px] min-[1440px]:w-[400px] min-[1440px]:max-w-[400px]"
+            >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-cyan-500 to-foreground" />
             <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[80px_minmax(0,1fr)]">
               <div className="flex h-[72px] w-[72px] items-center justify-center rounded-md border border-border bg-background p-3 shadow-inner sm:h-20 sm:w-20">
