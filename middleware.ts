@@ -19,6 +19,7 @@ export const config = {
     '/sign-in(.*)',
     '/sign-up(.*)',
     '/onboarding',
+    '/account',
     '/api/user/preferences',
   ],
 }

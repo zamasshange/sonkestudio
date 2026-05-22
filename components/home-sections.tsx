@@ -6,6 +6,8 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { ArrowRight, Check, Code2, FileText, GraduationCap, PenTool, Search, Sparkles, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { pickToolsForUser } from '@/lib/filter-tools'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
 import faviconImage from '@/app/images/favicon.png'
 import { SiInstagram, SiX } from 'react-icons/si'
@@ -370,18 +372,31 @@ export function LogoMarquee() {
 }
 
 export function ServicesSection() {
-  const serviceCards = categories.map((category, index) => ({
-    ...category,
-    image: [imageBank.serviceA, imageBank.serviceB, imageBank.serviceC, imageBank.serviceD][index % 4],
-    count: tools.filter((tool) => tool.category === category.id).length,
-    samples: tools.filter((tool) => tool.category === category.id).slice(0, 3),
-  }))
-  const previewTools = southAfricaPopularTools.slice(0, 6)
+  const { prefs, persona, hasDesk, isSignedIn } = useUserPreferences()
+  const serviceCards = categories
+    .filter((category) => !hasDesk || !prefs || prefs.toolCategories.includes(category.id))
+    .map((category, index) => ({
+      ...category,
+      image: [imageBank.serviceA, imageBank.serviceB, imageBank.serviceC, imageBank.serviceD][index % 4],
+      count: tools.filter((tool) => tool.category === category.id).length,
+      samples: tools.filter((tool) => tool.category === category.id).slice(0, 3),
+    }))
+  const previewTools = pickToolsForUser(southAfricaPopularTools, prefs, 6)
 
   return (
-    <section id="services" className="bg-background px-5 py-20 sm:px-8 lg:py-24">
-      <div className="mx-auto max-w-[1720px]">
-        <div className="grid gap-5 lg:grid-cols-[0.95fr_1.45fr] lg:items-stretch">
+    <section id="services" className="overflow-x-hidden bg-background px-5 py-20 sm:px-8 lg:py-24">
+      <div className="mx-auto w-full max-w-[1720px]">
+        {hasDesk && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-primary/20 bg-primary/5 px-4 py-3">
+            <p className="text-sm font-semibold text-foreground">
+              Showing tools for your <span className="text-primary">{persona?.label}</span> desk
+            </p>
+            <Link href="/tools?desk=1" className="text-xs font-semibold uppercase text-primary hover:text-foreground">
+              Open filtered tools
+            </Link>
+          </div>
+        )}
+        <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.45fr)] lg:items-stretch">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -438,19 +453,26 @@ export function ServicesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, delay: 0.08, ease: 'easeOut' }}
-            className="overflow-hidden rounded-lg border border-border bg-white"
+            className="min-w-0 overflow-hidden rounded-lg border border-border bg-white"
           >
-            <div className="grid min-h-[520px] lg:grid-cols-[1fr_330px]">
-              <div className="p-5 sm:p-8">
+            <div className="grid min-h-0 lg:grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(220px,260px)]">
+              <div className="min-w-0 p-5 sm:p-8">
                 <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3 rounded-md border border-border bg-background px-4 py-3 text-muted-foreground sm:min-w-[360px]">
-                    <Search className="h-5 w-5" />
-                    <span className="text-sm font-medium">Find a tool for the task in front of you</span>
+                  <div className="flex min-w-0 items-center gap-3 rounded-md border border-border bg-background px-4 py-3 text-muted-foreground">
+                    <Search className="h-5 w-5 shrink-0" />
+                    <span className="truncate text-sm font-medium">
+                      {isSignedIn && hasDesk
+                        ? `Tools picked for ${persona?.label ?? 'you'}`
+                        : 'Find a tool for the task in front of you'}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <Link
+                    href={hasDesk ? '/tools?desk=1' : '/tools'}
+                    className="flex shrink-0 items-center gap-2 text-sm font-semibold text-primary"
+                  >
                     <Sparkles className="h-4 w-4" />
-                    Curated workspaces
-                  </div>
+                    {hasDesk ? 'My desk' : 'All tools'}
+                  </Link>
                 </div>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -485,22 +507,30 @@ export function ServicesSection() {
                 </div>
               </div>
 
-              <div className="border-t border-border bg-background p-5 sm:p-8 lg:border-l lg:border-t-0">
+              <div className="min-w-0 border-t border-border bg-background p-5 sm:p-6 xl:border-l xl:border-t-0">
                 <p className="text-sm font-semibold uppercase text-muted-foreground">Inside SONKE</p>
-                <div className="mt-6 space-y-4">
+                <div className="mt-4 space-y-3">
                   {[
-                    { value: `${tools.length}+`, label: 'live tools' },
-                    { value: '8', label: 'focused categories' },
+                    {
+                      value: hasDesk
+                        ? `${previewTools.length}`
+                        : `${tools.length}+`,
+                      label: hasDesk ? 'on your desk' : 'live tools',
+                    },
+                    {
+                      value: hasDesk && prefs ? `${prefs.toolCategories.length}` : '8',
+                      label: hasDesk ? 'your systems' : 'focused categories',
+                    },
                     { value: 'Free', label: 'to start using' },
                   ].map((stat) => (
-                    <div key={stat.label} className="rounded-md border border-border bg-white p-5">
-                      <p className="text-5xl font-semibold leading-none text-foreground">{stat.value}</p>
-                      <p className="mt-3 text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <div key={stat.label} className="rounded-md border border-border bg-white p-4">
+                      <p className="text-3xl font-semibold leading-none text-foreground sm:text-4xl">{stat.value}</p>
+                      <p className="mt-2 text-sm font-medium text-muted-foreground">{stat.label}</p>
                     </div>
                   ))}
                 </div>
-                <div className="mt-6 overflow-hidden rounded-md">
-                  <img src={imageBank.aboutA} alt="A focused digital workspace" className="h-40 w-full object-cover" />
+                <div className="mt-4 overflow-hidden rounded-md">
+                  <img src={imageBank.aboutA} alt="A focused digital workspace" className="h-32 w-full object-cover sm:h-36" />
                 </div>
               </div>
             </div>
@@ -613,7 +643,8 @@ export function ServicesSection() {
 }
 
 export function FeaturedWorkSection() {
-  const featured = southAfricaPopularTools.slice(0, 6)
+  const { prefs, persona, hasDesk } = useUserPreferences()
+  const featured = pickToolsForUser(southAfricaPopularTools, prefs, 6)
   const primaryTool = featured[0]
   const PrimaryIcon = primaryTool.icon
   const quickStats = [
@@ -623,13 +654,15 @@ export function FeaturedWorkSection() {
   ]
 
   return (
-    <section id="featured" className="bg-white px-5 py-16 sm:px-8 lg:py-20">
-      <div className="mx-auto max-w-[1720px]">
-        <div className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-          <div>
-            <SectionLabel>Featured tools</SectionLabel>
+    <section id="featured" className="overflow-x-hidden bg-white px-5 py-16 sm:px-8 lg:py-20">
+      <div className="mx-auto w-full max-w-[1720px]">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+          <div className="min-w-0">
+            <SectionLabel>{hasDesk ? 'Your desk' : 'Featured tools'}</SectionLabel>
             <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl lg:text-6xl">
-              Start with the tools people actually reach for.
+              {hasDesk
+                ? `Tools picked for ${persona?.label ?? 'your'} workflow.`
+                : 'Start with the tools people actually reach for.'}
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

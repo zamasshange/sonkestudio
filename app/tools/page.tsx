@@ -9,6 +9,9 @@ import Link from 'next/link'
 import { ArrowRight, ArrowUpRight, Check, Search, Sparkles, Star, TrendingUp, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { MyDeskBanner } from '@/components/auth/my-desk-banner'
+import { filterToolsForUser } from '@/lib/filter-tools'
+import { useUserPreferences } from '@/hooks/use-user-preferences'
 import {
   categories,
   featuredTools,
@@ -225,19 +228,33 @@ function CategoryPanel({
 export default function ToolsPage() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get('category')
+  const deskParam = searchParams.get('desk')
+  const { prefs, hasDesk, persona } = useUserPreferences()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(initialCategory)
+  const [showMyDesk, setShowMyDesk] = useState(deskParam === '1' || Boolean(hasDesk))
 
   useEffect(() => {
     setActiveCategory(searchParams.get('category'))
+    if (searchParams.get('desk') === '1') {
+      setShowMyDesk(true)
+    }
   }, [searchParams])
+
+  useEffect(() => {
+    if (hasDesk && deskParam === '1') {
+      setShowMyDesk(true)
+    }
+  }, [hasDesk, deskParam])
 
   const filteredTools = useMemo(() => {
     let result = tools
 
     if (searchQuery.trim()) {
       result = searchTools(searchQuery)
+    } else if (showMyDesk && hasDesk && prefs && !activeCategory) {
+      result = filterToolsForUser(result, prefs)
     }
 
     if (activeCategory) {
@@ -245,9 +262,15 @@ export default function ToolsPage() {
     }
 
     return result
-  }, [activeCategory, searchQuery])
+  }, [activeCategory, searchQuery, showMyDesk, hasDesk, prefs])
 
-  const leadTools = dedupeTools([...southAfricaPopularTools, ...featuredTools, ...trendingTools]).slice(0, 8)
+  const leadTools = useMemo(() => {
+    const pool = dedupeTools([...southAfricaPopularTools, ...featuredTools, ...trendingTools])
+    if (showMyDesk && hasDesk && prefs) {
+      return filterToolsForUser(pool, prefs).slice(0, 8)
+    }
+    return pool.slice(0, 8)
+  }, [showMyDesk, hasDesk, prefs])
   const activeCategoryName = categories.find((category) => category.id === activeCategory)?.name
 
   return (
@@ -260,10 +283,12 @@ export default function ToolsPage() {
                 <SectionLabel>Tools workspace</SectionLabel>
                 <div>
                   <h1 className="mt-8 max-w-[900px] text-[4rem] font-semibold leading-none sm:text-[6.5rem] lg:text-[8rem]">
-                    All Tools
+                    {showMyDesk && hasDesk ? 'My Desk' : 'All Tools'}
                   </h1>
                   <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-                    A focused command center for AI writing, PDFs, student work, business planning, creator tasks, developer utilities, and everyday fixes.
+                    {showMyDesk && hasDesk
+                      ? `Showing ${persona?.label ?? 'your'} tool systems first — change filters anytime or browse everything.`
+                      : 'A focused command center for AI writing, PDFs, student work, business planning, creator tasks, developer utilities, and everyday fixes.'}
                   </p>
                 </div>
                 <div className="mt-10 grid gap-3 sm:grid-cols-3">
@@ -331,9 +356,9 @@ export default function ToolsPage() {
               </div>
             </motion.div>
 
-            <motion.div variants={reveal} className="mt-5 overflow-hidden border border-border bg-white">
-              <div className="grid lg:grid-cols-[1fr_340px]">
-                <div className="relative overflow-hidden p-5 sm:p-6">
+            <motion.div variants={reveal} className="mt-5 min-w-0 overflow-hidden border border-border bg-white">
+              <div className="grid min-w-0 lg:grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(220px,280px)]">
+                <div className="relative min-w-0 overflow-hidden p-5 sm:p-6">
                   <div className="relative z-10">
                     <p className="mb-4 text-sm font-semibold uppercase text-muted-foreground">Find the exact workspace</p>
                   <div className="relative">
@@ -370,7 +395,7 @@ export default function ToolsPage() {
                   </div>
                 </div>
 
-                <div className="border-t border-border bg-background p-5 lg:border-l lg:border-t-0">
+                <div className="min-w-0 border-t border-border bg-background p-5 xl:border-l xl:border-t-0">
                   <p className="text-sm font-semibold uppercase text-muted-foreground">Hot shortcuts</p>
                   <div className="mt-4 grid gap-2">
                     {trendingTools.slice(0, 3).map((tool, index) => {
@@ -395,6 +420,15 @@ export default function ToolsPage() {
       )}
 
       <section className={`border-y border-border bg-white px-5 py-7 sm:px-8 ${activeCategory ? 'pt-32' : ''}`}>
+        <div className="mx-auto max-w-[1720px]">
+          <MyDeskBanner
+            activeCategory={activeCategory}
+            onClearCategory={() => setActiveCategory(null)}
+            showMyDesk={showMyDesk}
+            onToggleMyDesk={setShowMyDesk}
+            className="mb-5"
+          />
+        </div>
         <div className="mx-auto flex max-w-[1720px] gap-4 overflow-x-auto pb-3">
           <motion.button
             layout

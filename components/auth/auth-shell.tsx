@@ -6,7 +6,6 @@ import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import logoImage from '@/app/images/logo.png'
-import faviconImage from '@/app/images/favicon.png'
 
 interface AuthShellProps {
   title: string
@@ -24,84 +23,55 @@ export function AuthShell({
   backHref = '/',
 }: AuthShellProps) {
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto grid min-h-screen max-w-[1820px] lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden overflow-hidden border-r border-border lg:block">
-          <div className="absolute inset-0 sonke-hero-field" />
-          <div className="absolute inset-0 sonke-hero-mesh" />
-          <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
-            <Link href="/" className="inline-flex h-16 w-44 items-center">
-              <Image
-                src={logoImage}
-                alt="SONKE logo"
-                className="h-full w-full object-contain object-left brightness-0 invert"
-                priority
-              />
-            </Link>
+    <main className="relative min-h-screen overflow-x-hidden bg-background">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, oklch(0.885 0.004 260) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.885 0.004 260) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }}
+      />
+      <div className="pointer-events-none absolute -right-24 top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -left-16 bottom-16 h-56 w-56 rounded-full bg-foreground/5 blur-3xl" />
 
-            <div className="max-w-xl space-y-6 text-white">
-              <p className="text-sm font-semibold uppercase text-white/70">SONKE account</p>
-              <h1 className="text-5xl font-semibold leading-[0.95] tracking-tight xl:text-6xl">
-                Your desk, tuned to how you work.
-              </h1>
-              <p className="text-lg text-white/80">
-                Pick your lane — student, creator, business, developer, or everyday utilities —
-                and we&apos;ll surface the right tools first.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
-              <span className="flex h-14 w-14 items-center justify-center border border-white/25 bg-white/10">
-                <Image src={faviconImage} alt="" className="h-9 w-9 object-contain" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold uppercase text-white/60">Free toolbox</p>
-                <p className="mt-1 text-lg font-semibold text-white">AI, PDF, study, dev, and more</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="flex flex-col px-5 py-8 sm:px-8 lg:py-12">
-          <div className="mb-8 flex items-center justify-between gap-4">
-            <Link
-              href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground transition hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Link>
-            <Link href="/" className="inline-flex h-12 w-32 items-center lg:hidden">
-              <Image
-                src={logoImage}
-                alt="SONKE logo"
-                className="h-full w-full object-contain object-left"
-                priority
-              />
-            </Link>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="mx-auto flex w-full max-w-[520px] flex-1 flex-col"
+      <div className="relative mx-auto max-w-[640px] px-5 py-8 sm:px-8 sm:py-12">
+        <div className="mb-10 flex items-center justify-between gap-4 border-b border-border pb-6">
+          <Link href="/" className="inline-flex h-12 w-36 items-center" aria-label="SONKE home">
+            <Image src={logoImage} alt="SONKE" className="h-full w-full object-contain object-left" priority />
+          </Link>
+          <Link
+            href={backHref}
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground transition hover:text-foreground"
           >
-            <div className="mb-8">
-              <p className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground">
-                <span className="h-2.5 w-2.5 bg-primary" />
-                {title}
-              </p>
-              <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                {subtitle}
-              </h2>
-            </div>
+            <ArrowLeft className="h-4 w-4" />
+            Home
+          </Link>
+        </div>
 
-            {sideContent}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground">
+            <span className="h-2 w-2 bg-primary" />
+            {title}
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {subtitle}
+          </h1>
+          {sideContent}
+        </motion.div>
 
-            <div className="mt-auto border border-border bg-white p-5 sm:p-7">{children}</div>
-          </motion.div>
-        </section>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-8 border border-border bg-white p-5 shadow-[0_24px_70px_-50px_rgba(15,23,42,0.45)] sm:p-7"
+        >
+          {children}
+        </motion.div>
       </div>
     </main>
   )

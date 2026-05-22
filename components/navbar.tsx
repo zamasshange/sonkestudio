@@ -34,32 +34,36 @@ export function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className={`mx-auto flex max-w-[1820px] items-center justify-between px-5 py-6 transition sm:px-8 ${scrolled ? 'py-4' : ''}`}>
-          <Link href="/" className="group inline-flex items-center gap-3" aria-label="SONKE home">
-            <span className="relative inline-flex h-14 w-40 items-center overflow-hidden">
+        <div className={`mx-auto flex max-w-[1820px] items-center gap-4 px-5 py-6 transition sm:px-8 ${scrolled ? 'py-4' : ''}`}>
+          <Link href="/" className="group inline-flex shrink-0 items-center gap-3" aria-label="SONKE home">
+            <span className="relative inline-flex h-12 w-32 items-center overflow-hidden sm:h-14 sm:w-40">
               <Image src={logoImage} alt="SONKE logo" className="h-full w-full object-contain object-left" priority />
             </span>
           </Link>
 
-          <div className="hidden items-center gap-8 md:flex">
-            <nav className="flex items-center gap-10">
-              {navLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="text-sm font-semibold uppercase text-muted-foreground transition hover:text-foreground">
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-            <NavbarAuth />
-          </div>
+          <nav className="hidden min-w-0 items-center gap-6 lg:flex lg:gap-8 xl:gap-10">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="whitespace-nowrap text-sm font-semibold uppercase text-muted-foreground transition hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
-          <button
-            type="button"
-            onClick={() => setIsOpen((value) => !value)}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-sm text-foreground transition hover:bg-muted"
-            aria-label="Toggle navigation"
-          >
-            {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
-          </button>
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <NavbarAuth />
+            <button
+              type="button"
+              onClick={() => setIsOpen((value) => !value)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-foreground transition hover:bg-muted lg:hidden"
+              aria-label="Toggle navigation"
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </motion.header>
 
