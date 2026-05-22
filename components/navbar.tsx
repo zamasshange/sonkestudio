@@ -7,7 +7,8 @@ import { ArrowRight, Compass, Flame, Grid2X2, Menu, Rocket, Sparkles, X } from '
 import { useEffect, useState } from 'react'
 import logoImage from '@/app/images/logo.png'
 import faviconImage from '@/app/images/favicon.png'
-import { categories, trendingTools } from '@/lib/tools-data'
+import { NavbarAuth } from '@/components/auth/navbar-auth'
+import { navCategories, navTrendingTools } from '@/lib/nav-data'
 
 const navLinks = [
   { href: '/tools', label: 'All Tools', description: 'Browse every workspace', icon: Grid2X2 },
@@ -40,13 +41,16 @@ export function Navbar() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-10 md:flex">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="text-sm font-semibold uppercase text-muted-foreground transition hover:text-foreground">
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="hidden items-center gap-8 md:flex">
+            <nav className="flex items-center gap-10">
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="text-sm font-semibold uppercase text-muted-foreground transition hover:text-foreground">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <NavbarAuth />
+          </div>
 
           <button
             type="button"
@@ -119,6 +123,23 @@ export function Navbar() {
                   </span>
                   <ArrowRight className="h-5 w-5" />
                 </Link>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setIsOpen(false)}
+                    className="border border-border bg-background px-4 py-3 text-center text-sm font-semibold uppercase text-foreground transition hover:bg-muted"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    onClick={() => setIsOpen(false)}
+                    className="bg-foreground px-4 py-3 text-center text-sm font-semibold uppercase text-background transition hover:bg-primary hover:text-primary-foreground"
+                  >
+                    Get started
+                  </Link>
+                </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -128,7 +149,7 @@ export function Navbar() {
                     <Sparkles className="h-5 w-5 text-primary" />
                   </div>
                   <div className="mt-5 grid gap-3">
-                    {trendingTools.slice(0, 4).map((tool, index) => {
+                    {navTrendingTools.map((tool, index) => {
                       const Icon = tool.icon
                       return (
                         <Link
@@ -152,7 +173,7 @@ export function Navbar() {
                 <div className="border border-border bg-white p-5 sm:p-7">
                   <p className="text-sm font-semibold uppercase text-muted-foreground">Systems</p>
                   <div className="mt-5 grid gap-2">
-                    {categories.slice(0, 6).map((category) => {
+                    {navCategories.slice(0, 6).map((category) => {
                       const Icon = category.icon
                       return (
                         <Link

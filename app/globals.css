@@ -451,3 +451,19 @@
   background: oklch(0.65 0.18 35 / 0.3);
   color: oklch(0.15 0.01 280);
 }
+
+/* Clerk auth components — match SONKE sharp editorial style */
+.cl-rootBox,
+.cl-cardBox,
+.cl-signIn-root,
+.cl-signUp-root {
+  width: 100%;
+}
+
+.cl-card {
+  box-shadow: none !important;
+}
+
+.cl-footer {
+  background: transparent !important;
+}

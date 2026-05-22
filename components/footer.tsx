@@ -44,6 +44,8 @@ const footerColumns = [
       { href: '/tools', label: 'All Tools' },
       { href: '/#services', label: 'Systems' },
       { href: '/#featured', label: 'Featured' },
+      { href: '/sign-in', label: 'Sign In' },
+      { href: '/sign-up', label: 'Get Started' },
       { href: '/', label: 'Back Home' },
     ],
   },

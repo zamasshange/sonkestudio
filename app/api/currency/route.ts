@@ -18,7 +18,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Amount must be a valid number.' }, { status: 400 })
   }
 
-  const apiKey = process.env.EXCHANGE_RATE_API_KEY
+  const apiKey = process.env.FREECURRENCY_API_KEY
+    || process.env.EXCHANGE_RATE_API_KEY
     || process.env.EXCHANGERATE_API_KEY
     || process.env.CURRENCY_API_KEY
     || process.env.NEXT_PUBLIC_CURRENCY_API_KEY
