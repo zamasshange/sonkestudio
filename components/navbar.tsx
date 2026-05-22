@@ -3,14 +3,16 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Menu, X } from 'lucide-react'
+import { ArrowRight, Compass, Flame, Grid2X2, Menu, Rocket, Sparkles, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import logoImage from '@/app/images/logo.png'
+import faviconImage from '@/app/images/favicon.png'
+import { categories, trendingTools } from '@/lib/tools-data'
 
 const navLinks = [
-  { href: '/tools', label: 'All Tools' },
-  { href: '/#services', label: 'Systems' },
-  { href: '/#featured', label: 'Popular' },
+  { href: '/tools', label: 'All Tools', description: 'Browse every workspace', icon: Grid2X2 },
+  { href: '/#services', label: 'Systems', description: 'Pick a tool category', icon: Compass },
+  { href: '/#featured', label: 'Popular', description: 'Start with top tools', icon: Flame },
 ]
 
 export function Navbar() {
@@ -60,30 +62,117 @@ export function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-40 bg-background px-5 pb-8 pt-28 sm:px-8"
+            className="fixed inset-0 z-40 overflow-y-auto bg-background px-5 pb-8 pt-28 sm:px-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.nav
+            <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 18 }}
               transition={{ duration: 0.35 }}
-              className="mx-auto grid max-w-[1200px] gap-4"
+              className="mx-auto grid max-w-[1320px] gap-4 lg:grid-cols-[0.9fr_1.1fr]"
             >
-              {[...navLinks, { href: '/tools', label: 'Launch tools' }].map((link, index) => (
+              <div className="border border-border bg-white p-5 sm:p-7">
+                <div className="flex items-center gap-4 border-b border-border pb-6">
+                  <span className="flex h-16 w-16 items-center justify-center border border-border bg-background">
+                    <Image src={faviconImage} alt="SONKE favicon" className="h-10 w-10 object-contain" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold uppercase text-muted-foreground">SONKE menu</p>
+                    <p className="mt-1 text-2xl font-semibold leading-none text-foreground">Jump straight in.</p>
+                  </div>
+                </div>
+
+                <nav className="mt-5 grid gap-3">
+                  {navLinks.map((link, index) => {
+                    const Icon = link.icon
+                    return (
+                      <Link
+                        key={`${link.label}-${index}`}
+                        href={link.href}
+                        onClick={() => setIsOpen(false)}
+                        className="group grid grid-cols-[48px_1fr_auto] items-center gap-4 border border-border bg-background p-4 transition hover:border-primary/50 hover:bg-foreground hover:text-background"
+                      >
+                        <span className="flex h-12 w-12 items-center justify-center border border-border bg-white text-primary">
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <span>
+                          <span className="block text-xl font-semibold">{link.label}</span>
+                          <span className="mt-1 block text-sm text-muted-foreground transition group-hover:text-background/65">{link.description}</span>
+                        </span>
+                        <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
+                      </Link>
+                    )
+                  })}
+                </nav>
+
                 <Link
-                  key={`${link.label}-${index}`}
-                  href={link.href}
+                  href="/tools"
                   onClick={() => setIsOpen(false)}
-                  className="group flex items-center justify-between border border-border bg-white px-6 py-7 text-3xl font-semibold text-foreground transition hover:bg-foreground hover:text-background"
+                  className="mt-5 flex items-center justify-between bg-primary px-5 py-4 text-base font-semibold text-primary-foreground transition hover:bg-foreground"
                 >
-                  {link.label}
-                  <ArrowRight className="h-7 w-7 transition group-hover:translate-x-1" />
+                  <span className="inline-flex items-center gap-3">
+                    <Rocket className="h-5 w-5" />
+                    Launch tools
+                  </span>
+                  <ArrowRight className="h-5 w-5" />
                 </Link>
-              ))}
-            </motion.nav>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="border border-border bg-foreground p-5 text-background sm:p-7">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-semibold uppercase text-background/55">Trending now</p>
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="mt-5 grid gap-3">
+                    {trendingTools.slice(0, 4).map((tool, index) => {
+                      const Icon = tool.icon
+                      return (
+                        <Link
+                          key={tool.id}
+                          href={tool.href}
+                          onClick={() => setIsOpen(false)}
+                          className="group flex items-center justify-between gap-3 border border-background/15 p-4 transition hover:border-primary/70 hover:bg-background/5"
+                        >
+                          <span className="flex min-w-0 items-center gap-3">
+                            <span className="text-xs font-semibold text-background/45">0{index + 1}</span>
+                            <Icon className="h-5 w-5 shrink-0 text-primary" style={{ color: tool.iconColor }} />
+                            <span className="truncate text-base font-semibold">{tool.name}</span>
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-background/45 transition group-hover:translate-x-1 group-hover:text-primary" />
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="border border-border bg-white p-5 sm:p-7">
+                  <p className="text-sm font-semibold uppercase text-muted-foreground">Systems</p>
+                  <div className="mt-5 grid gap-2">
+                    {categories.slice(0, 6).map((category) => {
+                      const Icon = category.icon
+                      return (
+                        <Link
+                          key={category.id}
+                          href={`/tools?category=${category.id}`}
+                          onClick={() => setIsOpen(false)}
+                          className="group flex items-center justify-between gap-3 border border-border bg-background px-4 py-3 transition hover:border-primary/50 hover:bg-white"
+                        >
+                          <span className="flex min-w-0 items-center gap-3">
+                            <Icon className="h-4 w-4 shrink-0 text-primary" />
+                            <span className="truncate text-sm font-semibold text-foreground">{category.name}</span>
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

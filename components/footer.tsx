@@ -7,7 +7,7 @@ import { ArrowRight, ArrowUp, Check, Sparkles, Zap } from 'lucide-react'
 import { SiInstagram, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 import { categories, tools, trendingTools } from '@/lib/tools-data'
-import logoImage from '@/app/images/logo.png'
+import faviconImage from '@/app/images/favicon.png'
 
 const popularToolIds = [
   'ai-humanizer',
@@ -49,52 +49,38 @@ const footerColumns = [
   },
 ]
 
-const footerImages = [
-  'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=500&q=85',
-  'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=500&q=85',
-]
-
 export function Footer() {
   const toolCount = tools.length
   const trending = trendingTools.slice(0, 5)
 
   return (
-    <footer className="border-t border-border bg-white px-5 py-20 sm:px-8">
+    <footer className="border-t border-border bg-white px-5 py-14 sm:px-8">
       <div className="mx-auto max-w-[1720px]">
-        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
+        <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
             <p className="flex items-center gap-3 text-sm font-semibold uppercase text-muted-foreground">
               <span className="h-2.5 w-2.5 bg-primary" />
-              Let's build faster
+              SONKE directory
             </p>
-            <h2 className="mt-6 text-5xl font-semibold leading-none text-foreground sm:text-7xl lg:text-8xl">
-              Pick a tool and get it done.
+            <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl lg:text-6xl">
+              Find the next tool without hunting around.
             </h2>
           </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="grid grid-cols-5 gap-2 overflow-hidden rounded-md"
-          >
-            {footerImages.map((image, index) => (
-              <motion.img
-                key={image}
-                src={image}
-                alt=""
-                animate={{ y: index % 2 ? [28, 8, 28] : [0, 18, 0] }}
-                transition={{ duration: 7 + index, repeat: Infinity, ease: 'easeInOut' }}
-                className="h-44 w-full object-cover"
-              />
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.08 }} className="grid gap-3 sm:grid-cols-3">
+            {[
+              { value: `${toolCount}+`, label: 'live tools' },
+              { value: categories.length.toString(), label: 'systems' },
+              { value: 'Free', label: 'to start' },
+            ].map((item) => (
+              <div key={item.label} className="border border-border bg-background p-5">
+                <p className="text-3xl font-semibold leading-none text-foreground">{item.value}</p>
+                <p className="mt-2 text-sm font-semibold uppercase text-muted-foreground">{item.label}</p>
+              </div>
             ))}
           </motion.div>
         </div>
 
-        <div className="mt-16 grid gap-4 lg:grid-cols-[1.1fr_1fr_1fr]">
+        <div className="mt-10 grid gap-4 lg:grid-cols-[1.1fr_1fr_1fr]">
           {footerColumns.map((column, index) => (
             <motion.div
               key={column.title}
@@ -102,8 +88,7 @@ export function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: index * 0.08 }}
-              whileHover={{ y: -6 }}
-              className="min-h-[210px] rounded-md border border-border bg-background p-6 transition hover:bg-white"
+              className="min-h-[210px] border border-border bg-background p-6 transition hover:bg-white"
             >
               <p className="mb-5 text-sm font-semibold uppercase text-muted-foreground">{column.title}</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -123,48 +108,53 @@ export function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mt-16 overflow-hidden rounded-md border border-border bg-foreground text-background"
+          className="mt-10 overflow-hidden border border-border bg-foreground text-background"
         >
-          <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="relative p-7 sm:p-10">
-              <div className="absolute right-6 top-6 text-[7rem] font-semibold leading-none text-background/5 sm:text-[10rem]">
-                {toolCount}
+          <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="relative overflow-hidden p-6 sm:p-8 lg:p-10">
+              <div className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
+              <div className="pointer-events-none absolute bottom-8 right-8 h-32 w-32 border border-background/10" />
+              <div className="relative z-10 inline-flex items-center gap-5">
+                <span className="relative flex h-24 w-24 items-center justify-center sm:h-32 sm:w-32">
+                  <span className="absolute inset-0 border border-primary/35" />
+                  <span className="absolute inset-3 border border-background/10" />
+                  <Image src={faviconImage} alt="SONKE favicon" className="relative h-16 w-16 object-contain sm:h-20 sm:w-20" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold uppercase text-background/45">SONKE</span>
+                  <span className="mt-2 block text-2xl font-semibold leading-none text-background sm:text-3xl">Tools</span>
+                </span>
               </div>
-              <div className="relative z-10">
-                <div className="relative h-16 w-48 rounded-sm bg-white p-3 sm:h-20 sm:w-64">
-                  <Image src={logoImage} alt="SONKE logo" className="h-full w-full object-contain object-left" />
-                </div>
-                <p className="mt-8 max-w-2xl text-3xl font-semibold leading-tight sm:text-5xl">
-                  A compact workbench for writing, study, PDF, creator, business, and dev work.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  {[
-                    'Free to start',
-                    `${toolCount}+ live tools`,
-                    'No tab-hopping',
-                  ].map((item) => (
-                    <span key={item} className="inline-flex items-center gap-2 rounded-sm border border-background/15 px-3 py-2 text-sm text-background/80">
-                      <Check className="h-4 w-4 text-primary" />
-                      {item}
-                    </span>
-                  ))}
-                </div>
+              <p className="relative z-10 mt-7 max-w-2xl text-2xl font-semibold leading-tight sm:text-4xl">
+                A compact workbench for everyday AI, PDF, study, creator, business, and developer tasks.
+              </p>
+              <div className="relative z-10 mt-7 flex flex-wrap gap-3">
+                {[
+                  'No sign-up required',
+                  `${toolCount}+ live tools`,
+                  'Built for quick tasks',
+                ].map((item) => (
+                  <span key={item} className="inline-flex items-center gap-2 border border-background/15 px-3 py-2 text-sm text-background/80">
+                    <Check className="h-4 w-4 text-primary" />
+                    {item}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <div className="border-t border-background/15 p-7 sm:p-10 lg:border-l lg:border-t-0">
+            <div className="border-t border-background/15 p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-sm font-semibold uppercase text-background/60">Trending now</p>
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
-              <div className="mt-6 grid gap-3">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {trending.map((tool, index) => {
                   const Icon = tool.icon
                   return (
                     <Link
                       key={tool.id}
                       href={tool.href}
-                      className="group flex items-center justify-between gap-4 rounded-sm border border-background/15 p-4 transition hover:border-primary/70 hover:bg-background/5"
+                      className="group flex items-center justify-between gap-4 border border-background/15 p-4 transition hover:border-primary/70 hover:bg-background/5"
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <span className="text-xs font-semibold text-background/45">
@@ -178,7 +168,7 @@ export function Footer() {
                   )
                 })}
               </div>
-              <Link href="/tools" className="mt-6 inline-flex items-center gap-3 rounded-sm bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
+              <Link href="/tools" className="mt-6 inline-flex items-center gap-3 bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
                 Browse all tools
                 <Zap className="h-4 w-4" />
               </Link>

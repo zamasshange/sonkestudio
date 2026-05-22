@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ScrollRestoration } from '@/components/scroll-restoration'
 import faviconImage from './images/favicon.png'
 import './globals.css'
 
@@ -46,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-background" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <ScrollRestoration />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

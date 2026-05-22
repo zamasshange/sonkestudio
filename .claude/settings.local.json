@@ -9,7 +9,9 @@
       "Bash(curl *)",
       "WebFetch(domain:openrouter.ai)",
       "Bash(npm run *)",
-      "Bash(taskkill *)"
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(npx next *)"
     ]
   }
 }

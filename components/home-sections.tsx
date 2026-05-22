@@ -99,15 +99,15 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 export function HeroSection() {
   return (
-    <section className="bg-background px-5 pb-6 pt-16 sm:px-8 lg:pt-20">
+    <section className="bg-background px-5 pb-6 pt-32 sm:px-8 sm:pt-36 lg:pt-36">
       <motion.div
         variants={container}
         initial="hidden"
         animate="visible"
         className="mx-auto max-w-[1820px]"
       >
-        <motion.div variants={item} className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+        <motion.div variants={item} className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+          <div className="min-w-0 flex-1">
             <motion.p
               variants={item}
               className="mb-2 text-sm font-semibold uppercase text-muted-foreground"
@@ -130,30 +130,30 @@ export function HeroSection() {
             variants={item}
             whileHover={{ y: -6, rotate: -0.4 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="relative overflow-hidden rounded-lg border border-border bg-white p-3 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.7)] lg:min-w-[360px]"
+            className="relative w-full max-w-[452px] overflow-hidden rounded-lg border border-border bg-white p-3 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.7)] lg:w-[452px] lg:min-w-[452px]"
           >
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-cyan-500 to-foreground" />
-            <div className="grid grid-cols-[76px_1fr] gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-md border border-border bg-background p-3 shadow-inner">
+            <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[80px_minmax(0,1fr)]">
+              <div className="flex h-[72px] w-[72px] items-center justify-center rounded-md border border-border bg-background p-3 shadow-inner sm:h-20 sm:w-20">
                 <Image src={faviconImage} alt="SONKE favicon" className="h-full w-full object-contain" priority />
               </div>
               <div className="min-w-0">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xl font-semibold leading-none text-foreground">SONKE desk</p>
                     <p className="mt-1.5 text-sm font-medium text-muted-foreground">AI, PDF, student, dev</p>
                   </div>
-                  <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase text-primary">
+                  <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase text-primary">
                     Live
                   </span>
                 </div>
-                <div className="mt-4 flex items-center gap-2">
+                <div className="mt-4 flex flex-wrap items-center gap-2">
                   {heroTools.slice(0, 4).map((tool) => {
                     const Icon = tool!.icon
                     return (
                       <span
                         key={tool!.id}
-                        className={`inline-flex h-8 w-8 items-center justify-center ${
+                        className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${
                           tool!.iconColor ? 'bg-transparent text-foreground' : 'rounded-sm border border-black/5 bg-muted text-foreground'
                         }`}
                         style={{ background: tool!.iconColor ? undefined : tool!.iconBg, color: tool!.iconColor }}
@@ -162,7 +162,7 @@ export function HeroSection() {
                       </span>
                     )
                   })}
-                  <Link href="/tools" className="ml-auto inline-flex items-center gap-2 rounded-sm bg-foreground px-3 py-2 text-sm font-semibold text-background transition hover:bg-primary">
+                  <Link href="/tools" className="inline-flex shrink-0 items-center gap-2 rounded-sm bg-foreground px-3 py-2 text-sm font-semibold text-background transition hover:bg-primary sm:ml-auto">
                     Open
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -374,6 +374,8 @@ export function ServicesSection() {
   const serviceCards = categories.map((category, index) => ({
     ...category,
     image: [imageBank.serviceA, imageBank.serviceB, imageBank.serviceC, imageBank.serviceD][index % 4],
+    count: tools.filter((tool) => tool.category === category.id).length,
+    samples: tools.filter((tool) => tool.category === category.id).slice(0, 3),
   }))
   const previewTools = southAfricaPopularTools.slice(0, 6)
 
@@ -521,14 +523,18 @@ export function ServicesSection() {
           ))}
         </div>
 
-        <div className="mt-24">
-          <div className="flex flex-col gap-8 border-b border-border pb-10 lg:flex-row lg:items-center">
-            <h2 className="text-5xl font-semibold text-foreground sm:text-7xl">Our Expertise</h2>
-            <div className="hidden h-24 w-px bg-border lg:block" />
-            <SectionLabel>Tool systems</SectionLabel>
+        <div className="mt-20">
+          <div className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <SectionLabel>Tool systems</SectionLabel>
+              <h2 className="mt-5 text-4xl font-semibold leading-tight text-foreground sm:text-5xl lg:text-6xl">Choose the lane that matches your work.</h2>
+            </div>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground lg:justify-self-end">
+              Each system groups related tools into a faster path, so people can jump from the problem to the right workspace without scanning a long list.
+            </p>
           </div>
 
-          <div className="mt-16 grid border border-border bg-white lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {serviceCards.slice(0, 8).map((category, index) => {
               const Icon = category.icon
               return (
@@ -538,26 +544,63 @@ export function ServicesSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.6, delay: index * 0.04 }}
-                  whileHover={{ y: -8 }}
-                  className={`${index === 0 ? 'lg:col-span-2' : ''}`}
+                  className={`${index === 0 ? 'xl:col-span-2' : ''}`}
                 >
                   <Link
                     href={`/tools?category=${category.id}`}
-                    className="group block min-h-[430px] border-border p-7 transition hover:bg-background lg:border-r"
+                    className={`group relative flex min-h-[360px] overflow-hidden border border-border bg-white p-5 transition hover:-translate-y-1 hover:border-primary/50 ${index === 0 ? 'sm:min-h-[420px]' : ''}`}
                   >
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span className="text-sm font-semibold uppercase">Service</span>
-                      <span>({String(index + 1).padStart(2, '0')})</span>
-                    </div>
-                    {index === 0 && (
-                      <div className="mt-7 h-56 overflow-hidden rounded-md">
-                        <img src={category.image} alt={category.name} className="avoora-image-zoom h-full w-full object-cover" />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-foreground to-transparent opacity-0 transition group-hover:opacity-100" />
+                    <div className="flex w-full flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-4">
+                          <span
+                            className={`inline-flex h-12 w-12 items-center justify-center border border-border bg-background ${index === 0 ? 'sm:h-14 sm:w-14' : ''}`}
+                          >
+                            <Icon className={`${index === 0 ? 'h-7 w-7' : 'h-6 w-6'} text-primary transition group-hover:rotate-6 group-hover:scale-110`} />
+                          </span>
+                          <span className="text-sm font-semibold text-muted-foreground">0{index + 1}</span>
+                        </div>
+
+                        {index === 0 && (
+                          <div className="mt-6 grid gap-2 sm:grid-cols-[1.2fr_0.8fr]">
+                            <div className="h-36 overflow-hidden">
+                              <img src={category.image} alt={category.name} className="avoora-image-zoom h-full w-full object-cover" />
+                            </div>
+                            <div className="grid gap-2">
+                              {category.samples.slice(0, 2).map((tool) => {
+                                const ToolIcon = tool.icon
+                                return (
+                                  <span key={tool.id} className="flex items-center gap-2 border border-border bg-background p-3 text-sm font-semibold text-foreground">
+                                    <ToolIcon className="h-4 w-4 shrink-0 text-primary" style={{ color: tool.iconColor }} />
+                                    <span className="truncate">{tool.name}</span>
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className={index === 0 ? 'mt-8' : 'mt-16'}>
+                          <p className="text-sm font-semibold uppercase text-muted-foreground">{category.count} tools ready</p>
+                          <h3 className="mt-3 text-3xl font-semibold leading-tight text-foreground">{category.name}</h3>
+                          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">{category.description}</p>
+                        </div>
                       </div>
-                    )}
-                    <div className={index === 0 ? 'mt-8' : 'mt-40'}>
-                  <Icon className="mb-5 h-8 w-8 text-primary transition group-hover:rotate-6 group-hover:scale-110" />
-                      <h3 className="text-4xl font-semibold text-foreground">{category.name}</h3>
-                      <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">{category.description}</p>
+
+                      <div className="mt-8 border-t border-border pt-4">
+                        <div className="mb-4 flex flex-wrap gap-2">
+                          {category.samples.map((tool) => (
+                            <span key={tool.id} className="border border-border bg-background px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                              {tool.name}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                          Explore system
+                          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1 group-hover:text-primary" />
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 </motion.div>
@@ -571,101 +614,146 @@ export function ServicesSection() {
 }
 
 export function FeaturedWorkSection() {
-  const featured = southAfricaPopularTools.slice(0, 4)
-  const workspaceNotes = [
-    { prompt: 'Make this sound more natural', output: 'Clearer tone, tighter phrasing, ready to paste.' },
-    { prompt: 'Rewrite for a sharper angle', output: 'Three alternate versions with different emphasis.' },
-    { prompt: 'Turn rough notes into an email', output: 'Polished subject, opener, body, and CTA.' },
-    { prompt: 'Fix the messy draft', output: 'Grammar, flow, and readability cleaned up.' },
+  const featured = southAfricaPopularTools.slice(0, 6)
+  const primaryTool = featured[0]
+  const PrimaryIcon = primaryTool.icon
+  const quickStats = [
+    { value: `${tools.length}+`, label: 'tools' },
+    { value: categories.length.toString(), label: 'systems' },
+    { value: 'Free', label: 'start' },
   ]
 
   return (
-    <section id="featured" className="overflow-hidden bg-white px-5 py-20 sm:px-8 lg:py-24">
+    <section id="featured" className="bg-white px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto max-w-[1720px]">
-        <div className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <div className="max-w-5xl">
+        <div className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+          <div>
             <SectionLabel>Featured tools</SectionLabel>
-            <h2 className="mt-6 text-4xl font-semibold leading-tight text-foreground sm:text-6xl lg:text-7xl">
-              Popular workspaces that feel ready before you open them.
+            <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl lg:text-6xl">
+              Start with the tools people actually reach for.
             </h2>
           </div>
-          <div className="lg:justify-self-end">
-            <p className="max-w-lg text-base leading-7 text-muted-foreground sm:text-lg">
-              Each tool is built around one job: add the context, get the output, copy it, and keep moving.
-            </p>
-            <Link href="/tools" className="mt-6 inline-flex items-center gap-3 rounded-sm bg-foreground px-6 py-3.5 text-base font-semibold text-background transition hover:bg-primary">
-              View all tools <ArrowRight className="h-5 w-5" />
-            </Link>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {quickStats.map((stat) => (
+              <div key={stat.label} className="border border-border bg-background p-5">
+                <p className="text-3xl font-semibold leading-none text-foreground">{stat.value}</p>
+                <p className="mt-2 text-sm font-semibold uppercase text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-4">
-          {featured.map((tool, index) => {
-            const Icon = tool.icon
-            const note = workspaceNotes[index % workspaceNotes.length]
-            return (
-              <motion.div
-                key={tool.id}
-                initial={{ opacity: 0, y: 26 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-                whileHover={{ y: -8 }}
-              >
-                <Link href={tool.href} className={`group block min-h-[520px] overflow-hidden rounded-lg border border-border ${index === 0 ? 'bg-foreground text-background' : 'bg-background text-foreground'} transition hover:border-primary/40 hover:shadow-[0_30px_80px_-55px_rgba(15,23,42,0.8)]`}>
-                  <div className={`relative p-5 ${index === 0 ? 'border-background/15' : 'border-border'} border-b`}>
-                    <div className="flex items-start justify-between gap-4">
-                      <span
-                        className={`inline-flex h-12 w-12 items-center justify-center ${tool.iconColor ? '' : 'rounded-sm border border-black/5 bg-white'}`}
-                        style={{ background: tool.iconColor ? undefined : tool.iconBg, color: tool.iconColor }}
-                      >
-                        <Icon className={tool.iconColor ? 'h-8 w-8' : 'h-6 w-6'} />
-                      </span>
-                      <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${index === 0 ? 'bg-background/10 text-background/70' : 'bg-white text-muted-foreground'}`}>
-                        Workspace 0{index + 1}
-                      </span>
+        <div className="mt-8 grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6 }}
+          >
+            <Link href={primaryTool.href} className="group flex h-full min-h-[390px] flex-col justify-between border border-foreground bg-foreground p-6 text-background transition hover:border-primary">
+              <div>
+                <div className="flex items-start justify-between gap-4">
+                  <span
+                    className={`inline-flex h-14 w-14 items-center justify-center bg-background text-foreground ${primaryTool.iconColor ? '' : 'border border-background/20'}`}
+                    style={{ color: primaryTool.iconColor }}
+                  >
+                    <PrimaryIcon className={primaryTool.iconColor ? 'h-8 w-8' : 'h-7 w-7'} />
+                  </span>
+                  <span className="border border-background/15 px-3 py-1 text-xs font-semibold uppercase text-background/70">
+                    Most opened
+                  </span>
+                </div>
+                <p className="mt-12 text-sm font-semibold uppercase text-background/55">Recommended workspace</p>
+                <h3 className="mt-3 max-w-xl text-4xl font-semibold leading-tight sm:text-5xl">{primaryTool.name}</h3>
+                <p className="mt-4 max-w-lg text-base leading-7 text-background/70">{primaryTool.description}</p>
+                <div className="mt-10 grid gap-3 sm:grid-cols-[0.78fr_1fr]">
+                  <div className="border border-background/15 bg-background/5 p-4">
+                    <p className="text-xs font-semibold uppercase text-background/45">Quick swap</p>
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <span className="text-3xl font-semibold leading-none">R</span>
+                      <ArrowRight className="h-4 w-4 text-primary" />
+                      <span className="text-3xl font-semibold leading-none">$</span>
                     </div>
-                    <h3 className="mt-8 text-3xl font-semibold leading-tight">{tool.name}</h3>
-                    <p className={`mt-3 min-h-[48px] text-sm leading-6 ${index === 0 ? 'text-background/68' : 'text-muted-foreground'}`}>{tool.description}</p>
+                    <p className="mt-5 text-sm text-background/55">Live-style conversion preview</p>
                   </div>
-
-                  <div className="p-5">
-                    <div className={`rounded-md border p-4 ${index === 0 ? 'border-background/15 bg-background/8' : 'border-border bg-white'}`}>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className={`text-xs font-semibold uppercase ${index === 0 ? 'text-background/58' : 'text-muted-foreground'}`}>Input</span>
-                        <Sparkles className="h-4 w-4 text-primary" />
-                      </div>
-                      <p className={`mt-4 text-base font-semibold leading-6 ${index === 0 ? 'text-background' : 'text-foreground'}`}>{note.prompt}</p>
+                  <div className="border border-background/15 bg-background/5 p-4">
+                    <div className="flex items-center justify-between text-xs font-semibold uppercase text-background/45">
+                      <span>Market pulse</span>
+                      <Sparkles className="h-4 w-4 text-primary" />
                     </div>
-
-                    <div className={`mt-3 rounded-md border p-4 ${index === 0 ? 'border-background/15 bg-background text-foreground' : 'border-border bg-white'}`}>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs font-semibold uppercase text-muted-foreground">Output</span>
-                        <span className="h-2 w-2 rounded-full bg-primary" />
-                      </div>
-                      <p className="mt-4 text-sm leading-6 text-muted-foreground">{note.output}</p>
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {tool.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className={`rounded-full border px-3 py-1 text-xs font-semibold ${index === 0 ? 'border-background/20 text-background/70' : 'border-border bg-white text-muted-foreground'}`}>
-                          {tag}
-                        </span>
+                    <div className="mt-5 flex h-20 items-end gap-2">
+                      {[42, 68, 52, 78, 61, 88, 72].map((height, index) => (
+                        <span
+                          key={`${height}-${index}`}
+                          className="flex-1 bg-primary/80"
+                          style={{ height: `${height}%`, opacity: 0.45 + index * 0.07 }}
+                        />
                       ))}
                     </div>
-
-                    <div className={`mt-7 flex items-center justify-between border-t pt-5 text-sm font-semibold ${index === 0 ? 'border-background/15' : 'border-border'}`}>
-                      <span>{tool.usageCount ? `${Math.round(tool.usageCount / 1000)}k uses` : 'Open workspace'}</span>
-                      <span className="inline-flex items-center gap-2">
-                        Open
-                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                      </span>
-                    </div>
                   </div>
-                </Link>
-              </motion.div>
-            )
-          })}
+                </div>
+              </div>
+              <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-background/15 pt-5">
+                <div className="flex flex-wrap gap-2">
+                  {primaryTool.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="border border-background/15 px-3 py-1 text-xs font-semibold text-background/70">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <span className="inline-flex items-center gap-2 text-sm font-semibold">
+                  Open tool
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </span>
+              </div>
+            </Link>
+          </motion.div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {featured.slice(1).map((tool, index) => {
+              const Icon = tool.icon
+              return (
+                <motion.div
+                  key={tool.id}
+                  initial={{ opacity: 0, y: 22 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.55, delay: index * 0.05 }}
+                >
+                  <Link href={tool.href} className="group flex min-h-[185px] flex-col justify-between border border-border bg-background p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:bg-white">
+                    <div className="flex items-start justify-between gap-4">
+                      <span
+                        className={`inline-flex h-12 w-12 shrink-0 items-center justify-center bg-white ${tool.iconColor ? '' : 'border border-border'}`}
+                        style={{ background: tool.iconColor ? undefined : tool.iconBg, color: tool.iconColor }}
+                      >
+                        <Icon className={tool.iconColor ? 'h-7 w-7' : 'h-5 w-5'} />
+                      </span>
+                      <span className="text-xs font-semibold text-muted-foreground">0{index + 2}</span>
+                    </div>
+                    <div className="mt-7">
+                      <h3 className="text-2xl font-semibold leading-tight text-foreground">{tool.name}</h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{tool.description}</p>
+                    </div>
+                    <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-sm font-semibold text-foreground">
+                      <span>{tool.usageCount ? `${Math.round(tool.usageCount / 1000)}k uses` : 'Ready'}</span>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+                    </div>
+                  </Link>
+                </motion.div>
+              )
+            })}
+
+            <Link href="/tools" className="group flex min-h-[185px] flex-col justify-between border border-dashed border-border bg-white p-5 transition hover:border-primary hover:bg-background">
+              <div>
+                <p className="text-sm font-semibold uppercase text-muted-foreground">All workspaces</p>
+                <h3 className="mt-7 text-2xl font-semibold leading-tight text-foreground">Browse the full toolbox by task.</h3>
+              </div>
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                View all tools
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -675,56 +763,91 @@ export function FeaturedWorkSection() {
 export function StatsSection() {
   const steps = [
     {
-      image: imageBank.processA,
-      title: 'Choose a job',
-      text: 'Start from writing, study, PDF, utility, business, or developer workflows.',
+      title: 'Pick the job',
+      text: 'Choose the workspace that matches the task instead of starting from a blank page.',
+      tools: ['AI writing', 'PDF', 'Study'],
     },
     {
-      image: imageBank.processB,
-      title: 'Add context',
-      text: 'Each tool asks for the details that matter for that exact output.',
+      title: 'Add the details',
+      text: 'The controls ask for the context that changes the quality of the answer.',
+      tools: ['Tone', 'Audience', 'Format'],
     },
     {
-      image: imageBank.processC,
-      title: 'Generate or convert',
-      text: 'Get polished copy, conversions, summaries, plans, and clean utility results.',
+      title: 'Generate, convert, clean',
+      text: 'Get a usable result, then adjust it without leaving the page.',
+      tools: ['Rewrite', 'Summarize', 'Convert'],
     },
     {
-      image: imageBank.footer,
-      title: 'Copy and move',
-      text: 'Use the output immediately, refine it, or jump into the next tool.',
+      title: 'Copy and continue',
+      text: 'Move the output into your real work or jump straight to the next tool.',
+      tools: ['Copy', 'Export', 'Next task'],
     },
   ]
+  const lanes = categories.slice(0, 4)
 
   return (
-    <section className="bg-background px-5 py-24 sm:px-8">
+    <section className="bg-background px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto max-w-[1720px]">
-        <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <h2 className="text-5xl font-semibold text-foreground sm:text-7xl">How It Works</h2>
-          <SectionLabel>Working process</SectionLabel>
+        <div className="grid gap-8 lg:grid-cols-[0.74fr_1.26fr]">
+          <div>
+            <SectionLabel>Workflow</SectionLabel>
+            <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
+              A simpler path from task to finished output.
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+              These sections should help people choose quickly, understand what happens next, and keep moving.
+            </p>
+            <Link href="/tools" className="mt-8 inline-flex items-center gap-3 bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-primary">
+              Open the toolbox
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: index * 0.06 }}
+                className="border border-border bg-white p-6"
+              >
+                <div className="flex items-start justify-between gap-5">
+                  <span className="text-sm font-semibold text-primary">0{index + 1}</span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+                <h3 className="mt-8 text-2xl font-semibold text-foreground">{step.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{step.text}</p>
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {step.tools.map((tool) => (
+                    <span key={tool} className="border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-4">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.title}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: index * 0.08 }}
-              whileHover={{ y: -8 }}
-              className="group min-h-[520px] border border-border bg-white"
-            >
-              <div className="h-64 overflow-hidden">
-                <img src={step.image} alt={step.title} className="avoora-image-zoom h-full w-full object-cover" />
-              </div>
-              <div className="p-8">
-                <p className="text-xl font-semibold uppercase text-muted-foreground">(Step - {String(index + 1).padStart(2, '0')})</p>
-                <h3 className="mt-28 text-3xl font-semibold text-foreground">{step.title}</h3>
-                <p className="mt-5 text-lg leading-8 text-muted-foreground">{step.text}</p>
-              </div>
-            </motion.div>
-          ))}
+        <div className="mt-4 grid gap-3 md:grid-cols-4">
+          {lanes.map((category) => {
+            const Icon = category.icon
+            const count = tools.filter((tool) => tool.category === category.id).length
+            return (
+              <Link key={category.id} href={`/tools?category=${category.id}`} className="group flex items-center justify-between gap-4 border border-border bg-white p-4 transition hover:border-primary/50">
+                <span className="flex min-w-0 items-center gap-3">
+                  <Icon className="h-5 w-5 shrink-0 text-primary" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-foreground">{category.name}</span>
+                    <span className="mt-1 block text-xs font-medium text-muted-foreground">{count} tools</span>
+                  </span>
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -733,44 +856,57 @@ export function StatsSection() {
 
 export function CTASection() {
   return (
-    <section className="bg-white px-5 py-24 sm:px-8">
-      <div className="mx-auto max-w-[1720px] border-t border-border pt-20">
-        <div className="grid gap-10 lg:grid-cols-[0.55fr_1fr] lg:items-end">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            whileHover={{ y: -8 }}
-            className="group overflow-hidden rounded-lg"
-          >
-            <img src={imageBank.footer} alt="Abstract digital workspace" className="avoora-image-zoom h-[320px] w-full object-cover" />
-          </motion.div>
+    <section className="bg-white px-5 py-16 sm:px-8 lg:py-20">
+      <div className="mx-auto max-w-[1720px]">
+        <div className="grid overflow-hidden border border-border bg-foreground text-background lg:grid-cols-[1fr_0.72fr]">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1 }}
+            transition={{ duration: 0.65 }}
+            className="p-6 sm:p-9 lg:p-10"
           >
-            <p className="mb-4 flex items-center gap-2 text-lg text-muted-foreground">
-              <Check className="h-5 w-5 text-primary" />
-              No sign-up required
+            <p className="flex items-center gap-3 text-sm font-semibold uppercase text-background/60">
+              <Check className="h-4 w-4 text-primary" />
+              Ready when you are
             </p>
-            <h2 className="text-[4rem] font-semibold leading-none text-foreground sm:text-[7rem] lg:text-[10rem]">
-              SONKE
+            <h2 className="mt-6 max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+              Choose a focused tool, finish the small job, move on.
             </h2>
-            <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-2xl text-xl leading-8 text-muted-foreground">
-                A home for everyday tools that feel specific, useful, and alive. Pick a tool and get the thing done.
-              </p>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-background/68">
+              SONKE keeps everyday AI, PDF, study, creator, business, and developer utilities close together so the next step is obvious.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/tools">
-                <Button className="rounded-sm bg-primary px-9 py-6 text-lg font-semibold text-primary-foreground hover:bg-primary/90">
+                <Button className="rounded-sm bg-primary px-6 py-5 text-base font-semibold text-primary-foreground hover:bg-primary/90">
                   Launch tools
                   <Zap className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+              <Link href="/#featured" className="inline-flex items-center gap-2 border border-background/15 px-5 py-3 text-sm font-semibold text-background/80 transition hover:border-primary hover:text-background">
+                See featured
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </motion.div>
+
+          <div className="border-t border-background/15 p-6 sm:p-9 lg:border-l lg:border-t-0 lg:p-10">
+            <p className="text-sm font-semibold uppercase text-background/55">Good for</p>
+            <div className="mt-5 grid gap-3">
+              {toolboxWorkflows.map(({ label, value, icon: Icon }) => (
+                <div key={value} className="flex items-center justify-between gap-4 border border-background/15 bg-background/5 p-4">
+                  <span className="flex items-center gap-3">
+                    <Icon className="h-5 w-5 text-primary" />
+                    <span>
+                      <span className="block text-sm font-medium text-background/55">{label}</span>
+                      <span className="block text-base font-semibold">{value}</span>
+                    </span>
+                  </span>
+                  <Check className="h-4 w-4 text-primary" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

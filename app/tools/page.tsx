@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight, Search, Sparkles, Star, TrendingUp, X } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check, Search, Sparkles, Star, TrendingUp, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -20,7 +20,7 @@ import {
   tools,
   trendingTools,
 } from '@/lib/tools-data'
-import logoImage from '@/app/images/logo.png'
+import faviconImage from '@/app/images/favicon.png'
 
 const categoryVisuals: Record<string, { tint: string; mark: string; pattern: string }> = {
   'ai-text': { tint: 'from-violet-500/20 via-white to-primary/20', mark: 'AI', pattern: 'Prompt / Rewrite / Polish' },
@@ -253,48 +253,89 @@ export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {!activeCategory && (
-        <section className="px-5 pb-12 pt-32 sm:px-8">
+        <section className="px-5 pb-10 pt-32 sm:px-8">
           <motion.div initial="hidden" animate="visible" variants={grid} className="mx-auto max-w-[1720px]">
-            <motion.div variants={reveal} className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-              <div>
+            <motion.div variants={reveal} className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
+              <div className="flex min-h-[430px] flex-col justify-between border border-border bg-white p-6 sm:p-8">
                 <SectionLabel>Tools workspace</SectionLabel>
-                <h1 className="mt-6 max-w-[1100px] text-[4rem] font-semibold leading-none sm:text-[6.5rem] lg:text-[9rem]">
-                  All Tools
-                </h1>
+                <div>
+                  <h1 className="mt-8 max-w-[900px] text-[4rem] font-semibold leading-none sm:text-[6.5rem] lg:text-[8rem]">
+                    All Tools
+                  </h1>
+                  <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+                    A focused command center for AI writing, PDFs, student work, business planning, creator tasks, developer utilities, and everyday fixes.
+                  </p>
+                </div>
+                <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                  {[
+                    { value: `${tools.length}+`, label: 'live tools' },
+                    { value: categories.length.toString(), label: 'systems' },
+                    { value: 'Fast', label: 'workspace search' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="border border-border bg-background p-4">
+                      <p className="text-3xl font-semibold leading-none text-foreground">{stat.value}</p>
+                      <p className="mt-2 text-xs font-semibold uppercase text-muted-foreground">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="group overflow-hidden rounded-md border border-border bg-white">
-                <div className="grid min-h-[280px] sm:grid-cols-[220px_1fr]">
-                  <div className="relative overflow-hidden bg-foreground">
-                    <img
-                      src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=700&q=85"
-                      alt="Organized digital workspace"
-                      className="avoora-image-zoom h-full min-h-[220px] w-full object-cover opacity-80"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-foreground/30 to-primary/60" />
-                  </div>
-                  <div className="flex flex-col justify-between p-6">
-                    <div className="relative h-14 w-44">
-                      <Image src={logoImage} alt="SONKE logo" className="h-full w-full object-contain object-left" priority />
+
+              <div className="grid gap-5">
+                <div className="overflow-hidden border border-border bg-foreground text-background">
+                  <div className="grid min-h-[250px] sm:grid-cols-[0.9fr_1.1fr]">
+                    <div className="relative flex items-center justify-center overflow-hidden border-b border-background/15 bg-background/5 p-8 sm:border-b-0 sm:border-r">
+                      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:30px_30px]" />
+                      <div className="relative flex h-32 w-32 items-center justify-center sm:h-40 sm:w-40">
+                        <span className="absolute inset-0 border border-primary/45" />
+                        <span className="absolute inset-4 border border-background/15" />
+                        <Image src={faviconImage} alt="SONKE favicon" className="h-20 w-20 object-contain sm:h-24 sm:w-24" priority />
+                      </div>
                     </div>
-                    <div>
-                      <p className="mt-8 text-2xl font-semibold leading-tight text-foreground">
-                        A living directory for focused work, not a drawer of random utilities.
-                      </p>
-                      <p className="mt-4 text-base leading-7 text-muted-foreground">
-                        Browse AI writing, documents, PDFs, student help, business planning, developer tools, and everyday utilities with each system shaped around its real job.
-                      </p>
+                    <div className="flex flex-col justify-between p-6">
+                      <div>
+                        <p className="text-sm font-semibold uppercase text-background/55">Directory mode</p>
+                        <p className="mt-5 text-3xl font-semibold leading-tight">
+                          Search by the job, then jump into the right workspace.
+                        </p>
+                      </div>
+                      <div className="mt-8 grid gap-2">
+                        {['No account wall', 'Real task categories', 'Popular tools first'].map((item) => (
+                          <span key={item} className="flex items-center gap-2 text-sm font-medium text-background/75">
+                            <Check className="h-4 w-4 text-primary" />
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-4">
+                  {categories.slice(0, 4).map((category) => {
+                    const Icon = category.icon
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => setActiveCategory(category.id)}
+                        className="group flex items-center justify-between gap-3 border border-border bg-white p-4 text-left transition hover:border-primary/50 hover:bg-background"
+                      >
+                        <span className="flex min-w-0 items-center gap-3">
+                          <Icon className="h-5 w-5 shrink-0 text-primary" />
+                          <span className="truncate text-sm font-semibold text-foreground">{category.name}</span>
+                        </span>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </motion.div>
 
-            <motion.div variants={reveal} className="mt-8 overflow-hidden rounded-[1.2rem] border border-border bg-white avoora-soft-shadow">
-              <div className="grid lg:grid-cols-[1fr_390px]">
-                <div className="relative overflow-hidden p-6 sm:p-8">
-                  <div className="absolute right-8 top-8 hidden text-[7rem] font-semibold leading-none text-muted/60 lg:block">110</div>
-                  <div className="relative z-10 max-w-5xl">
-                    <p className="mb-5 text-sm font-semibold uppercase text-muted-foreground">Find the exact workspace</p>
+            <motion.div variants={reveal} className="mt-5 overflow-hidden border border-border bg-white">
+              <div className="grid lg:grid-cols-[1fr_340px]">
+                <div className="relative overflow-hidden p-5 sm:p-6">
+                  <div className="relative z-10">
+                    <p className="mb-4 text-sm font-semibold uppercase text-muted-foreground">Find the exact workspace</p>
                   <div className="relative">
                     <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -314,7 +355,7 @@ export default function ToolsPage() {
                     )}
                   </div>
 
-                  <div className="mt-5 flex flex-wrap items-center gap-2">
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
                     <span className="text-sm text-muted-foreground">Trending:</span>
                     {trendingSearches.map((term) => (
                       <button
@@ -329,19 +370,22 @@ export default function ToolsPage() {
                   </div>
                 </div>
 
-                <div className="border-t border-border bg-foreground p-6 text-background lg:border-l lg:border-t-0">
-                  <p className="text-sm uppercase text-background/60">Directory status</p>
-                  <div className="mt-8 grid gap-3">
-                    {[
-                      { value: tools.length, label: 'Tools' },
-                      { value: categories.length, label: 'Systems' },
-                      { value: 'Free', label: 'Access' },
-                    ].map((stat) => (
-                      <div key={stat.label} className="flex items-center justify-between rounded-sm border border-background/15 p-4">
-                        <p className="text-3xl font-semibold">{stat.value}</p>
-                        <p className="mt-1 text-xs text-background/60">{stat.label}</p>
-                      </div>
-                    ))}
+                <div className="border-t border-border bg-background p-5 lg:border-l lg:border-t-0">
+                  <p className="text-sm font-semibold uppercase text-muted-foreground">Hot shortcuts</p>
+                  <div className="mt-4 grid gap-2">
+                    {trendingTools.slice(0, 3).map((tool, index) => {
+                      const Icon = tool.icon
+                      return (
+                        <Link key={tool.id} href={tool.href} className="group flex items-center justify-between gap-3 border border-border bg-white p-3 transition hover:border-primary/50">
+                          <span className="flex min-w-0 items-center gap-3">
+                            <span className="text-xs font-semibold text-muted-foreground">0{index + 1}</span>
+                            <Icon className="h-4 w-4 shrink-0 text-primary" style={{ color: tool.iconColor }} />
+                            <span className="truncate text-sm font-semibold text-foreground">{tool.name}</span>
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
+                        </Link>
+                      )
+                    })}
                   </div>
                 </div>
               </div>
