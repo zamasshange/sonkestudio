@@ -188,11 +188,11 @@
     --hero-d-x: 38%;
     --hero-d-y: 82%;
     background:
-      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 24%), rgba(59, 130, 246, 0.9), transparent 34%),
-      radial-gradient(circle at var(--hero-b-x, 50%) var(--hero-b-y, 44%), rgba(99, 102, 241, 0.75), transparent 36%),
-      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 28%), rgba(168, 85, 247, 0.8), transparent 36%),
-      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 82%), rgba(236, 72, 153, 0.5), transparent 36%),
-      linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #4c1d95 100%);
+      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 24%), rgba(0, 96, 116, 0.92), transparent 34%),
+      radial-gradient(circle at var(--hero-b-x, 50%) var(--hero-b-y, 44%), rgba(116, 156, 160, 0.72), transparent 38%),
+      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 28%), rgba(201, 147, 69, 0.82), transparent 38%),
+      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 82%), rgba(206, 73, 45, 0.58), transparent 38%),
+      linear-gradient(135deg, #024d68 0%, #08737b 28%, #98a3a0 54%, #c9823d 78%, #d84a2f 100%);
     background-size: 220% 220%;
     animation: sonke-hero-field 8s ease-in-out infinite alternate;
   }
@@ -200,10 +200,10 @@
   .sonke-hero-field::before {
     animation: sonke-hero-wash 7s ease-in-out infinite alternate;
     background:
-      radial-gradient(circle at 8% 70%, rgba(59, 130, 246, 0.75), transparent 34%),
-      radial-gradient(circle at 42% 28%, rgba(99, 102, 241, 0.7), transparent 34%),
-      radial-gradient(circle at 70% 62%, rgba(168, 85, 247, 0.6), transparent 34%),
-      radial-gradient(circle at 96% 18%, rgba(236, 72, 153, 0.5), transparent 36%);
+      radial-gradient(circle at 8% 70%, rgba(18, 70, 145, 0.5), transparent 34%),
+      radial-gradient(circle at 36% 24%, rgba(0, 132, 136, 0.54), transparent 34%),
+      radial-gradient(circle at 66% 58%, rgba(202, 161, 116, 0.46), transparent 34%),
+      radial-gradient(circle at 98% 18%, rgba(214, 83, 39, 0.52), transparent 36%);
     background-size: 210% 210%;
     content: '';
     inset: -24%;
@@ -215,10 +215,10 @@
 
   .sonke-hero-mesh {
     background-image:
-      radial-gradient(circle at 18% 20%, rgba(255,255,255,.16), transparent 24%),
-      radial-gradient(circle at 78% 22%, rgba(255,255,255,.12), transparent 22%),
-      radial-gradient(circle at 58% 84%, rgba(255,255,255,.1), transparent 28%);
-    opacity: 0.78;
+      radial-gradient(circle at 18% 20%, rgba(255,255,255,.18), transparent 24%),
+      radial-gradient(circle at 76% 22%, rgba(255,244,220,.16), transparent 22%),
+      radial-gradient(circle at 58% 84%, rgba(255,255,255,.12), transparent 28%);
+    opacity: 0.72;
     mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
   }
 

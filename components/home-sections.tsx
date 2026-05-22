@@ -66,11 +66,11 @@ const heroRotatingTasks = [
 ]
 
 const heroTileVisuals = [
-  'from-cyan-500 via-blue-500 to-primary',
-  'from-indigo-400 via-white to-sky-500',
-  'from-amber-500 via-orange-300 to-primary',
-  'from-rose-500 via-teal-400 to-cyan-500',
-  'from-slate-500 via-zinc-300 to-orange-400',
+  'from-[#0b6b76] via-[#6d99a4] to-[#d19b4a]',
+  'from-[#0e5d70] via-[#8ca8aa] to-[#c67d49]',
+  'from-[#1f6f72] via-[#9aa7a0] to-[#cf9152]',
+  'from-[#135f72] via-[#9c8f9c] to-[#c8613f]',
+  'from-[#174b78] via-[#8ea0a2] to-[#d28a41]',
 ]
 
 const avatarImages = [
@@ -273,17 +273,16 @@ export function HeroSection() {
                   >
                     <Link
                       href={tool!.href}
-                      className="group grid h-[70px] grid-cols-[78px_1fr] items-center overflow-hidden rounded-md border border-background/35 bg-background/78 p-2 text-foreground backdrop-blur-xl transition hover:-translate-y-1 hover:bg-background"
+                      className="group grid h-[70px] grid-cols-[78px_1fr] items-center overflow-hidden rounded-md border border-background/45 bg-background/84 p-2 text-foreground backdrop-blur-xl transition hover:-translate-y-1 hover:bg-background"
                     >
                       <div className={`relative h-full overflow-hidden rounded-sm bg-gradient-to-r ${heroTileVisuals[index % heroTileVisuals.length]}`}>
-                        <div className="absolute inset-0 opacity-45 [background-image:linear-gradient(90deg,rgba(255,255,255,.55)_0_16%,transparent_16%_30%,rgba(15,23,42,.22)_30%_43%,transparent_43%_56%,rgba(255,255,255,.35)_56%_70%,transparent_70%)]" />
+                        <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(90deg,rgba(255,255,255,.32)_0_14%,transparent_14%_30%,rgba(255,255,255,.2)_30%_42%,transparent_42%_58%,rgba(15,23,42,.12)_58%_72%,transparent_72%)]" />
+                        <div className="absolute inset-0 bg-white/10" />
                         <div
-                          className={`absolute bottom-2 right-2 inline-flex h-8 w-8 items-center justify-center ${
-                            tool!.iconColor ? 'bg-transparent' : 'rounded-sm border border-black/5 bg-background/90'
-                          }`}
-                          style={{ background: tool!.iconColor ? undefined : tool!.iconBg, color: tool!.iconColor }}
+                          className="absolute bottom-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-sm border border-white/50 bg-background/95 shadow-sm"
+                          style={{ color: tool!.iconColor }}
                         >
-                          <Icon className={tool!.iconColor ? 'h-6 w-6' : 'h-4 w-4'} style={{ filter: tool!.id === 'tiktok-hook' ? 'drop-shadow(-1px 0 #00F2EA) drop-shadow(1px 0 #FF0050)' : undefined }} />
+                          <Icon className={tool!.iconColor ? 'h-5 w-5' : 'h-4 w-4'} style={{ filter: tool!.id === 'tiktok-hook' ? 'drop-shadow(-1px 0 #00F2EA) drop-shadow(1px 0 #FF0050)' : undefined }} />
                         </div>
                       </div>
                       <div className="min-w-0 px-3">
