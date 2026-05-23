@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getToolsCategoryHref, Tool } from '@/lib/tools-data'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Wand2, Copy, Loader2, Check, Sparkles, Lightbulb } from 'lucide-react'
+import { ArrowLeft, Wand2, Copy, Loader2, Check, Sparkles, Lightbulb, Send } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -324,6 +325,10 @@ export function AITextEditorLayout({ tool }: AITextEditorLayoutProps) {
   const [context, setContext] = useState<Record<string, string>>(() => initialContext(writingProfile.fields))
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
+  const [sendTo, setSendTo] = useState('')
+  const [sendStatus, setSendStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
+  const [sendError, setSendError] = useState('')
+  const canSendEmail = tool.id === 'ai-email' || tool.id === 'ai-cold-email'
   const [error, setError] = useState('')
   const [selectedOutput, setSelectedOutput] = useState<string | null>(null)
   const ToolIcon = tool.icon
@@ -398,6 +403,33 @@ Use the selected context to shape the result. If any context is blank, make a se
   const getSelectedOutputText = () => {
     if (!selectedOutput) return ''
     return outputs[selectedOutput] || ''
+  }
+
+  const sendEmail = async () => {
+    const body = getSelectedOutputText()
+    if (!body.trim() || !sendTo.trim()) return
+
+    setSendStatus('loading')
+    setSendError('')
+
+    try {
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: sendTo.trim(),
+          subject: `${tool.name} draft from SONKE`,
+          html: `<div style="font-family:Inter,Arial,sans-serif;line-height:1.6;white-space:pre-wrap">${body.replace(/</g, '&lt;')}</div>`,
+          text: body,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to send email')
+      setSendStatus('sent')
+    } catch (err) {
+      setSendStatus('error')
+      setSendError(err instanceof Error ? err.message : 'Failed to send email')
+    }
   }
 
   return (
@@ -634,6 +666,29 @@ Use the selected context to shape the result. If any context is blank, make a se
                   {copied === 'selected' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   {copied === 'selected' ? 'Copied' : 'Copy to clipboard'}
                 </Button>
+                {canSendEmail && (
+                  <div className="mt-4 rounded-sm border border-border bg-background p-4">
+                    <p className="text-xs font-semibold uppercase text-muted-foreground">Send with Resend</p>
+                    <Input
+                      type="email"
+                      value={sendTo}
+                      onChange={(event) => setSendTo(event.target.value)}
+                      placeholder="recipient@email.com"
+                      className="mt-2 h-10 rounded-sm"
+                    />
+                    <Button
+                      type="button"
+                      onClick={sendEmail}
+                      disabled={!sendTo.trim() || !getSelectedOutputText().trim() || sendStatus === 'loading'}
+                      className="mt-3 w-full rounded-sm gap-2 bg-primary text-primary-foreground hover:bg-foreground"
+                    >
+                      {sendStatus === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      Send email
+                    </Button>
+                    {sendStatus === 'sent' && <p className="mt-2 text-sm text-emerald-600">Email sent successfully.</p>}
+                    {sendStatus === 'error' && sendError && <p className="mt-2 text-sm text-destructive">{sendError}</p>}
+                  </div>
+                )}
               </div>
             )}
           </aside>

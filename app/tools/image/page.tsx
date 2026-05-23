@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'
-import { Image as ImageIcon, Minimize2, Maximize2, RefreshCw, Upload, X, Download, ArrowLeft, Loader2, Check } from 'lucide-react'
+import { Image as ImageIcon, Minimize2, Maximize2, RefreshCw, Upload, X, Download, ArrowLeft, Loader2, Check, CloudUpload } from 'lucide-react'
+import { uploadToCloudinary } from '@/lib/upload-client'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
@@ -28,6 +29,7 @@ interface ImageFile {
     size: number
     url: string
   }
+  cloudUrl?: string
 }
 
 const containerVariants = {
@@ -65,6 +67,7 @@ export default function ImageToolsPage() {
   
   // Convert settings
   const [outputFormat, setOutputFormat] = useState('jpeg')
+  const [cloudUploadingId, setCloudUploadingId] = useState<string | null>(null)
 
   const handleFileDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -332,6 +335,25 @@ export default function ImageToolsPage() {
     }
   }
 
+  const uploadToCloud = async (file: ImageFile) => {
+    const source = file.processed?.blob
+      ? new File([file.processed.blob], file.name, { type: file.processed.blob.type || 'image/jpeg' })
+      : file.file
+
+    setCloudUploadingId(file.id)
+    try {
+      const result = await uploadToCloudinary(source, 'sonke-images')
+      setFiles((current) =>
+        current.map((item) => (item.id === file.id ? { ...item, cloudUrl: result.url } : item)),
+      )
+    } catch (error) {
+      console.error(error)
+      alert(error instanceof Error ? error.message : 'Cloud upload failed')
+    } finally {
+      setCloudUploadingId(null)
+    }
+  }
+
   const downloadSingle = (file: ImageFile) => {
     if (file.processed) {
       saveAs(file.processed.blob, file.name)
@@ -484,10 +506,27 @@ export default function ImageToolsPage() {
                               <Download className="w-3 h-3" />
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={cloudUploadingId === file.id}
+                            onClick={() => uploadToCloud(file)}
+                          >
+                            {cloudUploadingId === file.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <CloudUpload className="w-3 h-3" />
+                            )}
+                          </Button>
                           <Button size="sm" variant="destructive" onClick={() => removeFile(file.id)}>
                             <X className="w-3 h-3" />
                           </Button>
                         </div>
+                        {file.cloudUrl && (
+                          <a href={file.cloudUrl} target="_blank" rel="noreferrer" className="mt-2 text-[10px] text-cyan-200 underline">
+                            Cloud link ready
+                          </a>
+                        )}
                       </div>
                       {file.processed && (
                           <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-sm bg-green-500">
@@ -616,10 +655,27 @@ export default function ImageToolsPage() {
                               <Download className="w-3 h-3" />
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={cloudUploadingId === file.id}
+                            onClick={() => uploadToCloud(file)}
+                          >
+                            {cloudUploadingId === file.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <CloudUpload className="w-3 h-3" />
+                            )}
+                          </Button>
                           <Button size="sm" variant="destructive" onClick={() => removeFile(file.id)}>
                             <X className="w-3 h-3" />
                           </Button>
                         </div>
+                        {file.cloudUrl && (
+                          <a href={file.cloudUrl} target="_blank" rel="noreferrer" className="mt-2 text-[10px] text-cyan-200 underline">
+                            Cloud link ready
+                          </a>
+                        )}
                       </div>
                       {file.processed && (
                           <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-sm bg-green-500">
@@ -720,10 +776,27 @@ export default function ImageToolsPage() {
                               <Download className="w-3 h-3" />
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={cloudUploadingId === file.id}
+                            onClick={() => uploadToCloud(file)}
+                          >
+                            {cloudUploadingId === file.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <CloudUpload className="w-3 h-3" />
+                            )}
+                          </Button>
                           <Button size="sm" variant="destructive" onClick={() => removeFile(file.id)}>
                             <X className="w-3 h-3" />
                           </Button>
                         </div>
+                        {file.cloudUrl && (
+                          <a href={file.cloudUrl} target="_blank" rel="noreferrer" className="mt-2 text-[10px] text-cyan-200 underline">
+                            Cloud link ready
+                          </a>
+                        )}
                       </div>
                       {file.processed && (
                           <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-sm bg-green-500">

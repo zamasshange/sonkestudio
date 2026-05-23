@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-shell'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import JSZip from 'jszip'
+import { uploadToCloudinary } from '@/lib/upload-client'
 
 type LineItem = {
   id: string
@@ -172,7 +173,7 @@ export function DocumentWorkspaceLayout({ tool }: { tool: Tool }) {
   const isConverter = converterTools.has(tool.id)
   const config = analysisTools[tool.id] || analysisTools['pdf-summarizer']
   const [mode, setMode] = useState(config.modes[0])
-  const [files, setFiles] = useState<{ file: File; name: string; size: number; type: string; preview?: string }[]>([])
+  const [files, setFiles] = useState<{ file: File; name: string; size: number; type: string; preview?: string; cloudUrl?: string }[]>([])
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -214,9 +215,25 @@ export function DocumentWorkspaceLayout({ tool }: { tool: Tool }) {
     setError('')
     setOutput('')
 
+    const filesWithCloud = [...files]
+    for (let index = 0; index < filesWithCloud.length; index += 1) {
+      const entry = filesWithCloud[index]
+      if (!entry.cloudUrl && entry.type.startsWith('image/')) {
+        try {
+          const uploaded = await uploadToCloudinary(entry.file, 'sonke-documents')
+          filesWithCloud[index] = { ...entry, cloudUrl: uploaded.url }
+          setFiles((current) =>
+            current.map((item, itemIndex) => (itemIndex === index ? { ...item, cloudUrl: uploaded.url } : item)),
+          )
+        } catch (uploadError) {
+          console.error(uploadError)
+        }
+      }
+    }
+
     const prompt = `${tool.name}
 Mode: ${mode}
-Uploaded files: ${files.map((file) => `${file.name} (${file.type})`).join(', ') || 'none'}
+Uploaded files: ${filesWithCloud.map((file) => `${file.name} (${file.type})${file.cloudUrl ? ` [cloud:${file.cloudUrl}]` : ''}`).join(', ') || 'none'}
 
 User material:
 ${input || 'The user uploaded files and needs help based on the selected mode.'}
@@ -572,6 +589,11 @@ Return a polished, practical document workspace result with:
                       {file.preview && <img src={file.preview} alt="" className="mb-3 aspect-video w-full object-cover" />}
                       <p className="font-medium text-foreground">{file.name}</p>
                       <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB / {file.type}</p>
+                      {file.cloudUrl && (
+                        <a href={file.cloudUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-primary underline">
+                          View on Cloudinary
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>

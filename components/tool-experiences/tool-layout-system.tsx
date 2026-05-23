@@ -14,6 +14,8 @@ import { ExplainWorkspaceLayout } from './layouts/explain-workspace-layout'
 import { BusinessNameGeneratorLayout } from './layouts/business-name-generator-layout'
 import { DocumentWorkspaceLayout } from './layouts/document-workspace-layout'
 import { PasswordWorkspaceLayout } from './layouts/password-workspace-layout'
+import { LinkShortenerLayout } from './layouts/link-shortener-layout'
+import { TempNotesLayout } from './layouts/temp-notes-layout'
 
 interface ToolExperienceProps {
   tool: Tool
@@ -34,6 +36,14 @@ export function ToolExperienceSystem({ tool }: ToolExperienceProps) {
 
   if (tool.id === 'password-generator' || tool.id === 'password-checker') {
     return <PasswordWorkspaceLayout tool={tool} />
+  }
+
+  if (tool.id === 'link-shortener') {
+    return <LinkShortenerLayout tool={tool} />
+  }
+
+  if (tool.id === 'temp-notes') {
+    return <TempNotesLayout tool={tool} />
   }
 
   if (tool.id === 'caption-generator') {
