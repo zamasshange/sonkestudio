@@ -1,6 +1,5 @@
 "use client"
 
-import Image from 'next/image'
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -9,8 +8,7 @@ import { Button } from '@/components/ui/button'
 import { pickToolsForUser } from '@/lib/filter-tools'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
-import faviconImage from '@/app/images/favicon.png'
-import { SiInstagram, SiX } from 'react-icons/si'
+import { SiFacebook, SiInstagram, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 
 const imageBank = {
@@ -60,11 +58,11 @@ const heroTools = Array.from(
 ).slice(0, 5)
 
 const heroRotatingTasks = [
-  'AI writing tools',
-  'PDF cleanup',
-  'student helpers',
-  'creator workflows',
-  'developer fixes',
+  'Web Development',
+  'AI Automations',
+  'Brand Systems',
+  'Creator Workflows',
+  'Digital Tools',
 ]
 
 const heroTileVisuals = [
@@ -101,7 +99,8 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 export function HeroSection() {
   return (
-    <section className="bg-background px-5 pb-6 pt-32 sm:px-8 sm:pt-36 lg:pt-36">
+    // Navbar is fixed (`components/navbar.tsx`), so we need enough top padding here to avoid overlap.
+    <section className="bg-background px-4 pb-6 pt-28 sm:px-8 sm:pt-32 lg:pt-32">
       <motion.div
         variants={container}
         initial="hidden"
@@ -110,96 +109,36 @@ export function HeroSection() {
       >
         <motion.div
           variants={item}
-          className="flex flex-col gap-5 sm:gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-8"
+          className="flex flex-col gap-4"
         >
-          <div className="min-w-0 flex-1 lg:max-w-[calc(100%-21rem)] lg:pr-4 xl:max-w-[calc(100%-23rem)]">
-            <motion.p
-              variants={item}
-              className="mb-2 text-sm font-semibold uppercase text-muted-foreground"
-            >
-              Free AI toolbox for real work
-            </motion.p>
-            <h1 className="max-w-full font-semibold leading-none tracking-tight text-foreground">
+          <div className="min-w-0 flex-1">
+            <h1 className="max-w-full font-semibold leading-[0.82] text-foreground">
               <motion.span
-                className="block whitespace-nowrap text-[clamp(1.75rem,14vw,4.5rem)] sm:text-[clamp(2.25rem,10vw,5rem)] lg:text-[clamp(2.5rem,5.2vw,4.75rem)] xl:text-[clamp(3rem,4.5vw,5.75rem)] 2xl:text-[clamp(3.5rem,4vw,6rem)]"
+                className="block whitespace-nowrap text-[3.05rem] sm:text-[5.25rem] md:text-[7rem] lg:text-[8.1rem] xl:text-[10rem] 2xl:text-[11.6rem]"
                 initial={{ y: '105%', opacity: 0 }}
                 animate={{ y: '0%', opacity: 1 }}
                 transition={{ delay: 0.16, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
               >
-                SONKE_Tools
+                SONKE_Studio
               </motion.span>
             </h1>
           </div>
-
-          <motion.div
-            variants={item}
-            whileHover={{ y: -6, rotate: -0.4 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full shrink-0 overflow-hidden rounded-lg border border-border bg-white p-3 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.7)] sm:max-w-md lg:w-[320px] lg:max-w-[320px] xl:w-[360px] xl:max-w-[360px]"
-          >
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-cyan-500 to-foreground" />
-            <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 sm:grid-cols-[80px_minmax(0,1fr)]">
-              <div className="flex h-[72px] w-[72px] items-center justify-center rounded-md border border-border bg-background p-3 shadow-inner sm:h-20 sm:w-20">
-                <Image src={faviconImage} alt="SONKE favicon" className="h-full w-full object-contain" priority />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-xl font-semibold leading-none text-foreground">SONKE desk</p>
-                    <p className="mt-1.5 text-sm font-medium text-muted-foreground">AI, PDF, student, dev</p>
-                  </div>
-                  <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase text-primary">
-                    Live
-                  </span>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  {heroTools.slice(0, 4).map((tool) => {
-                    const Icon = tool!.icon
-                    return (
-                      <span
-                        key={tool!.id}
-                        className={`inline-flex h-8 w-8 shrink-0 items-center justify-center ${
-                          tool!.iconColor ? 'bg-transparent text-foreground' : 'rounded-sm border border-black/5 bg-muted text-foreground'
-                        }`}
-                        style={{ background: tool!.iconColor ? undefined : tool!.iconBg, color: tool!.iconColor }}
-                      >
-                        <Icon className={tool!.iconColor ? 'h-6 w-6' : 'h-4 w-4'} style={{ filter: tool!.id === 'tiktok-hook' ? 'drop-shadow(-1px 0 #00F2EA) drop-shadow(1px 0 #FF0050)' : undefined }} />
-                      </span>
-                    )
-                  })}
-                  <Link href="/tools" className="inline-flex shrink-0 items-center gap-2 rounded-sm bg-foreground px-3 py-2 text-sm font-semibold text-background transition hover:bg-primary sm:ml-auto">
-                    Open
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </motion.div>
 
         <motion.div
           variants={item}
-          className="sonke-hero-field relative mt-5 min-h-[380px] overflow-hidden rounded-[1.2rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] lg:min-h-[480px]"
+          className="sonke-hero-field relative mt-4 min-h-[400px] overflow-hidden rounded-[1.25rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] sm:min-h-[470px] lg:min-h-[500px]"
         >
           <div className="sonke-hero-mesh absolute inset-0" />
-          <motion.div
-            className="absolute left-[42%] top-[-18%] h-56 w-56 rounded-full bg-blue-400/25 blur-3xl"
-            animate={{ scale: [1, 1.08, 1], opacity: [0.22, 0.34, 0.22] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute bottom-[-22%] right-[8%] h-64 w-64 rounded-full bg-violet-500/25 blur-3xl"
-            animate={{ scale: [1.05, 0.96, 1.05], opacity: [0.28, 0.18, 0.28] }}
-            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground/45 via-foreground/10 to-foreground/15" />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground/18 via-foreground/5 to-foreground/10" />
 
-          <div className="relative z-10 flex min-h-[380px] flex-col justify-between p-5 sm:p-7 lg:min-h-[480px]">
-            <div className="pointer-events-none absolute right-5 top-10 hidden sm:block lg:right-8">
+          <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-10">
+            <div className="pointer-events-none absolute right-5 top-28 hidden sm:block lg:right-10 lg:top-32">
               <div className="flex flex-col gap-2">
                 {[
                   { icon: SiInstagram, label: 'Instagram', color: '#E4405F' },
                   { icon: FaLinkedin, label: 'LinkedIn', color: '#0A66C2' },
+                  { icon: SiFacebook, label: 'Facebook', color: '#111111' },
                   { icon: SiX, label: 'X', color: '#111111' },
                 ].map(({ icon: Icon, label, color }, index) => (
                   <motion.span
@@ -207,20 +146,20 @@ export function HeroSection() {
                     initial={{ opacity: 0, x: 22 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.35 + index * 0.08, duration: 0.55, ease: 'easeOut' }}
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-background/90 text-foreground"
+                    className="inline-flex h-[60px] w-[60px] items-center justify-center rounded-md bg-background/72 text-foreground backdrop-blur-sm"
                   >
-                    <Icon className="h-6 w-6" style={{ color }} />
+                    <Icon className="h-7 w-7" style={{ color }} />
                   </motion.span>
                 ))}
               </div>
             </div>
 
-            <div className="max-w-[900px] pt-8 sm:pt-12 lg:pt-16">
+            <div className="max-w-[900px] pt-20 sm:pt-28 lg:pt-32">
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.18, duration: 0.6, ease: 'easeOut' }}
-                className="mb-6 flex -space-x-3"
+                className="mb-7 flex -space-x-3"
               >
                 {avatarImages.map((src, index) => (
                   <motion.img
@@ -230,12 +169,12 @@ export function HeroSection() {
                     initial={{ opacity: 0, x: -14, scale: 0.92 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     transition={{ delay: 0.25 + index * 0.05, duration: 0.45, ease: 'easeOut' }}
-                    className="h-10 w-10 rounded-full border-2 border-background object-cover sm:h-11 sm:w-11"
+                    className="h-10 w-10 rounded-full border-2 border-background object-cover sm:h-12 sm:w-12"
                   />
                 ))}
               </motion.div>
-              <h2 className="max-w-[900px] text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
-                <span className="block">Work faster with</span>
+              <h2 className="max-w-[860px] text-[2.45rem] font-semibold leading-[1.12] sm:text-[3.15rem] lg:text-[3.85rem]">
+                <span className="block">We Build Digital Service with</span>
                 <span className="sonke-rotating-line mt-1 block h-[1.2em] overflow-hidden text-background">
                   <span className="sonke-rotating-stack block">
                     {heroRotatingTasks.map((task) => (
@@ -251,7 +190,7 @@ export function HeroSection() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9, duration: 0.65, ease: 'easeOut' }}
-                className="mt-3 max-w-2xl text-sm leading-6 text-background/80 sm:text-base"
+                className="mt-4 max-w-2xl text-sm leading-6 text-background/80 sm:text-base"
               >
                 The right workspace appears when the job changes.
               </motion.p>

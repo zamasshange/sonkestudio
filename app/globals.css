@@ -179,20 +179,21 @@
   }
 
   .sonke-hero-field {
-    --hero-a-x: 14%;
+    --hero-a-x: 8%;
     --hero-a-y: 18%;
-    --hero-b-x: 46%;
-    --hero-b-y: 36%;
-    --hero-c-x: 86%;
-    --hero-c-y: 28%;
-    --hero-d-x: 38%;
-    --hero-d-y: 82%;
+    --hero-b-x: 39%;
+    --hero-b-y: 30%;
+    --hero-c-x: 70%;
+    --hero-c-y: 38%;
+    --hero-d-x: 93%;
+    --hero-d-y: 34%;
     background:
-      radial-gradient(circle at var(--hero-a-x, 18%) var(--hero-a-y, 24%), rgba(0, 96, 116, 0.92), transparent 34%),
-      radial-gradient(circle at var(--hero-b-x, 50%) var(--hero-b-y, 44%), rgba(116, 156, 160, 0.72), transparent 38%),
-      radial-gradient(circle at var(--hero-c-x, 82%) var(--hero-c-y, 28%), rgba(201, 147, 69, 0.82), transparent 38%),
-      radial-gradient(circle at var(--hero-d-x, 42%) var(--hero-d-y, 82%), rgba(206, 73, 45, 0.58), transparent 38%),
-      linear-gradient(135deg, #024d68 0%, #08737b 28%, #98a3a0 54%, #c9823d 78%, #d84a2f 100%);
+      radial-gradient(circle at var(--hero-a-x, 8%) var(--hero-a-y, 18%), rgba(205, 54, 98, 0.95), transparent 34%),
+      radial-gradient(circle at var(--hero-b-x, 39%) var(--hero-b-y, 30%), rgba(0, 112, 182, 0.92), transparent 38%),
+      radial-gradient(circle at var(--hero-c-x, 70%) var(--hero-c-y, 38%), rgba(223, 176, 197, 0.7), transparent 40%),
+      radial-gradient(circle at var(--hero-d-x, 93%) var(--hero-d-y, 34%), rgba(0, 75, 196, 0.95), transparent 38%),
+      radial-gradient(circle at 82% 92%, rgba(201, 118, 56, 0.8), transparent 35%),
+      linear-gradient(135deg, #bd3f68 0%, #223d82 22%, #0078b8 40%, #c5b7cf 62%, #c07855 79%, #074fc8 100%);
     background-size: 220% 220%;
     animation: sonke-hero-field 8s ease-in-out infinite alternate;
   }
@@ -200,10 +201,10 @@
   .sonke-hero-field::before {
     animation: sonke-hero-wash 7s ease-in-out infinite alternate;
     background:
-      radial-gradient(circle at 8% 70%, rgba(18, 70, 145, 0.5), transparent 34%),
-      radial-gradient(circle at 36% 24%, rgba(0, 132, 136, 0.54), transparent 34%),
-      radial-gradient(circle at 66% 58%, rgba(202, 161, 116, 0.46), transparent 34%),
-      radial-gradient(circle at 98% 18%, rgba(214, 83, 39, 0.52), transparent 36%);
+      radial-gradient(circle at 8% 70%, rgba(181, 43, 92, 0.58), transparent 34%),
+      radial-gradient(circle at 35% 24%, rgba(0, 96, 180, 0.6), transparent 34%),
+      radial-gradient(circle at 63% 56%, rgba(227, 184, 205, 0.5), transparent 34%),
+      radial-gradient(circle at 98% 18%, rgba(0, 74, 206, 0.58), transparent 36%);
     background-size: 210% 210%;
     content: '';
     inset: -24%;
@@ -215,9 +216,9 @@
 
   .sonke-hero-mesh {
     background-image:
-      radial-gradient(circle at 18% 20%, rgba(255,255,255,.18), transparent 24%),
-      radial-gradient(circle at 76% 22%, rgba(255,244,220,.16), transparent 22%),
-      radial-gradient(circle at 58% 84%, rgba(255,255,255,.12), transparent 28%);
+      radial-gradient(circle at 18% 20%, rgba(255,255,255,.2), transparent 24%),
+      radial-gradient(circle at 58% 28%, rgba(248,219,232,.2), transparent 24%),
+      radial-gradient(circle at 78% 72%, rgba(255,224,195,.15), transparent 28%);
     opacity: 0.72;
     mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
   }
@@ -302,36 +303,36 @@
     background-position: 0% 35%;
     --hero-a-x: 14%;
     --hero-a-y: 18%;
-    --hero-b-x: 46%;
-    --hero-b-y: 36%;
-    --hero-c-x: 86%;
-    --hero-c-y: 28%;
-    --hero-d-x: 38%;
-    --hero-d-y: 82%;
+    --hero-b-x: 38%;
+    --hero-b-y: 32%;
+    --hero-c-x: 68%;
+    --hero-c-y: 38%;
+    --hero-d-x: 92%;
+    --hero-d-y: 30%;
     filter: saturate(1) hue-rotate(0deg);
   }
   50% {
     background-position: 78% 45%;
-    --hero-a-x: 30%;
-    --hero-a-y: 30%;
-    --hero-b-x: 62%;
-    --hero-b-y: 22%;
-    --hero-c-x: 72%;
-    --hero-c-y: 55%;
-    --hero-d-x: 52%;
-    --hero-d-y: 70%;
+    --hero-a-x: 18%;
+    --hero-a-y: 36%;
+    --hero-b-x: 48%;
+    --hero-b-y: 20%;
+    --hero-c-x: 76%;
+    --hero-c-y: 56%;
+    --hero-d-x: 82%;
+    --hero-d-y: 34%;
     filter: saturate(1.12) hue-rotate(-5deg);
   }
   100% {
     background-position: 100% 72%;
-    --hero-a-x: 22%;
-    --hero-a-y: 50%;
-    --hero-b-x: 68%;
+    --hero-a-x: 8%;
+    --hero-a-y: 44%;
+    --hero-b-x: 42%;
     --hero-b-y: 46%;
-    --hero-c-x: 92%;
-    --hero-c-y: 18%;
-    --hero-d-x: 32%;
-    --hero-d-y: 64%;
+    --hero-c-x: 66%;
+    --hero-c-y: 24%;
+    --hero-d-x: 94%;
+    --hero-d-y: 42%;
     filter: saturate(1.05) hue-rotate(4deg);
   }
 }
