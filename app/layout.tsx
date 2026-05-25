@@ -7,17 +7,79 @@ import { ScrollRestoration } from '@/components/scroll-restoration'
 import faviconImage from './images/favicon.png'
 import './globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: '--font-geist-sans',
 })
 
+const siteUrl = 'https://sonkestudio.co.za'
+
 export const metadata: Metadata = {
-  title: 'SONKE - AI-Powered Utility Tools',
-  description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use.',
-  generator: 'v0.app',
-  keywords: ['PDF tools', 'image compression', 'QR code generator', 'file converter', 'AI tools'],
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'SONKE - AI-Powered Utility Tools',
+    template: '%s | SONKE',
+  },
+  description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use. SONKE offers AI-powered tools for students, creators, developers, and businesses.',
+  generator: 'Next.js',
+  keywords: [
+    'PDF tools',
+    'image compression',
+    'QR code generator',
+    'file converter',
+    'AI tools',
+    'resume builder',
+    'caption generator',
+    'flashcard maker',
+    'bio generator',
+    'SEO tools',
+    'marketing tools',
+    'developer tools',
+  ],
   authors: [{ name: 'SONKE' }],
+  creator: 'SONKE',
+  publisher: 'SONKE',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_ZA',
+    url: siteUrl,
+    siteName: 'SONKE',
+    title: 'SONKE - AI-Powered Utility Tools',
+    description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use.',
+    images: [
+      {
+        url: `${siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: 'SONKE - AI-Powered Utility Tools',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SONKE - AI-Powered Utility Tools',
+    description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use.',
+    images: [`${siteUrl}/og-image.png`],
+    creator: '@sonkestudio',
+  },
+  alternates: {
+    canonical: siteUrl,
+    languages: {
+      'en': siteUrl,
+      'en-ZA': siteUrl,
+    },
+  },
   icons: {
     icon: [
       {
@@ -25,9 +87,22 @@ export const metadata: Metadata = {
         type: 'image/png',
         sizes: '32x32',
       },
+      {
+        url: '/favicon.ico',
+        type: 'image/x-icon',
+      },
     ],
     shortcut: faviconImage.src,
-    apple: faviconImage.src,
+    apple: [
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
+  },
+  verification: {
+    google: '2lzaFk4ZwUdTuws9kS-4gwpgi1Lpgbd8oOYJX0dks38',
   },
 }
 
@@ -46,6 +121,40 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: 'SONKE',
+        url: siteUrl,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        name: 'SONKE',
+        url: siteUrl,
+        logo: `${siteUrl}/logo.png`,
+        sameAs: [
+          'https://twitter.com/sonkestudio',
+        ],
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+27-XX-XXX-XXXX',
+          contactType: 'customer service',
+          availableLanguage: ['en', 'af', 'zu', 'xh'],
+        },
+      },
+    ],
+  }
+
   return (
     <ClerkProvider
       signInUrl="/sign-in"
@@ -53,6 +162,12 @@ export default function RootLayout({
       afterSignOutUrl="/"
     >
       <html lang="en" className="bg-background" suppressHydrationWarning>
+        <head>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
+        </head>
         <body className={`${inter.variable} font-sans antialiased`}>
           <ScrollRestoration />
           <Script
