@@ -11,7 +11,9 @@
       "Bash(npm run *)",
       "Bash(taskkill *)",
       "PowerShell(Stop-Process *)",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(Start-Sleep 15)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Lenovo\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Lenovo-Downloads-hello-there\\\\138ec5fd-5305-4429-8bd3-7a3126f34645\\\\tasks\\\\bzbx0j6yz.output\" -Tail 30)"
     ]
   }
 }
