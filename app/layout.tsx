@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { Script } from 'next/script'
 import { ScrollRestoration } from '@/components/scroll-restoration'
 import faviconImage from './images/favicon.png'
 import './globals.css'
@@ -54,6 +55,12 @@ export default function RootLayout({
       <html lang="en" className="bg-background" suppressHydrationWarning>
         <body className={`${inter.variable} font-sans antialiased`}>
           <ScrollRestoration />
+          <Script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8021272939133910"
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
           {children}
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </body>
