@@ -1,0 +1,32 @@
+{
+  "name": "SONKE - AI-Powered Utility Tools",
+  "short_name": "SONKE",
+  "description": "Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#faf8f5",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "lang": "en-ZA",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import { ScrollRestoration } from '@/components/scroll-restoration'
-import faviconImage from './images/favicon.png'
 import './globals.css'
 
 const inter = Inter({
@@ -83,16 +82,17 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: faviconImage.src,
-        type: 'image/png',
+        url: '/favicon.ico',
+        type: 'image/x-icon',
         sizes: '32x32',
       },
       {
-        url: '/favicon.ico',
-        type: 'image/x-icon',
+        url: '/icon.png',
+        type: 'image/png',
+        sizes: '32x32',
       },
     ],
-    shortcut: faviconImage.src,
+    shortcut: '/favicon.ico',
     apple: [
       {
         url: '/apple-touch-icon.png',
@@ -100,6 +100,10 @@ export const metadata: Metadata = {
         type: 'image/png',
       },
     ],
+    other: {
+      rel: 'manifest',
+      url: '/site.webmanifest',
+    },
   },
   verification: {
     google: '2lzaFk4ZwUdTuws9kS-4gwpgi1Lpgbd8oOYJX0dks38',
@@ -141,7 +145,7 @@ export default function RootLayout({
         '@type': 'Organization',
         name: 'SONKE',
         url: siteUrl,
-        logo: `${siteUrl}/logo.png`,
+        logo: `${siteUrl}/icon.png`,
         sameAs: [
           'https://twitter.com/sonkestudio',
         ],
@@ -163,6 +167,7 @@ export default function RootLayout({
     >
       <html lang="en" className="bg-background" suppressHydrationWarning>
         <head>
+          <link rel="manifest" href="/site.webmanifest" />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

@@ -17,7 +17,8 @@
       "Bash(npm install *)",
       "Bash(pnpm add *)",
       "Bash(Select-String -Path \".next\\\\server\\\\app\\\\index.html\" -Pattern \"google-site-verification\")",
-      "Bash(Select-Object -First 1)"
+      "Bash(Select-Object -First 1)",
+      "Bash(node -e ' *)"
     ]
   }
 }
