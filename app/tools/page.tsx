@@ -10,15 +10,14 @@ import { ArrowRight, ArrowUpRight, Check, Search, Sparkles, Star, TrendingUp, X 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MyDeskBanner } from '@/components/auth/my-desk-banner'
-import { filterToolsForUser } from '@/lib/filter-tools'
+import { filterToolsForUser, getPersonalizedLeadTools, sortToolsForUser } from '@/lib/filter-tools'
+import { useLocation } from '@/hooks/use-location'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import {
   categories,
-  featuredTools,
   getToolsByCategory,
   newTools,
   searchTools,
-  southAfricaPopularTools,
   Tool,
   tools,
   trendingTools,
@@ -47,10 +46,6 @@ const grid: Variants = {
 }
 
 const trendingSearches = ['Currency Converter', 'Time Zone', 'AI Humanizer', 'PDF to Word', 'CV Generator']
-
-function dedupeTools(input: Tool[]) {
-  return Array.from(new Map(input.map((tool) => [tool.id, tool])).values())
-}
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
@@ -234,6 +229,7 @@ export default function ToolsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(initialCategory)
   const [showMyDesk, setShowMyDesk] = useState(deskParam === '1' || Boolean(hasDesk))
+  const { location, season } = useLocation()
 
   useEffect(() => {
     setActiveCategory(searchParams.get('category'))
@@ -261,16 +257,17 @@ export default function ToolsPage() {
       result = result.filter((tool) => tool.category === activeCategory)
     }
 
+    // Smart-sort when browsing (not actively searching)
+    if (!searchQuery.trim()) {
+      result = sortToolsForUser(result, { location, season, prefs })
+    }
+
     return result
-  }, [activeCategory, searchQuery, showMyDesk, hasDesk, prefs])
+  }, [activeCategory, searchQuery, showMyDesk, hasDesk, prefs, location, season])
 
   const leadTools = useMemo(() => {
-    const pool = dedupeTools([...southAfricaPopularTools, ...featuredTools, ...trendingTools])
-    if (showMyDesk && hasDesk && prefs) {
-      return filterToolsForUser(pool, prefs).slice(0, 8)
-    }
-    return pool.slice(0, 8)
-  }, [showMyDesk, hasDesk, prefs])
+    return getPersonalizedLeadTools(tools, { location, season, prefs }, 8)
+  }, [location, season, prefs])
   const activeCategoryName = categories.find((category) => category.id === activeCategory)?.name
 
   return (

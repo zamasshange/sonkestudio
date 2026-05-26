@@ -4,6 +4,9 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import { ScrollRestoration } from '@/components/scroll-restoration'
+import { PostHogProvider } from '@/components/posthog-provider'
+import { OneSignalProvider } from '@/components/onesignal-provider'
+import { StreakBadge } from '@/components/streak-badge'
 import './globals.css'
 
 const inter = Inter({
@@ -165,26 +168,31 @@ export default function RootLayout({
       signUpUrl="/sign-up"
       afterSignOutUrl="/"
     >
-      <html lang="en" className="bg-background" suppressHydrationWarning>
-        <head>
-          <link rel="manifest" href="/site.webmanifest" />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-          />
-        </head>
-        <body className={`${inter.variable} font-sans antialiased`}>
-          <ScrollRestoration />
-          <Script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8021272939133910"
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-          {children}
-          {process.env.NODE_ENV === 'production' && <Analytics />}
-        </body>
-      </html>
+      <PostHogProvider>
+        <OneSignalProvider>
+          <html lang="en" className="bg-background" suppressHydrationWarning>
+            <head>
+              <link rel="manifest" href="/site.webmanifest" />
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+              />
+            </head>
+            <body className={`${inter.variable} font-sans antialiased`}>
+              <ScrollRestoration />
+              <Script
+                async
+                src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8021272939133910"
+                crossOrigin="anonymous"
+                strategy="afterInteractive"
+              />
+              {children}
+              <StreakBadge />
+              {process.env.NODE_ENV === 'production' && <Analytics />}
+            </body>
+          </html>
+        </OneSignalProvider>
+      </PostHogProvider>
     </ClerkProvider>
   )
 }

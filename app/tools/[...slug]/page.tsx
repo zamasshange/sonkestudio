@@ -1,10 +1,12 @@
 "use client"
 
 import * as React from 'react'
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { ToolExperienceSystem } from '@/components/tool-experiences/tool-layout-system'
 import { tools } from '@/lib/tools-data'
+import { trackToolOpen } from '@/lib/gamification'
 
 interface ToolPageProps {
   params: Promise<{ slug?: string[] }>
@@ -18,6 +20,12 @@ export default function ToolFallbackPage({ params }: ToolPageProps) {
   const tool = tools.find((tool) => tool.href === href)
     || tools.find((tool) => tool.id === requestPath)
     || tools.find((tool) => tool.href.replace(/^\/tools\//, '').endsWith(requestPath))
+
+  useEffect(() => {
+    if (tool) {
+      trackToolOpen(tool.id, tool.name, tool.category)
+    }
+  }, [tool])
 
   if (!tool) {
     return (

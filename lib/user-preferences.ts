@@ -64,6 +64,10 @@ export interface UserPreferences {
   persona: UserPersona
   toolCategories: string[]
   onboardingComplete: boolean
+  grade?: string
+  language?: string
+  interests?: string[]
+  favoriteTools?: string[]
 }
 
 export const SIGNUP_PREFS_KEY = 'sonke_signup_preferences'
@@ -79,5 +83,9 @@ export function parseUserPreferences(
     persona: metadata.persona as UserPersona,
     toolCategories: metadata.toolCategories as string[],
     onboardingComplete: Boolean(metadata.onboardingComplete),
+    grade: typeof metadata.grade === 'string' ? metadata.grade : undefined,
+    language: typeof metadata.language === 'string' ? metadata.language : undefined,
+    interests: Array.isArray(metadata.interests) ? metadata.interests as string[] : undefined,
+    favoriteTools: Array.isArray(metadata.favoriteTools) ? metadata.favoriteTools as string[] : undefined,
   }
 }

@@ -1,9 +1,10 @@
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { 
-  HeroSection, 
-  LogoMarquee, 
-  ServicesSection, 
+import { SmartRecommendations } from '@/components/smart-recommendations'
+import {
+  HeroSection,
+  LogoMarquee,
+  ServicesSection,
   FeaturedWorkSection,
   StatsSection,
   CTASection
@@ -19,7 +20,10 @@ export default function HomePage() {
       
       {/* Logo Marquee */}
       <LogoMarquee />
-      
+
+      {/* Smart Personalized Recommendations */}
+      <SmartRecommendations />
+
       {/* Services/Categories */}
       <ServicesSection />
       

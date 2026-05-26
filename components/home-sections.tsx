@@ -3,11 +3,15 @@
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { ArrowRight, Check, Code2, FileText, GraduationCap, PenTool, Search, Sparkles, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { pickToolsForUser } from '@/lib/filter-tools'
+import { sortToolsForUser } from '@/lib/filter-tools'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { useLocation } from '@/hooks/use-location'
+import { getHeroMessage } from '@/lib/smart-recommendations'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
+import { getToolImage, shuffleArray } from '@/lib/tool-images'
 import { SiFacebook, SiInstagram, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 
@@ -46,16 +50,6 @@ const item: Variants = {
   hidden: { opacity: 0, y: 18 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: 'easeOut' } },
 }
-
-const heroTools = Array.from(
-  new Map(
-    [
-      ...southAfricaPopularTools.slice(0, 5),
-    ]
-      .filter(Boolean)
-      .map((tool) => [tool!.id, tool!]),
-  ).values(),
-).slice(0, 5)
 
 const heroRotatingTasks = [
   'Web Development',
@@ -98,6 +92,18 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 export function HeroSection() {
+  const { location, season } = useLocation()
+  const heroMessage = getHeroMessage(location, season || undefined)
+
+  const { prefs } = useUserPreferences()
+
+  // Smart-sort all tools by location/season/prefs, then rotate top picks on refresh
+  const heroTools = useMemo(() => {
+    const sorted = sortToolsForUser(tools, { location, season, prefs })
+    const topPool = sorted.slice(0, 12)
+    return shuffleArray(topPool).slice(0, 5)
+  }, [location, season, prefs])
+
   return (
     // Navbar is fixed (`components/navbar.tsx`), so we need enough top padding here to avoid overlap.
     <section className="bg-background px-4 pb-6 pt-28 sm:px-8 sm:pt-32 lg:pt-32">
@@ -128,12 +134,12 @@ export function HeroSection() {
             transition={{ delay: 0.45, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="absolute right-0 top-0 hidden xl:flex items-center gap-3 rounded-xl border border-border bg-white p-2 pr-3.5 shadow-sm"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-[#0b5c6b] via-[#4a8cc8] to-[#d4884a] text-white">
-              <Sparkles className="h-4 w-4" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg overflow-hidden bg-gradient-to-br from-[#0b5c6b] via-[#4a8cc8] to-[#d4884a]">
+              <img src="/logo.png" alt="SONKE" className="h-8 w-8 object-contain" />
             </div>
             <div className="leading-tight">
               <p className="text-xs font-semibold text-foreground">SONKE Toolbox</p>
-              <p className="text-[10px] text-muted-foreground">50+ free utilities</p>
+              <p className="text-[10px] text-muted-foreground">{tools.length}+ tools</p>
             </div>
             <Link href="/tools">
               <span className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-2 text-[10px] font-bold tracking-wide text-background transition hover:bg-foreground/90 cursor-pointer">
@@ -207,6 +213,16 @@ export function HeroSection() {
                   </span>
                 </span>
               </h2>
+              {heroMessage && (
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                  className="mt-3 text-sm text-background/70"
+                >
+                  {heroMessage}
+                </motion.p>
+              )}
             </div>
 
             <motion.div
@@ -218,26 +234,29 @@ export function HeroSection() {
               }}
               className="grid gap-3 pt-5 sm:grid-cols-2 lg:grid-cols-5"
             >
-              {heroTools.map((tool, index) => {
-                const Icon = tool!.icon
+              {heroTools.map((tool: typeof southAfricaPopularTools[0], index: number) => {
+                const Icon = tool.icon
                 return (
                   <motion.div
-                    key={tool!.id}
+                    key={tool.id}
                     variants={{
                       hidden: { opacity: 0, y: 24 },
                       visible: { opacity: 1, y: 0, transition: { duration: 0.58, ease: 'easeOut' } },
                     }}
                   >
                     <Link
-                      href={tool!.href}
+                      href={tool.href}
                       className="group flex h-[84px] items-center gap-3 overflow-hidden rounded-lg border border-[#ddd9d5] bg-[#f0ece8] px-3 py-2.5 text-foreground transition hover:-translate-y-1 hover:bg-[#e8e4e0]"
                     >
-                      <div className={`relative h-[60px] w-[60px] shrink-0 overflow-hidden rounded-md bg-gradient-to-r ${heroTileVisuals[index % heroTileVisuals.length]}`}>
-                        <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(90deg,rgba(255,255,255,.28)_0_14%,transparent_14%_30%,rgba(255,255,255,.16)_30%_42%,transparent_42%_58%,rgba(15,23,42,.1)_58%_72%,transparent_72%)]" />
-                      </div>
+                      <img
+                        src={getToolImage(tool)}
+                        alt={tool.name}
+                        className="h-[60px] w-[60px] shrink-0 rounded-md object-cover"
+                        loading="lazy"
+                      />
                       <div className="min-w-0">
                         <span className="text-xs text-muted-foreground">({String(index + 1).padStart(2, '0')})</span>
-                        <p className="mt-0.5 truncate text-sm font-semibold text-foreground">{tool!.name}</p>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-foreground">{tool.name}</p>
                       </div>
                     </Link>
                   </motion.div>
@@ -318,6 +337,7 @@ export function LogoMarquee() {
 
 export function ServicesSection() {
   const { prefs, persona, hasDesk, isSignedIn } = useUserPreferences()
+  const { location, season } = useLocation()
   const serviceCards = categories
     .filter((category) => !hasDesk || !prefs || prefs.toolCategories.includes(category.id))
     .map((category, index) => ({
@@ -326,7 +346,10 @@ export function ServicesSection() {
       count: tools.filter((tool) => tool.category === category.id).length,
       samples: tools.filter((tool) => tool.category === category.id).slice(0, 3),
     }))
-  const previewTools = pickToolsForUser(southAfricaPopularTools, prefs, 6)
+  const previewTools = useMemo(() => {
+    const sorted = sortToolsForUser(tools, { location, season, prefs })
+    return sorted.slice(0, 6)
+  }, [location, season, prefs])
 
   return (
     <section id="services" className="overflow-x-hidden bg-background px-5 py-20 sm:px-8 lg:py-24">
@@ -589,7 +612,11 @@ export function ServicesSection() {
 
 export function FeaturedWorkSection() {
   const { prefs, persona, hasDesk } = useUserPreferences()
-  const featured = pickToolsForUser(southAfricaPopularTools, prefs, 6)
+  const { location, season } = useLocation()
+  const featured = useMemo(() => {
+    const sorted = sortToolsForUser(tools, { location, season, prefs })
+    return sorted.slice(0, 6)
+  }, [location, season, prefs])
   const primaryTool = featured[0]
   const PrimaryIcon = primaryTool.icon
   const quickStats = [

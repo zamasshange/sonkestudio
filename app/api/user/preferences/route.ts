@@ -8,6 +8,10 @@ const preferencesSchema = z.object({
   persona: z.enum(['student', 'creator', 'business', 'developer', 'everyday']),
   toolCategories: z.array(z.string()).min(1),
   onboardingComplete: z.boolean().optional(),
+  grade: z.string().optional(),
+  language: z.string().optional(),
+  interests: z.array(z.string()).optional(),
+  favoriteTools: z.array(z.string()).optional(),
 })
 
 export async function POST(request: Request) {
@@ -32,17 +36,21 @@ export async function POST(request: Request) {
     )
   }
 
-  const { persona, toolCategories } = parsed.data
+  const { persona, toolCategories, grade, language, interests, favoriteTools } = parsed.data
   const validPersona = personaOptions.some((option) => option.id === persona)
   if (!validPersona) {
     return NextResponse.json({ error: 'Unknown persona' }, { status: 400 })
   }
 
-  const metadata = {
+  const metadata: Record<string, unknown> = {
     persona,
     toolCategories,
     onboardingComplete: true,
   }
+  if (grade) metadata.grade = grade
+  if (language) metadata.language = language
+  if (interests) metadata.interests = interests
+  if (favoriteTools) metadata.favoriteTools = favoriteTools
 
   const client = await clerkClient()
   await client.users.updateUserMetadata(userId, {
