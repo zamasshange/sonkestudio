@@ -11,7 +11,7 @@ import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { useLocation } from '@/hooks/use-location'
 import { getHeroMessage } from '@/lib/smart-recommendations'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
-import { getToolImage, shuffleArray } from '@/lib/tool-images'
+import { shuffleArray } from '@/lib/tool-images'
 import { SiFacebook, SiInstagram, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 
@@ -134,8 +134,8 @@ export function HeroSection() {
             transition={{ delay: 0.45, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="absolute right-0 top-0 hidden xl:flex items-center gap-3 rounded-xl border border-border bg-white p-2 pr-3.5 shadow-sm"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg overflow-hidden bg-gradient-to-br from-[#0b5c6b] via-[#4a8cc8] to-[#d4884a]">
-              <img src="/logo.png" alt="SONKE" className="h-8 w-8 object-contain" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg overflow-hidden bg-white">
+              <img src="/sonke-logo.png" alt="SONKE" className="h-8 w-8 object-contain" />
             </div>
             <div className="leading-tight">
               <p className="text-xs font-semibold text-foreground">SONKE Toolbox</p>
@@ -248,12 +248,12 @@ export function HeroSection() {
                       href={tool.href}
                       className="group flex h-[84px] items-center gap-3 overflow-hidden rounded-lg border border-[#ddd9d5] bg-[#f0ece8] px-3 py-2.5 text-foreground transition hover:-translate-y-1 hover:bg-[#e8e4e0]"
                     >
-                      <img
-                        src={getToolImage(tool)}
-                        alt={tool.name}
-                        className="h-[60px] w-[60px] shrink-0 rounded-md object-cover"
-                        loading="lazy"
-                      />
+                      <span
+                        className="inline-flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-md border border-[#ddd9d5] bg-white"
+                        style={{ background: tool.iconColor ? undefined : tool.iconBg, color: tool.iconColor }}
+                      >
+                        <Icon className={tool.iconColor ? 'h-8 w-8' : 'h-6 w-6'} />
+                      </span>
                       <div className="min-w-0">
                         <span className="text-xs text-muted-foreground">({String(index + 1).padStart(2, '0')})</span>
                         <p className="mt-0.5 truncate text-sm font-semibold text-foreground">{tool.name}</p>
