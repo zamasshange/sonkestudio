@@ -179,48 +179,35 @@
   }
 
   .sonke-hero-field {
-    --hero-a-x: 8%;
-    --hero-a-y: 18%;
-    --hero-b-x: 39%;
-    --hero-b-y: 30%;
-    --hero-c-x: 70%;
-    --hero-c-y: 38%;
-    --hero-d-x: 93%;
-    --hero-d-y: 34%;
     background:
-      radial-gradient(circle at var(--hero-a-x, 8%) var(--hero-a-y, 18%), rgba(205, 54, 98, 0.95), transparent 34%),
-      radial-gradient(circle at var(--hero-b-x, 39%) var(--hero-b-y, 30%), rgba(0, 112, 182, 0.92), transparent 38%),
-      radial-gradient(circle at var(--hero-c-x, 70%) var(--hero-c-y, 38%), rgba(223, 176, 197, 0.7), transparent 40%),
-      radial-gradient(circle at var(--hero-d-x, 93%) var(--hero-d-y, 34%), rgba(0, 75, 196, 0.95), transparent 38%),
-      radial-gradient(circle at 82% 92%, rgba(201, 118, 56, 0.8), transparent 35%),
-      linear-gradient(135deg, #bd3f68 0%, #223d82 22%, #0078b8 40%, #c5b7cf 62%, #c07855 79%, #074fc8 100%);
-    background-size: 220% 220%;
-    animation: sonke-hero-field 8s ease-in-out infinite alternate;
+      radial-gradient(circle at 0% 40%, rgba(180, 60, 30, 0.55), transparent 55%),
+      radial-gradient(circle at 35% 55%, rgba(60, 130, 100, 0.45), transparent 55%),
+      radial-gradient(circle at 100% 45%, rgba(30, 50, 140, 0.55), transparent 55%),
+      linear-gradient(135deg, #a83820 0%, #b86028 10%, #a07830 20%, #6a8a4a 30%, #3a8a8a 40%, #2a6ab8 50%, #1a4a9a 62%, #0a2a6a 78%, #0a1a4a 90%, #0a0a2a 100%);
+    background-size: 200% 200%;
+    animation: sonke-hero-field 10s ease-in-out infinite alternate;
   }
 
   .sonke-hero-field::before {
-    animation: sonke-hero-wash 7s ease-in-out infinite alternate;
+    animation: sonke-hero-wash 8s ease-in-out infinite alternate;
     background:
-      radial-gradient(circle at 8% 70%, rgba(181, 43, 92, 0.58), transparent 34%),
-      radial-gradient(circle at 35% 24%, rgba(0, 96, 180, 0.6), transparent 34%),
-      radial-gradient(circle at 63% 56%, rgba(227, 184, 205, 0.5), transparent 34%),
-      radial-gradient(circle at 98% 18%, rgba(0, 74, 206, 0.58), transparent 36%);
-    background-size: 210% 210%;
+      radial-gradient(circle at 15% 65%, rgba(200, 80, 30, 0.35), transparent 50%),
+      radial-gradient(circle at 70% 30%, rgba(30, 80, 160, 0.35), transparent 50%);
+    background-size: 180% 180%;
     content: '';
-    inset: -24%;
+    inset: -20%;
     mix-blend-mode: screen;
-    opacity: 0.95;
+    opacity: 0.7;
     position: absolute;
     transform: translate3d(0, 0, 0);
   }
 
   .sonke-hero-mesh {
     background-image:
-      radial-gradient(circle at 18% 20%, rgba(255,255,255,.2), transparent 24%),
-      radial-gradient(circle at 58% 28%, rgba(248,219,232,.2), transparent 24%),
-      radial-gradient(circle at 78% 72%, rgba(255,224,195,.15), transparent 28%);
-    opacity: 0.72;
-    mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.1), transparent 30%),
+      radial-gradient(circle at 80% 80%, rgba(255,200,150,.08), transparent 30%);
+    opacity: 0.4;
+    mask-image: linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,.15));
   }
 
   .sonke-type-line {

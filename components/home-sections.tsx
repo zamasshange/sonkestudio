@@ -107,59 +107,80 @@ export function HeroSection() {
         animate="visible"
         className="mx-auto max-w-[1820px]"
       >
-        <motion.div
-          variants={item}
-          className="flex flex-col gap-4"
-        >
-          <div className="min-w-0 flex-1">
+        <motion.div variants={item} className="relative">
+          <div className="min-w-0">
             <h1 className="max-w-full font-semibold leading-[0.82] text-foreground">
               <motion.span
-                className="block whitespace-nowrap text-[3.05rem] sm:text-[5.25rem] md:text-[7rem] lg:text-[8.1rem] xl:text-[10rem] 2xl:text-[11.6rem]"
+                className="block whitespace-nowrap text-[3.05rem] sm:text-[5.25rem] md:text-[7rem] lg:text-[8.1rem] xl:text-[8rem] 2xl:text-[9.2rem]"
                 initial={{ y: '105%', opacity: 0 }}
                 animate={{ y: '0%', opacity: 1 }}
                 transition={{ delay: 0.16, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
               >
-                SONKE_Studio
+                SONKE<sup className="text-[0.28em] align-super">®</sup>_Studio
               </motion.span>
             </h1>
           </div>
+
+          {/* SONKE Toolbox Card — floats over title, Avoora-style */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.45, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute right-0 top-0 hidden xl:flex items-center gap-3 rounded-xl border border-border bg-white p-2 pr-3.5 shadow-sm"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-[#0b5c6b] via-[#4a8cc8] to-[#d4884a] text-white">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div className="leading-tight">
+              <p className="text-xs font-semibold text-foreground">SONKE Toolbox</p>
+              <p className="text-[10px] text-muted-foreground">50+ free utilities</p>
+            </div>
+            <Link href="/tools">
+              <span className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-2 text-[10px] font-bold tracking-wide text-background transition hover:bg-foreground/90 cursor-pointer">
+                START CREATING
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <ArrowRight className="h-2 w-2" />
+                </span>
+              </span>
+            </Link>
+          </motion.div>
         </motion.div>
 
         <motion.div
           variants={item}
-          className="sonke-hero-field relative mt-4 min-h-[400px] overflow-hidden rounded-[1.25rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] sm:min-h-[470px] lg:min-h-[500px]"
+          className="sonke-hero-field relative mt-3 min-h-[360px] overflow-hidden rounded-[1.25rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] sm:min-h-[400px] lg:min-h-[420px]"
         >
           <div className="sonke-hero-mesh absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground/18 via-foreground/5 to-foreground/10" />
 
-          <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-10">
-            <div className="pointer-events-none absolute right-5 top-28 hidden sm:block lg:right-10 lg:top-32">
+          <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute right-5 top-12 hidden sm:block lg:right-8 lg:top-16">
               <div className="flex flex-col gap-2">
                 {[
-                  { icon: SiInstagram, label: 'Instagram', color: '#E4405F' },
-                  { icon: FaLinkedin, label: 'LinkedIn', color: '#0A66C2' },
-                  { icon: SiFacebook, label: 'Facebook', color: '#111111' },
-                  { icon: SiX, label: 'X', color: '#111111' },
-                ].map(({ icon: Icon, label, color }, index) => (
+                  { icon: SiInstagram, label: 'Instagram' },
+                  { icon: FaLinkedin, label: 'LinkedIn' },
+                  { icon: SiFacebook, label: 'Facebook' },
+                  { icon: SiX, label: 'X' },
+                ].map(({ icon: Icon, label }, index) => (
                   <motion.span
                     key={label}
                     initial={{ opacity: 0, x: 22 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.35 + index * 0.08, duration: 0.55, ease: 'easeOut' }}
-                    className="inline-flex h-[60px] w-[60px] items-center justify-center rounded-md bg-background/72 text-foreground backdrop-blur-sm"
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#e4e0dc] text-foreground shadow-sm"
                   >
-                    <Icon className="h-7 w-7" style={{ color }} />
+                    <Icon className="h-5 w-5" style={{ color: '#1a1a1a' }} />
                   </motion.span>
                 ))}
               </div>
             </div>
 
-            <div className="max-w-[900px] pt-20 sm:pt-28 lg:pt-32">
+            <div className="max-w-[800px] pt-6 sm:pt-10 lg:pt-10">
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.18, duration: 0.6, ease: 'easeOut' }}
-                className="mb-7 flex -space-x-3"
+                className="mb-6 flex -space-x-3"
               >
                 {avatarImages.map((src, index) => (
                   <motion.img
@@ -169,11 +190,11 @@ export function HeroSection() {
                     initial={{ opacity: 0, x: -14, scale: 0.92 }}
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     transition={{ delay: 0.25 + index * 0.05, duration: 0.45, ease: 'easeOut' }}
-                    className="h-10 w-10 rounded-full border-2 border-background object-cover sm:h-12 sm:w-12"
+                    className="h-9 w-9 rounded-full border-2 border-background object-cover sm:h-10 sm:w-10"
                   />
                 ))}
               </motion.div>
-              <h2 className="max-w-[860px] text-[2.45rem] font-semibold leading-[1.12] sm:text-[3.15rem] lg:text-[3.85rem]">
+              <h2 className="max-w-[800px] text-[2.2rem] font-bold leading-[1.05] tracking-tight sm:text-[2.8rem] lg:text-[3.4rem]">
                 <span className="block">We Build Digital Service with</span>
                 <span className="sonke-rotating-line mt-1 block h-[1.2em] overflow-hidden text-background">
                   <span className="sonke-rotating-stack block">
@@ -186,14 +207,6 @@ export function HeroSection() {
                   </span>
                 </span>
               </h2>
-              <motion.p
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.65, ease: 'easeOut' }}
-                className="mt-4 max-w-2xl text-sm leading-6 text-background/80 sm:text-base"
-              >
-                The right workspace appears when the job changes.
-              </motion.p>
             </div>
 
             <motion.div
@@ -217,24 +230,14 @@ export function HeroSection() {
                   >
                     <Link
                       href={tool!.href}
-                      className="group grid h-[70px] grid-cols-[78px_1fr] items-center overflow-hidden rounded-md border border-background/45 bg-background/84 p-2 text-foreground backdrop-blur-xl transition hover:-translate-y-1 hover:bg-background"
+                      className="group flex h-[84px] items-center gap-3 overflow-hidden rounded-lg border border-[#ddd9d5] bg-[#f0ece8] px-3 py-2.5 text-foreground transition hover:-translate-y-1 hover:bg-[#e8e4e0]"
                     >
-                      <div className={`relative h-full overflow-hidden rounded-sm bg-gradient-to-r ${heroTileVisuals[index % heroTileVisuals.length]}`}>
-                        <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(90deg,rgba(255,255,255,.32)_0_14%,transparent_14%_30%,rgba(255,255,255,.2)_30%_42%,transparent_42%_58%,rgba(15,23,42,.12)_58%_72%,transparent_72%)]" />
-                        <div className="absolute inset-0 bg-white/10" />
-                        <div
-                          className="absolute bottom-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-sm border border-white/50 bg-background/95 shadow-sm"
-                          style={{ color: tool!.iconColor }}
-                        >
-                          <Icon className={tool!.iconColor ? 'h-5 w-5' : 'h-4 w-4'} style={{ filter: tool!.id === 'tiktok-hook' ? 'drop-shadow(-1px 0 #00F2EA) drop-shadow(1px 0 #FF0050)' : undefined }} />
-                        </div>
+                      <div className={`relative h-[60px] w-[60px] shrink-0 overflow-hidden rounded-md bg-gradient-to-r ${heroTileVisuals[index % heroTileVisuals.length]}`}>
+                        <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(90deg,rgba(255,255,255,.28)_0_14%,transparent_14%_30%,rgba(255,255,255,.16)_30%_42%,transparent_42%_58%,rgba(15,23,42,.1)_58%_72%,transparent_72%)]" />
                       </div>
-                      <div className="min-w-0 px-3">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm font-semibold text-muted-foreground">({String(index + 1).padStart(2, '0')})</span>
-                          <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" />
-                        </div>
-                        <p className="mt-1.5 truncate text-base font-semibold text-foreground">{tool!.name}</p>
+                      <div className="min-w-0">
+                        <span className="text-xs text-muted-foreground">({String(index + 1).padStart(2, '0')})</span>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-foreground">{tool!.name}</p>
                       </div>
                     </Link>
                   </motion.div>
