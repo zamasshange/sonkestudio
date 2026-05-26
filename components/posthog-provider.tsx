@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import posthog from 'posthog-js'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogPageView() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -30,7 +30,18 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     posthog.capture('$pageview', { $current_url: url })
   }, [pathname, searchParams])
 
-  return <>{children}</>
+  return null
+}
+
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <PostHogPageView />
+      </Suspense>
+      {children}
+    </>
+  )
 }
 
 export { posthog }
