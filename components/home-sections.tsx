@@ -10,6 +10,7 @@ import { sortToolsForUser } from '@/lib/filter-tools'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { useLocation } from '@/hooks/use-location'
 import { getHeroMessage } from '@/lib/smart-recommendations'
+import { isSouthAfricanUser } from '@/lib/sa-intelligence'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
 import { shuffleArray } from '@/lib/tool-images'
 import { SiFacebook, SiInstagram, SiX } from 'react-icons/si'
@@ -94,6 +95,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 export function HeroSection() {
   const { location, season } = useLocation()
   const heroMessage = getHeroMessage(location, season || undefined)
+  const isSA = isSouthAfricanUser(location)
 
   const { prefs } = useUserPreferences()
 
@@ -221,6 +223,16 @@ export function HeroSection() {
                   className="mt-3 text-sm text-background/70"
                 >
                   {heroMessage}
+                </motion.p>
+              )}
+              {isSA && (
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.72, duration: 0.5 }}
+                  className="mt-2 text-xs text-background/70"
+                >
+                  Popular in {location?.city || 'South Africa'}: CAPS study tools, ZAR-ready business docs, and local creator workflows.
                 </motion.p>
               )}
             </div>

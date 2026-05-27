@@ -66,12 +66,10 @@ export function ToolWorkspaceHero({
               <div className="flex items-center justify-between">
                 <span className="text-sm uppercase text-background/70">{label}</span>
                 <span
-                  className={`inline-flex h-14 w-14 items-center justify-center ${
-                    tool.iconColor ? 'bg-transparent text-foreground' : 'rounded-sm border border-black/5 bg-background/90 text-foreground'
-                  }`}
-                  style={{ background: tool.iconColor ? undefined : tool.iconBg, color: tool.iconColor }}
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-lg border border-white/35 bg-white/85 text-foreground shadow-sm backdrop-blur"
+                  style={{ color: tool.iconColor || 'currentColor' }}
                 >
-                  <Icon className={tool.iconColor ? 'h-10 w-10' : 'h-7 w-7'} style={{ filter: iconFilter }} />
+                  <Icon className="h-7 w-7" style={{ filter: iconFilter }} />
                 </span>
               </div>
               <div>

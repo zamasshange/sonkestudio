@@ -92,6 +92,7 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
   const [aiLoading, setAiLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [targetRole, setTargetRole] = useState('')
   const previewRef = useRef<HTMLDivElement>(null)
 
   const selectedSection = sections.find(s => s.id === selectedSectionId)
@@ -150,14 +151,39 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
   }
 
   const generateAIContent = async () => {
+    if (!selectedSection) return
     setAiLoading(true)
     try {
-      // Simulate AI generation - in production, call actual API
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      // Update selected section with placeholder content
-      if (selectedSection) {
+      const personal = sections.find((s) => s.name === 'Personal Details')?.content || {}
+      const prompt = `Build strong resume content for section: ${selectedSection.name}.
+Target role: ${targetRole || 'Not specified'}
+Current section content: ${JSON.stringify(selectedSection.content)}
+Candidate context: ${JSON.stringify(personal)}
+
+Return practical, recruiter-ready content for this section only.`
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: tool.id, text: prompt }),
+      })
+      const data = await response.json()
+      const content = data.result || data.choices?.[0]?.message?.content || ''
+
+      if (selectedSection.type === 'list') {
+        const items = content.split('\n').map((line: string) => line.replace(/^[-*]\s*/, '').trim()).filter(Boolean)
+        updateSectionContent(selectedSection.id, { items })
+      } else if (selectedSection.type === 'structured') {
+        const [fullName, email, phone, location] = content.split('\n').map((x: string) => x.trim())
         updateSectionContent(selectedSection.id, {
-          text: 'AI-generated content would appear here. This is a placeholder for the AI suggestions that would enhance your CV.'
+          ...selectedSection.content,
+          fullName: fullName || selectedSection.content.fullName,
+          email: email || selectedSection.content.email,
+          phone: phone || selectedSection.content.phone,
+          location: location || selectedSection.content.location,
+        })
+      } else {
+        updateSectionContent(selectedSection.id, {
+          text: content || selectedSection.content.text || '',
         })
       }
     } finally {
@@ -165,14 +191,60 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
     }
   }
 
+  const getResumeText = () => {
+    const lines: string[] = []
+    sections.filter((s) => s.visible).forEach((section) => {
+      lines.push(section.name.toUpperCase())
+      if (section.type === 'structured') {
+        const c = section.content || {}
+        lines.push(c.fullName || '')
+        lines.push(c.email || '')
+        lines.push(c.phone || '')
+        lines.push(c.location || '')
+      } else if (section.type === 'list') {
+        const items = section.content.items || []
+        items.forEach((item: string) => lines.push(`- ${item}`))
+      } else {
+        lines.push(section.content.text || '')
+      }
+      lines.push('')
+    })
+    return lines.join('\n').trim()
+  }
+
   const exportPDF = () => {
-    // Placeholder for PDF export
-    console.log('Export PDF')
+    const preview = previewRef.current
+    if (!preview) return
+    const printWindow = window.open('', '_blank', 'width=1024,height=768')
+    if (!printWindow) return
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>CV Export</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
+            .page { width: 794px; min-height: 1123px; margin: 0 auto; }
+          </style>
+        </head>
+        <body>
+          <div class="page">${preview.innerHTML}</div>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.focus()
+    printWindow.print()
   }
 
   const exportDOCX = () => {
-    // Placeholder for DOCX export
-    console.log('Export DOCX')
+    const text = getResumeText()
+    const blob = new Blob([text], { type: 'application/msword' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'resume.doc'
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -186,6 +258,7 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
       />
 
       <div className="mx-auto flex max-w-[1720px] justify-end gap-2 px-5 sm:px-8">
+        <Input value={targetRole} onChange={(e) => setTargetRole(e.target.value)} placeholder="Target role (e.g. Product Manager)" className="max-w-[320px] rounded-none bg-white" />
         <Button onClick={exportPDF} className="rounded-none bg-primary text-primary-foreground gap-2">
           <Download className="w-4 h-4" />
           PDF
@@ -376,7 +449,7 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
                 className="min-h-[520px] bg-muted overflow-auto border border-border p-5"
                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
               >
-                <div className="max-w-2xl min-h-[620px] mx-auto bg-white p-8">
+                <div className="w-[794px] min-h-[1123px] mx-auto bg-white p-12 shadow-sm">
                   {/* Personal Details Preview */}
                   {sections[0]?.visible && (
                     <div className="mb-6 border-b-2 pb-4" style={{ borderColor: template.colors.primary }}>

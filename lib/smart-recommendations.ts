@@ -1,5 +1,6 @@
 import type { GeoLocationData, SeasonalContext } from './geolocation'
 import { tools } from './tools-data'
+import { getSAContextSignal, isSouthAfricanUser } from './sa-intelligence'
 
 export interface SmartRecommendation {
   id: string
@@ -18,6 +19,7 @@ export function getSmartRecommendations(
 ): SmartRecommendation[] {
   const recommendations: SmartRecommendation[] = []
   const country = location?.country || ''
+  const sa = getSAContextSignal(location)
 
   // 1. Seasonal / Contextual picks (highest priority)
   if (season.isExamSeason) {
@@ -63,6 +65,33 @@ export function getSmartRecommendations(
       tools: countryRecs.tools,
       badge: `📍 ${location?.city || location?.country_name || country}`,
       priority: 85,
+    })
+  }
+
+  if (sa.isSouthAfrica) {
+    recommendations.push({
+      id: 'sa-student',
+      title: `Tools students love in ${sa.cityLabel}`,
+      subtitle: 'CAPS, Matric prep, APS-aware study support',
+      tools: getToolsByTags(['flashcards', 'quiz', 'exam', 'citation', 'planner', 'math']),
+      badge: '🇿🇦 Education',
+      priority: 92,
+    })
+    recommendations.push({
+      id: 'sa-creator',
+      title: 'Used by SA creators this week',
+      subtitle: 'Local trend-ready caption, hashtag, and hook workflows',
+      tools: getToolsByTags(['caption', 'hashtags', 'tiktok', 'hook', 'script', 'youtube-title']),
+      badge: '🇿🇦 Creator',
+      priority: 91,
+    })
+    recommendations.push({
+      id: 'sa-business',
+      title: 'SA business essentials',
+      subtitle: 'ZAR, VAT-ready docs, CV and proposal workflows',
+      tools: getToolsByTags(['invoice', 'resume', 'cv', 'contract', 'marketing', 'business']),
+      badge: '🇿🇦 Business',
+      priority: 90,
     })
   }
 
@@ -128,9 +157,9 @@ function getToolsByTags(tags: string[]) {
 function getCountryRecommendations(country: string): { title: string; subtitle: string; tools: typeof tools } | null {
   const map: Record<string, { title: string; subtitle: string; tags: string[] }> = {
     ZA: {
-      title: 'Made for South Africa',
-      subtitle: 'CV Builder, NSFAS tools, CAPS curriculum & more',
-      tags: ['resume', 'cv', 'essay', 'flashcards', 'pdf', 'qr'],
+      title: 'Trending in South Africa',
+      subtitle: 'CAPS study, SA CV workflows, ZAR-friendly tools',
+      tags: ['resume', 'cv', 'essay', 'flashcards', 'pdf', 'qr', 'invoice', 'math'],
     },
     IN: {
       title: 'Popular in India',
@@ -239,6 +268,7 @@ function getRoleRecommendations(role: string): { title: string; subtitle: string
 }
 
 export function getHeroMessage(location?: GeoLocationData | null, season?: SeasonalContext): string {
+  const isSA = isSouthAfricanUser(location)
   if (season?.isExamSeason) {
     return "You've got this. Let's crush those exams."
   }
@@ -248,11 +278,31 @@ export function getHeroMessage(location?: GeoLocationData | null, season?: Seaso
   if (season?.isBackToSchool) {
     return 'New term, new goals. Start strong.'
   }
-  if (location?.country === 'ZA') {
-    return 'Built with South African creators in mind.'
+  if (isSA) {
+    return 'Globally modern, with South African context when you need it.'
   }
   if (location?.country === 'IN') {
     return 'Tools that understand your grind.'
   }
   return 'The right workspace appears when the job changes.'
+}
+
+export function getLocalizedPromptSuggestions(location?: GeoLocationData | null): string[] {
+  const sa = getSAContextSignal(location)
+  if (!sa.isSouthAfrica) {
+    return [
+      'Make this more professional',
+      'Summarize into key points',
+      'Rewrite for a beginner audience',
+      'Generate three alternatives',
+    ]
+  }
+  return [
+    'Make this suitable for SA students',
+    'Convert pricing to Rand (ZAR)',
+    'Make this sound more South African',
+    'Use Johannesburg TikTok style',
+    'Add SA VAT-ready formatting',
+    'Explain this in CAPS context',
+  ]
 }

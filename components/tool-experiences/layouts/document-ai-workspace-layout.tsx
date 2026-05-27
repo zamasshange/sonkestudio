@@ -162,9 +162,9 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
             <select value={language} onChange={(e) => setLanguage(e.target.value)} className="h-9 rounded-md border border-white/20 bg-white/10 px-2 text-sm text-white">
               {['English', 'Afrikaans', 'isiZulu', 'French'].map((item) => <option key={item} className="text-black">{item}</option>)}
             </select>
-            <Button className="h-9 gap-2" variant="secondary" onClick={() => navigator.clipboard.writeText(documentText)}><Copy className="h-4 w-4" />Copy</Button>
-            <Button className="h-9 gap-2" onClick={() => applyAi('Create a polished full draft using the current context and workflow.', documentText || config.starterPrompt)}><Wand2 className="h-4 w-4" />Generate</Button>
-            <Button className="h-9 gap-2" variant="outline"><FileDown className="h-4 w-4" />Export</Button>
+            <Button className="h-9 gap-2 border border-white/25 bg-white/10 text-white hover:bg-white/20" variant="outline" onClick={() => navigator.clipboard.writeText(documentText)}><Copy className="h-4 w-4" />Copy</Button>
+            <Button className="h-9 gap-2 border border-white/35 bg-white text-slate-900 hover:bg-white/90" onClick={() => applyAi('Create a polished full draft using the current context and workflow.', documentText || config.starterPrompt)}><Wand2 className="h-4 w-4" />Generate</Button>
+            <Button className="h-9 gap-2 border border-white/25 bg-white/10 text-white hover:bg-white/20" variant="outline"><FileDown className="h-4 w-4" />Export</Button>
           </div>
         </div>
 
@@ -173,12 +173,25 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><Bot className="h-4 w-4" />AI Collaboration</div>
             <div className="mb-3 grid grid-cols-2 gap-2">
               {config.proactive.map((item) => (
-                <Button key={item} variant="outline" className="h-8 text-xs" onClick={() => applyAi(item)} disabled={loading}>{item}</Button>
+                <Button
+                  key={item}
+                  variant="outline"
+                  className="h-auto min-h-9 whitespace-normal break-words px-2 py-2 text-center text-xs leading-snug"
+                  onClick={() => applyAi(item)}
+                  disabled={loading}
+                >
+                  {item}
+                </Button>
               ))}
             </div>
             <div className="h-[420px] space-y-2 overflow-y-auto rounded-xl border border-border bg-background p-3 text-sm">
               {chat.map((m, i) => (
-                <div key={`${m.role}-${i}`} className={`rounded-lg px-3 py-2 ${m.role === 'assistant' ? 'border border-border bg-white' : 'bg-primary text-primary-foreground'}`}>{m.text}</div>
+                <div
+                  key={`${m.role}-${i}`}
+                  className={`rounded-lg px-3 py-2 whitespace-pre-wrap break-words ${m.role === 'assistant' ? 'border border-border bg-white' : 'bg-primary text-primary-foreground'}`}
+                >
+                  {m.text}
+                </div>
               ))}
             </div>
             <div className="mt-3 flex gap-2">
@@ -192,7 +205,15 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
           <main className="rounded-2xl border border-border/60 bg-white/80 p-4 backdrop-blur">
             <div className="mb-3 flex flex-wrap gap-2">
               {inlineActions.map((action) => (
-                <Button key={action} variant="outline" className="h-8 text-xs" onClick={() => runInlineAction(action)} disabled={loading}>{action}</Button>
+                <Button
+                  key={action}
+                  variant="outline"
+                  className="h-auto min-h-8 whitespace-normal break-words px-3 py-1.5 text-xs leading-snug"
+                  onClick={() => runInlineAction(action)}
+                  disabled={loading}
+                >
+                  {action}
+                </Button>
               ))}
             </div>
             <Textarea

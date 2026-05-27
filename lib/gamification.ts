@@ -19,6 +19,20 @@ export interface Achievement {
 const STREAK_KEY = 'sonke-streak'
 const ACHIEVEMENTS_KEY = 'sonke-achievements'
 
+function getLocalDateKey(date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function dayDiff(fromDate: string, toDate: string): number {
+  const from = new Date(`${fromDate}T00:00:00`)
+  const to = new Date(`${toDate}T00:00:00`)
+  const diffMs = to.getTime() - from.getTime()
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24))
+}
+
 export function getStreakData(): StreakData {
   if (typeof window === 'undefined') {
     return { currentStreak: 0, longestStreak: 0, lastActiveDate: '', totalToolsUsed: 0 }
@@ -43,7 +57,7 @@ export function recordToolUsage(toolId: string) {
   if (typeof window === 'undefined') return
 
   const data = getStreakData()
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateKey()
 
   data.totalToolsUsed += 1
 
@@ -54,15 +68,11 @@ export function recordToolUsage(toolId: string) {
     return
   }
 
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  const yesterdayStr = yesterday.toISOString().split('T')[0]
-
-  if (data.lastActiveDate === yesterdayStr) {
-    data.currentStreak += 1
-  } else {
-    data.currentStreak = 1
-  }
+  if (data.lastActiveDate) {
+    const diff = dayDiff(data.lastActiveDate, today)
+    if (diff === 1) data.currentStreak += 1
+    else if (diff > 1) data.currentStreak = 1
+  } else data.currentStreak = 1
 
   if (data.currentStreak > data.longestStreak) {
     data.longestStreak = data.currentStreak
@@ -181,11 +191,9 @@ function getDefaultAchievements(): Achievement[] {
 
 function checkAchievements(streak: StreakData) {
   const achievements = getAchievements()
-  let updated = false
+  let changed = false
 
   for (const ach of achievements) {
-    if (ach.unlocked) continue
-
     let newProgress = ach.progress
 
     switch (ach.id) {
@@ -201,15 +209,16 @@ function checkAchievements(streak: StreakData) {
         break
     }
 
+    if (newProgress !== ach.progress) changed = true
     if (newProgress >= ach.target && !ach.unlocked) {
       ach.unlocked = true
       ach.unlockedAt = new Date().toISOString()
-      updated = true
+      changed = true
     }
     ach.progress = Math.min(newProgress, ach.target)
   }
 
-  if (updated) {
+  if (changed) {
     localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements))
   }
 }

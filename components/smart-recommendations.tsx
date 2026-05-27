@@ -17,6 +17,9 @@ const sectionIcons: Record<string, React.ReactNode> = {
   recent: <Clock className="h-4 w-4" />,
   trending: <TrendingUp className="h-4 w-4" />,
   discover: <Sparkles className="h-4 w-4" />,
+  'sa-student': <MapPin className="h-4 w-4" />,
+  'sa-creator': <MapPin className="h-4 w-4" />,
+  'sa-business': <MapPin className="h-4 w-4" />,
 }
 
 export function SmartRecommendations() {
