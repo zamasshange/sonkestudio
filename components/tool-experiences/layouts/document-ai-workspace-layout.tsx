@@ -7,6 +7,7 @@ import { Tool } from '@/lib/tools-data'
 import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-shell'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { VoiceNoteButton } from '@/components/tool-experiences/shared/voice-note-button'
 
 type ChatMessage = { role: 'user' | 'assistant'; text: string }
 
@@ -196,6 +197,7 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
             </div>
             <div className="mt-3 flex gap-2">
               <Textarea value={chatInput} onChange={(e) => setChatInput(e.target.value)} className="min-h-9 resize-none text-sm" placeholder="Ask AI to improve a section..." />
+              <VoiceNoteButton onTranscript={(text) => setChatInput((current) => (current ? `${current} ${text}` : text))} disabled={loading} />
               <Button disabled={loading || !chatInput.trim()} onClick={async () => { const msg = chatInput.trim(); setChatInput(''); setChat((p) => [...p, { role: 'user', text: msg }]); await applyAi(msg) }}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               </Button>

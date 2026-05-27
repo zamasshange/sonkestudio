@@ -7,6 +7,8 @@ import { Tool } from '@/lib/tools-data'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-shell'
+import { ImageUploadField, type UploadedImageAsset } from '@/components/tool-experiences/shared/image-upload-field'
+import { VoiceNoteButton } from '@/components/tool-experiences/shared/voice-note-button'
 import {
   developerLanguages,
   educationLevels,
@@ -142,6 +144,7 @@ export function ExplainWorkspaceLayout({ tool }: { tool: Tool }) {
   const [depth, setDepth] = useState(explanationDepths[1])
   const [input, setInput] = useState('')
   const [fileName, setFileName] = useState('')
+  const [uploadedImage, setUploadedImage] = useState<UploadedImageAsset | null>(null)
   const [output, setOutput] = useState('')
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -171,6 +174,7 @@ Mode: ${mode}
 Depth: ${depth}
 Context: ${contextSummary || 'General'}
 Uploaded file: ${fileName || 'none'}
+Uploaded image URL: ${uploadedImage?.url || 'none'}
 
 User material:
 ${input || 'The user uploaded a file and needs explanation based on the selected context.'}
@@ -178,6 +182,7 @@ ${input || 'The user uploaded a file and needs explanation based on the selected
 Return a practical explanation with these sections:
 ${config.outputSections.map((section) => `- ${section}`).join('\n')}
 
+If an image URL is provided, infer likely visual context from it and ask for one clarifying follow-up if needed.
 Make it specific, actionable, and avoid generic filler.`
 
     try {
@@ -260,10 +265,24 @@ Make it specific, actionable, and avoid generic filler.`
                   <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">{config.label}</p>
                   <h2 className="mt-2 text-2xl font-semibold text-foreground">{config.primaryField}</h2>
                 </div>
-                {config.acceptsFile && (
+                {config.acceptsFile && config.acceptsFile.includes('image') && (
+                  <ImageUploadField
+                    folder="sonke-explain"
+                    accept={config.acceptsFile}
+                    onUploaded={(asset) => {
+                      setUploadedImage(asset)
+                      setFileName(asset.name)
+                    }}
+                    onClear={() => {
+                      setUploadedImage(null)
+                      setFileName('')
+                    }}
+                  />
+                )}
+                {config.acceptsFile && config.acceptsFile !== 'image/*' && (
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-none border border-border px-3 py-2 text-sm hover:border-primary">
                     <FileUp className="h-4 w-4" />
-                    Upload
+                    Upload file
                     <input type="file" accept={config.acceptsFile} onChange={handleFile} className="hidden" />
                   </label>
                 )}
@@ -272,10 +291,18 @@ Make it specific, actionable, and avoid generic filler.`
               <Textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder={config.placeholder} className="mt-5 min-h-[320px] resize-none bg-muted border-none" />
               <div className="mt-4 flex items-center justify-between gap-4">
                 <span className="text-sm text-muted-foreground">{input.length} characters</span>
-                <Button onClick={explain} disabled={loading || (!input.trim() && !fileName)} className="rounded-none bg-primary">
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                  Explain
-                </Button>
+                <div className="flex items-center gap-2">
+                  <VoiceNoteButton
+                    onTranscript={(text) => setInput((current) => (current ? `${current}\n${text}` : text))}
+                    language={context.Language === 'isiZulu' ? 'zu-ZA' : context.Language === 'Afrikaans' ? 'af-ZA' : 'en-ZA'}
+                    disabled={loading}
+                    className="rounded-none"
+                  />
+                  <Button onClick={explain} disabled={loading || (!input.trim() && !fileName)} className="rounded-none bg-primary">
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                    Explain
+                  </Button>
+                </div>
               </div>
               {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
             </section>

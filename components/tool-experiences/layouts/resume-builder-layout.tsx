@@ -7,7 +7,7 @@ import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Download, FileJson2, Loader2, Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, FileJson2, Loader2, Sparkles } from 'lucide-react'
 
 type ResumeSection = {
   id: string
@@ -25,6 +25,8 @@ const templates = [
   { id: 'corporate', name: 'Corporate', color: '#1e40af' },
   { id: 'creative', name: 'Creative', color: '#dc2626' },
 ]
+
+const sectionOrder = ['summary', 'experience', 'education', 'skills'] as const
 
 export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
   const previewRef = useRef<HTMLDivElement>(null)
@@ -50,6 +52,7 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
     { id: 'education', title: 'Education', content: '' },
     { id: 'skills', title: 'Skills', content: '' },
   ])
+  const [previewPage, setPreviewPage] = useState(1)
 
   const selectedTemplate = templates.find((t) => t.id === templateId) || templates[0]
 
@@ -59,6 +62,46 @@ export function ResumeBuilderLayout({ tool }: ResumeBuilderLayoutProps) {
 
   const updateSection = (id: string, content: string) => {
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, content } : s)))
+  }
+
+  const moveSection = (id: string, direction: 'up' | 'down') => {
+    setSections((prev) => {
+      const idx = prev.findIndex((s) => s.id === id)
+      if (idx < 0) return prev
+      const target = direction === 'up' ? idx - 1 : idx + 1
+      if (target < 0 || target >= prev.length) return prev
+      const next = [...prev]
+      ;[next[idx], next[target]] = [next[target], next[idx]]
+      return next
+    })
+  }
+
+  const generateSection = async (sectionId: string) => {
+    const section = sections.find((s) => s.id === sectionId)
+    if (!section) return
+    setLoading(true)
+    try {
+      const prompt = `Generate only this CV section: ${section.title}.
+Target role: ${targetRole || 'Not specified'}
+Experience level: ${experienceLevel}
+Tone: ${tone}
+Name: ${name}
+Skills input: ${skills}
+Experience input: ${experience}
+Education input: ${education}
+
+Return section content only, no headings.`
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: tool.id, text: prompt }),
+      })
+      const data = await response.json()
+      const content = data.result || data.choices?.[0]?.message?.content || ''
+      updateSection(sectionId, content.trim())
+    } finally {
+      setLoading(false)
+    }
   }
 
   const generateWithAi = async () => {
@@ -202,7 +245,13 @@ Skills:
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {templates.map((t) => (
                   <button key={t.id} onClick={() => setTemplateId(t.id)} className={`rounded-md border p-3 text-left ${templateId === t.id ? 'border-foreground bg-foreground text-background' : 'border-border bg-background'}`}>
-                    <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: t.color }} />
+                    <div className="rounded-sm border border-border bg-white p-2">
+                      <div className="h-3 w-16 rounded-sm" style={{ backgroundColor: t.color }} />
+                      <div className="mt-2 h-2 w-20 rounded-sm bg-slate-200" />
+                      <div className="mt-1 h-2 w-14 rounded-sm bg-slate-100" />
+                      <div className="mt-3 h-1.5 w-full rounded-sm bg-slate-100" />
+                      <div className="mt-1 h-1.5 w-[92%] rounded-sm bg-slate-100" />
+                    </div>
                     <p className="mt-2 text-sm font-semibold">{t.name}</p>
                   </button>
                 ))}
@@ -219,19 +268,41 @@ Skills:
               <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />
               {sections.map((section) => (
                 <div key={section.id} className="space-y-2">
-                  <p className="text-sm font-semibold">{section.title}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold">{section.title}</p>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => moveSection(section.id, 'up')}>
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-7 px-2" onClick={() => moveSection(section.id, 'down')}>
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => generateSection(section.id)} disabled={loading}>
+                        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                        <span className="ml-1">AI</span>
+                      </Button>
+                    </div>
+                  </div>
                   <Textarea value={section.content} onChange={(e) => updateSection(section.id, e.target.value)} className="min-h-[120px]" />
                 </div>
               ))}
             </section>
 
             <section className="rounded-2xl border border-border bg-white p-5">
-              <p className="mb-3 text-sm uppercase tracking-[0.2em] text-muted-foreground">A4 CV Preview</p>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">A4 CV Preview</p>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => setPreviewPage(1)} disabled={previewPage === 1}>Page 1</Button>
+                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => setPreviewPage(2)} disabled={previewPage === 2}>Page 2</Button>
+                </div>
+              </div>
               <div className="overflow-auto rounded-xl border border-border bg-muted p-4">
                 <div ref={previewRef} className="mx-auto w-[794px] min-h-[1123px] bg-white p-12 shadow-sm">
                   <h1 className="text-4xl font-bold" style={{ color: selectedTemplate.color }}>{name || 'Your Name'}</h1>
                   <p className="mt-2 text-sm text-muted-foreground">{email || 'email@example.com'} | {phone || '+27 ...'} | {location || 'Location'}</p>
-                  {sections.map((section) => (
+                  {sections
+                    .filter((_, idx) => (previewPage === 1 ? idx < 2 : idx >= 2))
+                    .map((section) => (
                     <div key={section.id} className="mt-8">
                       <h2 className="text-2xl font-semibold" style={{ color: selectedTemplate.color }}>{section.title}</h2>
                       <div className="mt-2 whitespace-pre-wrap text-[15px] leading-7 text-slate-700">{section.content || 'No content yet.'}</div>

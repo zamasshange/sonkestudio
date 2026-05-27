@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Bot, Copy, Loader2, Mail, Send, Wand2 } from 'lucide-react'
+import { VoiceNoteButton } from '@/components/tool-experiences/shared/voice-note-button'
 
 interface EmailWorkspaceLayoutProps {
   tool: Tool
@@ -98,6 +99,11 @@ export function EmailWorkspaceLayout({ tool }: EmailWorkspaceLayoutProps) {
             </div>
             <div className="mt-3 flex gap-2">
               <Input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Ask AI for refinements..." />
+              <VoiceNoteButton
+                onTranscript={(text) => setChatInput((current) => (current ? `${current} ${text}` : text))}
+                language={language === 'isiZulu' ? 'zu-ZA' : language === 'Afrikaans' ? 'af-ZA' : 'en-ZA'}
+                disabled={loading}
+              />
               <Button disabled={loading || !chatInput.trim()} onClick={async () => { const msg = chatInput.trim(); setChatInput(''); setChat((p) => [...p, { role: 'user', text: msg }]); await askAi(msg) }}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>

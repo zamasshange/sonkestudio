@@ -20,7 +20,7 @@ function createRoomId() {
 }
 
 function NoteEditor() {
-  const note = useStorage((root) => root.note) ?? ''
+  const note = String(useStorage((root) => root.note) ?? '')
   const updateNote = useMutation(({ storage }, value: string) => {
     storage.set('note', value)
   }, [])
@@ -66,10 +66,18 @@ export function TempNotesLayout({ tool }: { tool: Tool }) {
   const [roomId, setRoomId] = useState('')
   const [shareLink, setShareLink] = useState('')
   const [copied, setCopied] = useState(false)
+  const [localNote, setLocalNote] = useState('')
+  const [liveblocksReady, setLiveblocksReady] = useState(true)
 
   useEffect(() => {
     const existing = roomIdFromSearch()
     setRoomId(existing || createRoomId())
+    try {
+      getLiveblocksPublishableKey()
+      setLiveblocksReady(true)
+    } catch {
+      setLiveblocksReady(false)
+    }
   }, [])
 
   const onShare = useCallback((link: string) => setShareLink(link), [])
@@ -108,43 +116,43 @@ export function TempNotesLayout({ tool }: { tool: Tool }) {
       />
 
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8">
-        <LiveblocksProvider
-          publicApiKey={getLiveblocksPublishableKey()}
-          authEndpoint={async (room) => {
-            const guestKey = 'sonke-liveblocks-guest'
-            let guestId = localStorage.getItem(guestKey)
-            if (!guestId) {
-              guestId = `guest-${crypto.randomUUID()}`
-              localStorage.setItem(guestKey, guestId)
-            }
-            const response = await fetch('/api/liveblocks-auth', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ room, userId: guestId }),
-            })
-            return response.json()
-          }}
-        >
-          <div className="rounded-md border border-border bg-white p-6 sm:p-8">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
-                <Users className="h-4 w-4 text-primary" />
-                Room: {roomId}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" className="rounded-sm" onClick={copyShare} disabled={!shareLink}>
-                  <Copy className="h-4 w-4" />
-                  {copied ? 'Link copied' : 'Copy share link'}
-                </Button>
-                <Button type="button" variant="outline" className="rounded-sm" onClick={newRoom}>
-                  <Link2 className="h-4 w-4" />
-                  New room
-                </Button>
+        {liveblocksReady ? (
+          <LiveblocksProvider
+            publicApiKey={getLiveblocksPublishableKey()}
+          >
+            <div className="rounded-md border border-border bg-white p-6 sm:p-8">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
+                  <Users className="h-4 w-4 text-primary" />
+                  Room: {roomId}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" className="rounded-sm" onClick={copyShare} disabled={!shareLink}>
+                    <Copy className="h-4 w-4" />
+                    {copied ? 'Link copied' : 'Copy share link'}
+                  </Button>
+                  <Button type="button" variant="outline" className="rounded-sm" onClick={newRoom}>
+                    <Link2 className="h-4 w-4" />
+                    New room
+                  </Button>
+                </div>
               </div>
+              <NoteRoom roomId={roomId} onShare={onShare} />
             </div>
-            <NoteRoom roomId={roomId} onShare={onShare} />
+          </LiveblocksProvider>
+        ) : (
+          <div className="rounded-md border border-border bg-white p-6 sm:p-8">
+            <div className="mb-4 rounded-sm border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Live collaboration is unavailable right now. You can still use Temp Notes in local mode.
+            </div>
+            <Textarea
+              value={localNote}
+              onChange={(event) => setLocalNote(event.target.value)}
+              placeholder="Write temporary notes here. This local mode does not sync across devices."
+              className="min-h-[320px] resize-y rounded-sm border-border text-base leading-7"
+            />
           </div>
-        </LiveblocksProvider>
+        )}
       </div>
     </motion.div>
   )
