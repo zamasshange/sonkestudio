@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     "AI tools for developers",
   ],
   openGraph: {
-    title: "SONKE Studio | Built in South Africa for a Global Generation",
+    title: "SONKE Studio | Ai Ecosystem Built in South Africa for a Global Generation",
     description:
       "One intelligent ecosystem where productivity, creativity, education, and AI come together.",
     url: "https://sonke.studio",

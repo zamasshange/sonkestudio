@@ -349,10 +349,10 @@ export function LogoMarquee() {
 
 export function BrandStorySection() {
   return (
-    <section className="bg-white px-5 py-16 sm:px-8 lg:py-20">
+    <section className="bg-background px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto max-w-[1720px]">
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <div className="border border-foreground bg-foreground p-7 text-background sm:p-10">
+        <div className="grid gap-5 lg:grid-cols-[1.25fr_1fr]">
+          <div className="overflow-hidden rounded-3xl border border-foreground/70 bg-gradient-to-br from-[#030712] via-[#0f172a] to-[#1f2937] p-7 text-background shadow-[0_40px_120px_-70px_rgba(15,23,42,0.9)] sm:p-10">
             <p className="text-sm font-semibold uppercase text-background/60">Why SONKE Exists</p>
             <h2 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl">
               A movement for practical AI, not a wall of random tools.
@@ -368,21 +368,21 @@ export function BrandStorySection() {
                 'Human-centered interfaces',
                 'Built in South Africa for a global generation',
               ].map((item) => (
-                <div key={item} className="border border-background/15 bg-background/5 px-4 py-3 text-sm font-medium">
+                <div key={item} className="rounded-xl border border-background/20 bg-background/10 px-4 py-3 text-sm font-medium">
                   {item}
                 </div>
               ))}
             </div>
           </div>
           <div className="grid gap-4">
-            <div className="border border-border bg-background p-6">
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Founder</p>
               <h3 className="mt-2 text-3xl font-semibold text-foreground">Zama Shange</h3>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
                 SONKE was founded and developed by South African creator and developer Zama Shange under BDL Corp.
               </p>
             </div>
-            <div className="border border-border bg-background p-6">
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Company</p>
               <h3 className="mt-2 text-3xl font-semibold text-foreground">BDL Corp</h3>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
@@ -390,7 +390,7 @@ export function BrandStorySection() {
                 and future-focused productivity platforms.
               </p>
             </div>
-            <div className="border border-border bg-background p-6">
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Who SONKE Is For</p>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
                 Students, creators, developers, entrepreneurs, businesses, professionals, and everyday users.
@@ -694,20 +694,20 @@ export function FeaturedWorkSection() {
   ]
 
   return (
-    <section id="featured" className="overflow-x-hidden bg-white px-5 py-16 sm:px-8 lg:py-20">
+    <section id="featured" className="overflow-x-hidden bg-background px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto w-full max-w-[1720px]">
         <div className="grid min-w-0 gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
           <div className="min-w-0">
-            <SectionLabel>{hasDesk ? 'Your desk' : 'Featured tools'}</SectionLabel>
+            <SectionLabel>{hasDesk ? 'Your desk' : 'Why SONKE feels different'}</SectionLabel>
             <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl lg:text-6xl">
               {hasDesk
                 ? `Tools picked for ${persona?.label ?? 'your'} workflow.`
-                : 'Start with the tools people actually reach for.'}
+                : 'Specialized workspaces instead of generic AI wrappers.'}
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {quickStats.map((stat) => (
-              <div key={stat.label} className="border border-border bg-background p-5">
+              <div key={stat.label} className="rounded-2xl border border-border bg-white p-5 shadow-sm">
                 <p className="text-3xl font-semibold leading-none text-foreground">{stat.value}</p>
                 <p className="mt-2 text-sm font-semibold uppercase text-muted-foreground">{stat.label}</p>
               </div>
@@ -722,7 +722,7 @@ export function FeaturedWorkSection() {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.6 }}
           >
-            <Link href={primaryTool.href} className="group flex h-full min-h-[390px] flex-col justify-between border border-foreground bg-foreground p-6 text-background transition hover:border-primary">
+            <Link href={primaryTool.href} className="group flex h-full min-h-[390px] flex-col justify-between overflow-hidden rounded-3xl border border-foreground bg-gradient-to-br from-[#020617] via-[#0b1324] to-[#1e293b] p-6 text-background shadow-[0_35px_110px_-75px_rgba(2,6,23,0.95)] transition hover:border-primary">
               <div>
                 <div className="flex items-start justify-between gap-4">
                   <span
@@ -739,7 +739,7 @@ export function FeaturedWorkSection() {
                 <h3 className="mt-3 max-w-xl text-4xl font-semibold leading-tight sm:text-5xl">{primaryTool.name}</h3>
                 <p className="mt-4 max-w-lg text-base leading-7 text-background/70">{primaryTool.description}</p>
                 <div className="mt-10 grid gap-3 sm:grid-cols-[0.78fr_1fr]">
-                  <div className="border border-background/15 bg-background/5 p-4">
+                  <div className="rounded-xl border border-background/20 bg-background/10 p-4">
                     <p className="text-xs font-semibold uppercase text-background/45">Quick swap</p>
                     <div className="mt-5 flex items-center justify-between gap-3">
                       <span className="text-3xl font-semibold leading-none">R</span>
@@ -748,7 +748,7 @@ export function FeaturedWorkSection() {
                     </div>
                     <p className="mt-5 text-sm text-background/55">Live-style conversion preview</p>
                   </div>
-                  <div className="border border-background/15 bg-background/5 p-4">
+                  <div className="rounded-xl border border-background/20 bg-background/10 p-4">
                     <div className="flex items-center justify-between text-xs font-semibold uppercase text-background/45">
                       <span>Market pulse</span>
                       <Sparkles className="h-4 w-4 text-primary" />
@@ -763,6 +763,17 @@ export function FeaturedWorkSection() {
                       ))}
                     </div>
                   </div>
+                </div>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {[
+                    'Built in South Africa',
+                    'For creators and students',
+                    'Focused on real output',
+                  ].map((tag) => (
+                    <span key={tag} className="border border-background/15 px-3 py-1 text-xs font-semibold text-background/70">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
               <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-background/15 pt-5">
@@ -792,7 +803,7 @@ export function FeaturedWorkSection() {
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.55, delay: index * 0.05 }}
                 >
-                  <Link href={tool.href} className="group flex min-h-[185px] flex-col justify-between border border-border bg-background p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:bg-white">
+                  <Link href={tool.href} className="group flex min-h-[185px] flex-col justify-between rounded-2xl border border-border bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-md">
                     <div className="flex items-start justify-between gap-4">
                       <span
                         className={`inline-flex h-12 w-12 shrink-0 items-center justify-center bg-white ${tool.iconColor ? '' : 'border border-border'}`}
@@ -815,7 +826,7 @@ export function FeaturedWorkSection() {
               )
             })}
 
-            <Link href="/tools" className="group flex min-h-[185px] flex-col justify-between border border-dashed border-border bg-white p-5 transition hover:border-primary hover:bg-background">
+            <Link href="/tools" className="group flex min-h-[185px] flex-col justify-between rounded-2xl border border-dashed border-border bg-gradient-to-b from-white to-slate-50 p-5 transition hover:border-primary hover:bg-background">
               <div>
                 <p className="text-sm font-semibold uppercase text-muted-foreground">All workspaces</p>
                 <h3 className="mt-7 text-2xl font-semibold leading-tight text-foreground">Browse the full toolbox by task.</h3>
@@ -835,39 +846,39 @@ export function FeaturedWorkSection() {
 export function StatsSection() {
   const steps = [
     {
-      title: 'Pick the job',
-      text: 'Choose the workspace that matches the task instead of starting from a blank page.',
-      tools: ['AI writing', 'PDF', 'Study'],
+      title: 'Pick the right system',
+      text: 'Choose a category-built workspace instead of forcing one prompt into every problem.',
+      tools: ['Student', 'Creator', 'Developer'],
     },
     {
-      title: 'Add the details',
-      text: 'The controls ask for the context that changes the quality of the answer.',
+      title: 'Add useful context',
+      text: 'SONKE asks for the details that improve quality, so outputs are practical from the first run.',
       tools: ['Tone', 'Audience', 'Format'],
     },
     {
-      title: 'Generate, convert, clean',
-      text: 'Get a usable result, then adjust it without leaving the page.',
+      title: 'Generate with structure',
+      text: 'Create, convert, explain, or clean outputs inside one focused workflow.',
       tools: ['Rewrite', 'Summarize', 'Convert'],
     },
     {
-      title: 'Copy and continue',
-      text: 'Move the output into your real work or jump straight to the next tool.',
+      title: 'Ship and continue',
+      text: 'Move from answer to action quickly, then jump to the next job without friction.',
       tools: ['Copy', 'Export', 'Next task'],
     },
   ]
   const lanes = categories.slice(0, 4)
 
   return (
-    <section className="bg-background px-5 py-16 sm:px-8 lg:py-20">
+    <section className="bg-white px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto max-w-[1720px]">
         <div className="grid gap-8 lg:grid-cols-[0.74fr_1.26fr]">
           <div>
-            <SectionLabel>Workflow</SectionLabel>
+            <SectionLabel>Workflow Engine</SectionLabel>
             <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
-              A simpler path from task to finished output.
+              A category-first AI productivity platform.
             </h2>
-              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-              SONKE is built for speed with clarity: choose a focused workspace, get useful output, and keep your momentum.
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+              SONKE Studio is an AI productivity platform built for students, creators, developers, and teams who need useful output, not prompt chaos.
             </p>
             <Link href="/tools" className="mt-8 inline-flex items-center gap-3 bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-primary">
               Open the toolbox
@@ -883,7 +894,7 @@ export function StatsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.55, delay: index * 0.06 }}
-                className="border border-border bg-white p-6"
+                className="rounded-2xl border border-border bg-gradient-to-b from-white to-slate-50 p-6 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-5">
                   <span className="text-sm font-semibold text-primary">0{index + 1}</span>
@@ -908,7 +919,7 @@ export function StatsSection() {
             const Icon = category.icon
             const count = tools.filter((tool) => tool.category === category.id).length
             return (
-              <Link key={category.id} href={`/tools?category=${category.id}`} className="group flex items-center justify-between gap-4 border border-border bg-white p-4 transition hover:border-primary/50">
+              <Link key={category.id} href={`/tools?category=${category.id}`} className="group flex items-center justify-between gap-4 rounded-2xl border border-border bg-white p-4 shadow-sm transition hover:border-primary/50 hover:shadow-md">
                 <span className="flex min-w-0 items-center gap-3">
                   <Icon className="h-5 w-5 shrink-0 text-primary" />
                   <span className="min-w-0">
@@ -928,9 +939,9 @@ export function StatsSection() {
 
 export function CTASection() {
   return (
-    <section className="bg-white px-5 py-16 sm:px-8 lg:py-20">
+    <section className="bg-background px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto max-w-[1720px]">
-        <div className="grid overflow-hidden border border-border bg-foreground text-background lg:grid-cols-[1fr_0.72fr]">
+        <div className="grid overflow-hidden rounded-3xl border border-border bg-foreground text-background shadow-[0_45px_130px_-85px_rgba(2,6,23,1)] lg:grid-cols-[1fr_0.72fr]">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -940,14 +951,26 @@ export function CTASection() {
           >
             <p className="flex items-center gap-3 text-sm font-semibold uppercase text-background/60">
               <Check className="h-4 w-4 text-primary" />
-              Ready when you are
+              SONKE Vision
             </p>
               <h2 className="mt-6 max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
-              Where productivity, creativity, education, and AI come together.
+              Built in South Africa for a global generation.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-7 text-background/68">
-              SONKE is a category-focused ecosystem, not a random tool dump, designed so students, creators, developers, and businesses can move from task to finished work faster.
+              SONKE is building a long-term intelligent ecosystem where productivity, creativity, education, and AI come together in workflows that feel human and useful.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[
+                'South African AI platform',
+                'AI tools for students',
+                'AI tools for creators',
+                'AI productivity platform',
+              ].map((item) => (
+                <span key={item} className="rounded-full border border-background/25 px-3 py-1 text-xs font-semibold text-background/80">
+                  {item}
+                </span>
+              ))}
+            </div>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/tools">
                 <Button className="rounded-sm bg-primary px-6 py-5 text-base font-semibold text-primary-foreground hover:bg-primary/90">
@@ -966,7 +989,7 @@ export function CTASection() {
             <p className="text-sm font-semibold uppercase text-background/55">Good for</p>
             <div className="mt-5 grid gap-3">
               {toolboxWorkflows.map(({ label, value, icon: Icon }) => (
-                <div key={value} className="flex items-center justify-between gap-4 border border-background/15 bg-background/5 p-4">
+                <div key={value} className="flex items-center justify-between gap-4 rounded-xl border border-background/20 bg-background/10 p-4">
                   <span className="flex items-center gap-3">
                     <Icon className="h-5 w-5 text-primary" />
                     <span>

@@ -14,7 +14,6 @@ const navLinks = [
   { href: '/tools', label: 'All Tools', description: 'Browse every workspace', icon: Grid2X2 },
   { href: '/#services', label: 'Systems', description: 'Pick a tool category', icon: Compass },
   { href: '/#featured', label: 'Popular', description: 'Start with top tools', icon: Flame },
-  { href: '/about', label: 'About', description: 'SONKE, BDL Corp, Founder', icon: Sparkles },
 ]
 
 export function Navbar() {

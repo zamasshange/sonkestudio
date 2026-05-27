@@ -44,6 +44,9 @@ const footerColumns = [
       { href: '/about', label: 'About SONKE' },
       { href: '/privacy', label: 'Privacy Policy' },
       { href: '/terms', label: 'Terms of Use' },
+      { href: '/ai-tools-south-africa', label: 'AI Tools South Africa' },
+      { href: '/ai-tools-for-students', label: 'AI Tools for Students' },
+      { href: '/ai-tools-for-creators', label: 'AI Tools for Creators' },
       { href: '/tools', label: 'All Tools' },
       { href: '/#services', label: 'Systems' },
       { href: '/#featured', label: 'Featured' },
@@ -59,7 +62,7 @@ export function Footer() {
   const trending = trendingTools.slice(0, 5)
 
   return (
-    <footer className="border-t border-border bg-white px-5 py-14 sm:px-8">
+    <footer className="border-t border-border bg-background px-5 py-14 sm:px-8">
       <div className="mx-auto max-w-[1720px]">
         <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
@@ -77,7 +80,7 @@ export function Footer() {
               { value: categories.length.toString(), label: 'systems' },
               { value: 'Free', label: 'to start' },
             ].map((item) => (
-              <div key={item.label} className="border border-border bg-background p-5">
+              <div key={item.label} className="rounded-2xl border border-border bg-white p-5 shadow-sm">
                 <p className="text-3xl font-semibold leading-none text-foreground">{item.value}</p>
                 <p className="mt-2 text-sm font-semibold uppercase text-muted-foreground">{item.label}</p>
               </div>
@@ -93,7 +96,7 @@ export function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: index * 0.08 }}
-              className="min-h-[210px] border border-border bg-background p-6 transition hover:bg-white"
+              className="min-h-[210px] rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:bg-white"
             >
               <p className="mb-5 text-sm font-semibold uppercase text-muted-foreground">{column.title}</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -113,7 +116,7 @@ export function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mt-10 overflow-hidden border border-border bg-foreground text-background"
+          className="mt-10 overflow-hidden rounded-3xl border border-border bg-foreground text-background shadow-[0_45px_130px_-85px_rgba(2,6,23,1)]"
         >
           <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="relative overflow-hidden p-6 sm:p-8 lg:p-10">

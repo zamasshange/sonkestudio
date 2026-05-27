@@ -22,9 +22,6 @@ export default function HomePage() {
       {/* Logo Marquee */}
       <LogoMarquee />
 
-      {/* Brand Story + Positioning */}
-      <BrandStorySection />
-
       {/* Smart Personalized Recommendations */}
       <SmartRecommendations />
 
@@ -39,6 +36,9 @@ export default function HomePage() {
       
       {/* CTA */}
       <CTASection />
+
+      {/* About + Vision (kept lower priority) */}
+      <BrandStorySection />
       
       <Footer />
     </main>
