@@ -3,6 +3,7 @@ import { Footer } from '@/components/footer'
 import { SmartRecommendations } from '@/components/smart-recommendations'
 import {
   HeroSection,
+  BrandStorySection,
   LogoMarquee,
   ServicesSection,
   FeaturedWorkSection,
@@ -20,6 +21,9 @@ export default function HomePage() {
       
       {/* Logo Marquee */}
       <LogoMarquee />
+
+      {/* Brand Story + Positioning */}
+      <BrandStorySection />
 
       {/* Smart Personalized Recommendations */}
       <SmartRecommendations />

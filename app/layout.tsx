@@ -19,21 +19,26 @@ const siteUrl = 'https://sonkestudio.co.za'
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'SONKE - AI-Powered Utility Tools',
+    default: 'SONKE Studio | South African AI Productivity Platform',
     template: '%s | SONKE',
   },
-  description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use. SONKE offers AI-powered tools for students, creators, developers, and businesses.',
+  description: 'SONKE Studio is a South African AI platform and productivity ecosystem built by Zama Shange under BDL Corp. Purpose-built AI tools for students, creators, developers, businesses, and everyday users.',
   generator: 'Next.js',
   keywords: [
     'SONKE',
     'SONKE Studio',
+    'BDL Corp',
+    'Zama Shange',
     'sonke studio',
     'sonkestudio.co.za',
     'AI tools South Africa',
+    'South African AI platform',
     'South African AI tools',
     'free AI tools',
     'online AI tools',
     'AI productivity platform',
+    'AI tools for students',
+    'AI tools for creators',
     'AI workspace tools',
     'PDF tools',
     'PDF converter South Africa',
@@ -70,9 +75,9 @@ export const metadata: Metadata = {
     'South African CV format',
     'VAT invoice South Africa',
   ],
-  authors: [{ name: 'SONKE' }],
-  creator: 'SONKE',
-  publisher: 'SONKE',
+  authors: [{ name: 'SONKE Studio' }, { name: 'Zama Shange' }],
+  creator: 'Zama Shange',
+  publisher: 'BDL Corp',
   robots: {
     index: true,
     follow: true,
@@ -89,8 +94,8 @@ export const metadata: Metadata = {
     locale: 'en_ZA',
     url: siteUrl,
     siteName: 'SONKE',
-    title: 'SONKE - AI-Powered Utility Tools',
-    description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use.',
+    title: 'SONKE Studio | Built in South Africa for a Global Generation',
+    description: 'One intelligent ecosystem where productivity, creativity, education, and AI come together.',
     images: [
       {
         url: `${siteUrl}/og-image.png`,
@@ -102,8 +107,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SONKE - AI-Powered Utility Tools',
-    description: 'Your bestie for file conversions, image editing, and more. Free, fast, and actually fun to use.',
+    title: 'SONKE Studio | South African AI Platform',
+    description: 'Purpose-built AI systems for students, creators, developers, businesses, and everyday users.',
     images: [`${siteUrl}/og-image.png`],
     creator: '@sonkestudio',
   },
@@ -179,9 +184,13 @@ export default function RootLayout({
       },
       {
         '@type': 'Organization',
-        name: 'SONKE',
+        name: 'BDL Corp',
         url: siteUrl,
         logo: `${siteUrl}/icon.png`,
+        brand: {
+          '@type': 'Brand',
+          name: 'SONKE Studio',
+        },
         sameAs: [
           'https://twitter.com/sonkestudio',
           'https://www.instagram.com/sonkestudio',
@@ -193,6 +202,19 @@ export default function RootLayout({
           contactType: 'customer service',
           availableLanguage: ['en', 'af', 'zu', 'xh'],
         },
+      },
+      {
+        '@type': 'Person',
+        name: 'Zama Shange',
+        worksFor: {
+          '@type': 'Organization',
+          name: 'BDL Corp',
+        },
+        knowsAbout: [
+          'AI productivity platforms',
+          'South African AI innovation',
+          'Digital product development',
+        ],
       },
     ],
   }

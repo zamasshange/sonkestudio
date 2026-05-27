@@ -347,6 +347,62 @@ export function LogoMarquee() {
   )
 }
 
+export function BrandStorySection() {
+  return (
+    <section className="bg-white px-5 py-16 sm:px-8 lg:py-20">
+      <div className="mx-auto max-w-[1720px]">
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+          <div className="border border-foreground bg-foreground p-7 text-background sm:p-10">
+            <p className="text-sm font-semibold uppercase text-background/60">Why SONKE Exists</p>
+            <h2 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl">
+              A movement for practical AI, not a wall of random tools.
+            </h2>
+            <p className="mt-5 max-w-3xl text-base leading-7 text-background/70">
+              SONKE means together in isiZulu. We built SONKE Studio to bring productivity, learning, creativity,
+              and AI into one intelligent ecosystem for real people, real workflows, and real outcomes.
+            </p>
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              {[
+                'Category-focused systems',
+                'Purpose-built workflows',
+                'Human-centered interfaces',
+                'Built in South Africa for a global generation',
+              ].map((item) => (
+                <div key={item} className="border border-background/15 bg-background/5 px-4 py-3 text-sm font-medium">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-4">
+            <div className="border border-border bg-background p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Founder</p>
+              <h3 className="mt-2 text-3xl font-semibold text-foreground">Zama Shange</h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                SONKE was founded and developed by South African creator and developer Zama Shange under BDL Corp.
+              </p>
+            </div>
+            <div className="border border-border bg-background p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Company</p>
+              <h3 className="mt-2 text-3xl font-semibold text-foreground">BDL Corp</h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                A modern technology and innovation company building AI experiences, digital products,
+                and future-focused productivity platforms.
+              </p>
+            </div>
+            <div className="border border-border bg-background p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Who SONKE Is For</p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                Students, creators, developers, entrepreneurs, businesses, professionals, and everyday users.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function ServicesSection() {
   const { prefs, persona, hasDesk, isSignedIn } = useUserPreferences()
   const { location, season } = useLocation()
@@ -810,8 +866,8 @@ export function StatsSection() {
             <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
               A simpler path from task to finished output.
             </h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-              These sections should help people choose quickly, understand what happens next, and keep moving.
+              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+              SONKE is built for speed with clarity: choose a focused workspace, get useful output, and keep your momentum.
             </p>
             <Link href="/tools" className="mt-8 inline-flex items-center gap-3 bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:bg-primary">
               Open the toolbox
@@ -886,11 +942,11 @@ export function CTASection() {
               <Check className="h-4 w-4 text-primary" />
               Ready when you are
             </p>
-            <h2 className="mt-6 max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
-              Choose a focused tool, finish the small job, move on.
+              <h2 className="mt-6 max-w-4xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+              Where productivity, creativity, education, and AI come together.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-7 text-background/68">
-              SONKE keeps everyday AI, PDF, study, creator, business, and developer utilities close together so the next step is obvious.
+              SONKE is a category-focused ecosystem, not a random tool dump, designed so students, creators, developers, and businesses can move from task to finished work faster.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/tools">

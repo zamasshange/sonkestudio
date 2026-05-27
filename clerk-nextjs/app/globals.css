@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f7f6;
+  --foreground: #0f1720;
+  --surface: #ffffff;
+  --brand: #0f766e;
+  --brand-deep: #115e59;
+  --brand-soft: #ccfbf1;
+  --ink-soft: #4b5563;
 }
 
 @theme inline {
@@ -14,13 +19,51 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0f14;
+    --foreground: #e6edf3;
+    --surface: #111a22;
+    --brand: #14b8a6;
+    --brand-deep: #2dd4bf;
+    --brand-soft: #0f2f2b;
+    --ink-soft: #94a3b8;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+}
+
+.sonke-gradient {
+  background: radial-gradient(circle at 10% 20%, #ccfbf1 0%, transparent 40%),
+    radial-gradient(circle at 90% 10%, #e0f2fe 0%, transparent 45%),
+    linear-gradient(180deg, #f7fffd 0%, #eef5f4 100%);
+}
+
+.sonke-card {
+  background: color-mix(in oklab, var(--surface) 96%, white 4%);
+  border: 1px solid color-mix(in oklab, var(--brand) 14%, transparent 86%);
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.sonke-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(12, 74, 110, 0.1);
+  border-color: color-mix(in oklab, var(--brand) 26%, transparent 74%);
+}
+
+.sonke-fade-up {
+  animation: sonkeFadeUp 700ms ease both;
+}
+
+@keyframes sonkeFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

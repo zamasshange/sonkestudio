@@ -41,6 +41,9 @@ const footerColumns = [
   {
     title: 'Pages',
     links: [
+      { href: '/about', label: 'About SONKE' },
+      { href: '/privacy', label: 'Privacy Policy' },
+      { href: '/terms', label: 'Terms of Use' },
       { href: '/tools', label: 'All Tools' },
       { href: '/#services', label: 'Systems' },
       { href: '/#featured', label: 'Featured' },
@@ -179,7 +182,7 @@ export function Footer() {
         </motion.div>
 
         <div className="mt-10 flex flex-col gap-6 border-t border-border pt-8 md:flex-row md:items-center md:justify-between">
-          <p className="text-base text-muted-foreground">Copyright - SONKE | Built for modern creators, students, teams, and builders.</p>
+          <p className="text-base text-muted-foreground">Copyright - SONKE Studio by BDL Corp | Built in South Africa for a global generation.</p>
           <div className="flex flex-wrap items-center gap-3">
             {[
               { icon: SiInstagram, label: 'Instagram', color: '#E4405F' },
