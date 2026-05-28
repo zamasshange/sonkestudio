@@ -2,18 +2,14 @@
 
 import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
 import { Footer } from '@/components/footer'
 import { Navbar } from '@/components/navbar'
 
 export function SiteShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname()
-
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background text-foreground">
       <Navbar />
       <motion.div
-        key={pathname}
         className="min-h-screen flex-1"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

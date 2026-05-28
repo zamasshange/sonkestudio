@@ -12,7 +12,6 @@ import { useLocation } from '@/hooks/use-location'
 import { getHeroMessage } from '@/lib/smart-recommendations'
 import { isSouthAfricanUser } from '@/lib/sa-intelligence'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
-import { shuffleArray } from '@/lib/tool-images'
 import { SiFacebook, SiInstagram, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 
@@ -92,6 +91,24 @@ function SectionLabel({ children }: { children: ReactNode }) {
   )
 }
 
+function hashString(input: string) {
+  let hash = 0
+  for (let i = 0; i < input.length; i += 1) {
+    hash = (hash << 5) - hash + input.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash)
+}
+
+function stableShuffle<T extends { id: string }>(items: T[], seed: string) {
+  return [...items].sort((a, b) => {
+    const aHash = hashString(`${seed}:${a.id}`)
+    const bHash = hashString(`${seed}:${b.id}`)
+    if (aHash !== bHash) return aHash - bHash
+    return a.id.localeCompare(b.id)
+  })
+}
+
 export function HeroSection() {
   const { location, season } = useLocation()
   const heroMessage = getHeroMessage(location, season || undefined)
@@ -103,7 +120,14 @@ export function HeroSection() {
   const heroTools = useMemo(() => {
     const sorted = sortToolsForUser(tools, { location, season, prefs })
     const topPool = sorted.slice(0, 12)
-    return shuffleArray(topPool).slice(0, 5)
+    const seed = [
+      topPool.map((tool) => tool.id).join('|'),
+      location?.country || '',
+      season || '',
+      prefs?.persona || '',
+      prefs?.favoriteTools?.join('|') || '',
+    ].join('::')
+    return stableShuffle(topPool, seed).slice(0, 5)
   }, [location, season, prefs])
 
   return (

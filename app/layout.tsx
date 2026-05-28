@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from 'next'
+import { headers } from 'next/headers'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
+import { ClerkModeProvider } from '@/components/auth/clerk-mode-provider'
 import { ScrollRestoration } from '@/components/scroll-restoration'
 import { PostHogProvider } from '@/components/posthog-provider'
 import { OneSignalProvider } from '@/components/onesignal-provider'
@@ -161,11 +163,16 @@ export const viewport: Viewport = {
   maximumScale: 5,
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const requestHeaders = await headers()
+  const host = requestHeaders.get('host') || ''
+  const localHost = host.startsWith('localhost') || host.startsWith('127.0.0.1') || host.startsWith('[::1]')
+  const disableClerk = localHost
+
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -221,36 +228,66 @@ export default function RootLayout({
   }
 
   return (
-    <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      afterSignOutUrl="/"
-    >
-      <PostHogProvider>
-        <OneSignalProvider>
-          <html lang="en" className="bg-background" suppressHydrationWarning>
-            <head>
-              <link rel="manifest" href="/site.webmanifest" />
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-              />
-            </head>
-            <body className={`${inter.variable} font-sans antialiased`}>
-              <ScrollRestoration />
-              <Script
-                async
-                src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8021272939133910"
-                crossOrigin="anonymous"
-                strategy="afterInteractive"
-              />
-              <SiteShell>{children}</SiteShell>
-              <StreakBadge />
-              {process.env.NODE_ENV === 'production' && <Analytics />}
-            </body>
-          </html>
-        </OneSignalProvider>
-      </PostHogProvider>
-    </ClerkProvider>
+    <ClerkModeProvider disabled={disableClerk}>
+      {disableClerk ? (
+        <PostHogProvider>
+          <OneSignalProvider>
+            <html lang="en" className="bg-background" suppressHydrationWarning>
+              <head>
+                <link rel="manifest" href="/site.webmanifest" />
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+                />
+              </head>
+              <body className={`${inter.variable} font-sans antialiased`}>
+                <ScrollRestoration />
+                <Script
+                  async
+                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8021272939133910"
+                  crossOrigin="anonymous"
+                  strategy="afterInteractive"
+                />
+                <SiteShell>{children}</SiteShell>
+                <StreakBadge />
+                {process.env.NODE_ENV === 'production' && <Analytics />}
+              </body>
+            </html>
+          </OneSignalProvider>
+        </PostHogProvider>
+      ) : (
+        <ClerkProvider
+          signInUrl="/sign-in"
+          signUpUrl="/sign-up"
+          afterSignOutUrl="/"
+        >
+          <PostHogProvider>
+            <OneSignalProvider>
+              <html lang="en" className="bg-background" suppressHydrationWarning>
+                <head>
+                  <link rel="manifest" href="/site.webmanifest" />
+                  <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+                  />
+                </head>
+                <body className={`${inter.variable} font-sans antialiased`}>
+                  <ScrollRestoration />
+                  <Script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8021272939133910"
+                    crossOrigin="anonymous"
+                    strategy="afterInteractive"
+                  />
+                  <SiteShell>{children}</SiteShell>
+                  <StreakBadge />
+                  {process.env.NODE_ENV === 'production' && <Analytics />}
+                </body>
+              </html>
+            </OneSignalProvider>
+          </PostHogProvider>
+        </ClerkProvider>
+      )}
+    </ClerkModeProvider>
   )
 }

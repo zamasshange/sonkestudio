@@ -4,9 +4,33 @@ import Link from 'next/link'
 import { useAuth, UserButton } from '@clerk/nextjs'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useClerkMode } from '@/components/auth/clerk-mode-provider'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 
 export function NavbarAuthClient() {
+  const { disabled } = useClerkMode()
+
+  if (disabled) {
+    return (
+      <>
+        <Button asChild variant="ghost" size="sm" className="hidden font-semibold uppercase sm:inline-flex">
+          <Link href="/sign-in">Sign in</Link>
+        </Button>
+        <Button
+          asChild
+          size="sm"
+          className="bg-primary font-semibold uppercase text-primary-foreground hover:bg-foreground"
+        >
+          <Link href="/sign-up">
+            <span className="hidden sm:inline">Get started</span>
+            <span className="sm:hidden">Join</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </>
+    )
+  }
+
   const { isLoaded, isSignedIn } = useAuth()
   const { persona, hasDesk } = useUserPreferences()
 

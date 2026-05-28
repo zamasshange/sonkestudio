@@ -7,8 +7,21 @@ import {
   personaOptions,
   type UserPreferences,
 } from '@/lib/user-preferences'
+import { useClerkMode } from '@/components/auth/clerk-mode-provider'
 
 export function useUserPreferences() {
+  const { disabled } = useClerkMode()
+
+  if (disabled) {
+    return {
+      prefs: null,
+      persona: undefined,
+      hasDesk: false,
+      isLoaded: true,
+      isSignedIn: false,
+    }
+  }
+
   const { user, isLoaded, isSignedIn } = useUser()
 
   const prefs = useMemo<UserPreferences | null>(() => {

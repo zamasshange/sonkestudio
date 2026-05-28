@@ -18,6 +18,7 @@ import {
   type UserPersona,
 } from '@/lib/user-preferences'
 import { tools } from '@/lib/tools-data'
+import { useClerkMode } from '@/components/auth/clerk-mode-provider'
 
 type OnboardingStep = 'persona' | 'details' | 'tools'
 
@@ -50,6 +51,25 @@ const gradeOptions = [
 ]
 
 export default function OnboardingPage() {
+  const { disabled } = useClerkMode()
+
+  if (disabled) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="max-w-xl border border-border bg-white p-8 text-center">
+          <p className="text-xs uppercase tracking-[0.35em] text-primary">Onboarding unavailable locally</p>
+          <h1 className="mt-4 text-3xl font-semibold text-foreground">Clerk is disabled on localhost</h1>
+          <p className="mt-4 text-sm leading-7 text-muted-foreground">
+            The app falls back to a local-safe mode on your machine so the site can open without the live Clerk key.
+          </p>
+          <Link href="/" className="mt-6 inline-flex items-center justify-center border border-border bg-foreground px-5 py-3 text-sm font-semibold text-background">
+            Return home
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
   const { isLoaded, isSignedIn, user } = useUser()
   const router = useRouter()
   const [step, setStep] = useState<OnboardingStep>('persona')

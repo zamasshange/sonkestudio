@@ -30,21 +30,7 @@ export function SmartRecommendations() {
   const { prefs, persona } = useUserPreferences()
   const [liveRecommendations, setLiveRecommendations] = useState<ReturnType<typeof getSmartRecommendations> | null>(null)
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null)
-
-  if (loading) {
-    return (
-      <section className="bg-background px-5 py-12 sm:px-8">
-        <div className="mx-auto max-w-[1720px]">
-          <div className="h-8 w-48 animate-pulse rounded bg-muted" />
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
-            ))}
-          </div>
-        </div>
-      </section>
-    )
-  }
+  const toolMap = useMemo(() => new Map(tools.map((tool) => [tool.id, tool])), [])
 
   // Use persona label as role for recommendations (e.g., 'Student', 'Creator')
   const userRole = persona?.label?.toLowerCase() || prefs?.persona
@@ -55,8 +41,6 @@ export function SmartRecommendations() {
     userRole,
     recentTools,
   )
-
-  const toolMap = useMemo(() => new Map(tools.map((tool) => [tool.id, tool])), [])
 
   useEffect(() => {
     if (loading) return
@@ -103,6 +87,21 @@ export function SmartRecommendations() {
 
   const recommendations = liveRecommendations || fallbackRecommendations
   const topRecs = recommendations.slice(0, 3)
+
+  if (loading) {
+    return (
+      <section className="bg-background px-5 py-12 sm:px-8">
+        <div className="mx-auto max-w-[1720px]">
+          <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="bg-background px-5 py-16 sm:px-8 lg:py-20">
