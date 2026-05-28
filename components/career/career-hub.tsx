@@ -3,19 +3,27 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
+  AlertCircle,
   Bookmark,
   BriefcaseBusiness,
   Building2,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
   FileText,
   GraduationCap,
   Loader2,
   MapPin,
   MessageSquareText,
+  RefreshCw,
   Search,
   Send,
   Sparkles,
   Target,
+  TrendingUp,
   Video,
+  Wallet,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +40,21 @@ import { tools } from '@/lib/tools-data'
 const careerTool = tools.find((tool) => tool.id === 'career-opportunity-hub') || tools.find((tool) => tool.id === 'cv-generator') || tools[0]
 
 type Providers = { jsearch: boolean; adzuna: boolean; adzunaMissing?: string[] }
+type ProviderErrors = { jsearch?: string | null; adzuna?: string | null }
+
+type CareerApiResponse = {
+  opportunities?: CareerOpportunity[]
+  providers?: Providers
+  providerErrors?: ProviderErrors
+  source?: 'live' | 'fallback'
+  meta?: {
+    page: number
+    perPage: number
+    returned: number
+    providerCounts: { jsearch: number; adzuna: number }
+    hasMore: boolean
+  }
+}
 
 type SavedApplication = CareerOpportunity & {
   stage: 'Saved' | 'Applied' | 'Interview' | 'Offer'
@@ -40,6 +63,32 @@ type SavedApplication = CareerOpportunity & {
 
 function storageKey(name: string) {
   return `sonke-career-${name}`
+}
+
+function formatPostedDate(value?: string) {
+  if (!value) return 'Recent'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Recent'
+  return date.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function CompanyMark({ opportunity, size = 'md' }: { opportunity: CareerOpportunity; size?: 'md' | 'lg' }) {
+  const [failed, setFailed] = useState(false)
+  const dimension = size === 'lg' ? 'h-16 w-16 text-xl' : 'h-12 w-12 text-sm'
+
+  if (opportunity.logoUrl && !failed) {
+    return (
+      <span className={`${dimension} flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-white p-2`}>
+        <img src={opportunity.logoUrl} alt={`${opportunity.company} logo`} className="h-full w-full object-contain" onError={() => setFailed(true)} />
+      </span>
+    )
+  }
+
+  return (
+    <span className={`${dimension} flex shrink-0 items-center justify-center rounded-xl border border-border bg-foreground font-semibold text-background`}>
+      {opportunity.companyInitials || opportunity.company.slice(0, 2).toUpperCase()}
+    </span>
+  )
 }
 
 export function CareerHub() {
@@ -55,7 +104,12 @@ export function CareerHub() {
   const [saved, setSaved] = useState<SavedApplication[]>([])
   const [assets, setAssets] = useState<InteractionAsset[]>([])
   const [providers, setProviders] = useState<Providers>({ jsearch: false, adzuna: false })
+  const [providerErrors, setProviderErrors] = useState<ProviderErrors>({})
+  const [source, setSource] = useState<'live' | 'fallback'>('fallback')
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
   const [aiOutput, setAiOutput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [showCvContext, setShowCvContext] = useState(false)
@@ -71,25 +125,52 @@ export function CareerHub() {
 
   const activeTrackMeta = careerInterestTracks.find((track) => track.id === activeTrack)
 
-  const search = async (nextQuery = query) => {
-    setLoading(true)
+  const search = async (
+    nextQuery = query,
+    options: {
+      page?: number
+      append?: boolean
+      location?: string
+      country?: string
+      remoteOnly?: boolean
+      salaryMin?: string
+      company?: string
+    } = {},
+  ) => {
+    const targetPage = options.page || 1
+    const append = Boolean(options.append)
+    if (append) setLoadingMore(true)
+    else setLoading(true)
     try {
       const params = new URLSearchParams({
         query: nextQuery,
-        location,
-        country,
-        remoteOnly: String(remoteOnly),
-        page: '1',
+        location: options.location ?? location,
+        country: options.country ?? country,
+        remoteOnly: String(options.remoteOnly ?? remoteOnly),
+        page: String(targetPage),
+        perPage: '20',
       })
-      if (salaryMin) params.set('salaryMin', salaryMin)
-      if (company) params.set('company', company)
+      const nextSalary = options.salaryMin ?? salaryMin
+      const nextCompany = options.company ?? company
+      if (nextSalary) params.set('salaryMin', nextSalary)
+      if (nextCompany) params.set('company', nextCompany)
       const response = await fetch(`/api/career/opportunities?${params}`)
-      const data = await response.json()
-      setOpportunities(data.opportunities || [])
+      const data: CareerApiResponse = await response.json()
+      const nextOpportunities = data.opportunities || []
+      setOpportunities((current) => {
+        if (!append) return nextOpportunities
+        const seen = new Set(current.map((item) => `${item.provider}-${item.id}`))
+        return [...current, ...nextOpportunities.filter((item) => !seen.has(`${item.provider}-${item.id}`))]
+      })
       setProviders(data.providers || { jsearch: false, adzuna: false })
-      setSelected(data.opportunities?.[0] || null)
+      setProviderErrors(data.providerErrors || {})
+      setSource(data.source || 'fallback')
+      setPage(data.meta?.page || targetPage)
+      setHasMore(data.meta?.hasMore ?? nextOpportunities.length > 0)
+      if (!append) setSelected(nextOpportunities[0] || null)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }
 
@@ -99,20 +180,20 @@ export function CareerHub() {
   }, [])
 
   const personalized = useMemo(() => {
-    const track = activeTrack.toLowerCase()
+    const trackTerms = `${activeTrackMeta?.label || activeTrack} ${activeTrackMeta?.query || ''}`.toLowerCase().split(/\W+/).filter((term) => term.length > 3)
     return opportunities
       .map((opportunity) => {
         const text = `${opportunity.title} ${opportunity.description} ${opportunity.category}`.toLowerCase()
         const score =
-          (text.includes(track) ? 3 : 0) +
+          (trackTerms.some((term) => text.includes(term)) ? 3 : 0) +
           (opportunity.remote ? 2 : 0) +
-          (/intern|graduate|learnership|entry|junior/i.test(text) ? 3 : 0) +
+          (/intern|graduate|learnership|bursary|entry|junior|admin|retail|call centre|government/i.test(text) ? 3 : 0) +
           (/south africa|johannesburg|cape town|durban|pretoria|remote africa/i.test(opportunity.location) ? 2 : 0)
         return { opportunity, score }
       })
       .sort((a, b) => b.score - a.score)
       .map((item) => item.opportunity)
-  }, [activeTrack, opportunities])
+  }, [activeTrack, activeTrackMeta, opportunities])
 
   const runAi = async (action: string, opportunity = selected) => {
     if (/resume|cv|cover letter|portfolio/i.test(action)) setShowCvContext(true)
@@ -155,13 +236,18 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
     setActiveTrack(trackId)
     if (track) {
       setQuery(track.query)
-      search(track.query)
+      search(track.query, { page: 1 })
     }
   }
 
   const adzunaStatus = providers.adzuna
     ? 'connected'
     : providers.adzunaMissing?.includes('ADZUNA_APP_ID') ? 'needs app id' : 'ready for key'
+  const providerHealth = [
+    `JSearch ${providers.jsearch ? 'connected' : 'not configured'}`,
+    `Adzuna ${adzunaStatus}`,
+    source === 'live' ? `${opportunities.length} live signals loaded` : 'fallback signal active',
+  ]
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -183,9 +269,16 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                 </p>
                 <div className="mt-7 flex flex-wrap gap-2">
                   {['Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Remote Africa'].map((item) => (
-                    <button key={item} onClick={() => { setLocation(item); search(query) }} className="rounded-sm border border-border bg-background px-3 py-2 text-xs font-semibold uppercase text-muted-foreground transition hover:border-primary hover:text-foreground">
+                    <button key={item} onClick={() => { setLocation(item); search(query, { location: item, page: 1 }) }} className="rounded-sm border border-border bg-background px-3 py-2 text-xs font-semibold uppercase text-muted-foreground transition hover:border-primary hover:text-foreground">
                       {item}
                     </button>
+                  ))}
+                </div>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {['NSFAS-aware', 'Learnerships', 'Bursaries', 'Government', 'Remote SA'].map((item) => (
+                    <span key={item} className="rounded-full border border-border bg-muted/45 px-3 py-1.5 text-xs font-semibold uppercase text-muted-foreground">
+                      {item}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -203,6 +296,13 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                   <p className="mt-3 text-sm leading-6 text-background/75">
                     JSearch {providers.jsearch ? 'connected' : 'ready for key'} / Adzuna {adzunaStatus} with local fallback signals.
                   </p>
+                  <div className="mt-4 grid gap-2">
+                    {providerHealth.map((item) => (
+                      <span key={item} className="rounded-sm border border-background/15 bg-background/5 px-3 py-2 text-xs font-semibold uppercase text-background/65">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -233,15 +333,15 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                   Remote only
                   <input type="checkbox" checked={remoteOnly} onChange={(event) => setRemoteOnly(event.target.checked)} />
                 </label>
-                <Button onClick={() => search()} disabled={loading}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}Search opportunities</Button>
+                <Button onClick={() => search(query, { page: 1 })} disabled={loading}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}Search opportunities</Button>
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-white/85 p-4">
-              <p className="mb-3 text-sm font-semibold">Personalization</p>
-              <div className="grid grid-cols-2 gap-2">
+              <p className="mb-3 text-sm font-semibold">Mzansi Personalization</p>
+              <div className="grid gap-2">
                 {careerInterestTracks.map((track) => (
-                  <Button key={track.id} variant={activeTrack === track.id ? 'default' : 'outline'} className="h-auto min-h-10 whitespace-normal text-xs" onClick={() => setTrack(track.id)}>
+                  <Button key={track.id} variant={activeTrack === track.id ? 'default' : 'outline'} className="h-auto min-h-10 justify-start whitespace-normal text-left text-xs" onClick={() => setTrack(track.id)}>
                     {track.label}
                   </Button>
                 ))}
@@ -252,9 +352,9 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
           <section className="space-y-4">
             <div className="grid gap-3 md:grid-cols-3">
               {[
-                { icon: GraduationCap, label: 'Internships', text: 'Learnerships, graduate programs, junior paths' },
-                { icon: FileText, label: 'Apply Smarter', text: 'CV feedback, ATS keywords, cover letters' },
-                { icon: MessageSquareText, label: 'Interview Prep', text: 'Questions, tips, company framing' },
+                { icon: GraduationCap, label: 'Internships + Learnerships', text: 'SETA pathways, graduate programs, junior roles' },
+                { icon: TrendingUp, label: 'Bursaries + Digital Skills', text: 'Student funding signals, tech, admin, creator paths' },
+                { icon: MessageSquareText, label: 'AI Career Prep', text: 'CV feedback, interview prep, cover letters' },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl border border-border bg-white/85 p-4">
                   <item.icon className="h-5 w-5 text-primary" />
@@ -264,7 +364,43 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
               ))}
             </div>
 
+            {(providerErrors.jsearch || providerErrors.adzuna) && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p className="flex items-center gap-2 font-semibold"><AlertCircle className="h-4 w-4" /> One provider is temporarily delayed</p>
+                <p className="mt-2 text-xs leading-5 text-amber-800">
+                  SONKE is still showing live opportunities from available sources while the delayed provider retries in the background.
+                </p>
+              </div>
+            )}
+
             <div className="grid gap-3">
+              {loading && opportunities.length === 0 ? (
+                <div className="grid gap-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="animate-pulse rounded-2xl border border-border bg-white/80 p-4">
+                      <div className="h-4 w-40 rounded bg-muted" />
+                      <div className="mt-4 h-7 w-3/4 rounded bg-muted" />
+                      <div className="mt-3 h-4 w-1/2 rounded bg-muted" />
+                      <div className="mt-5 h-12 rounded bg-muted/70" />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {!loading && personalized.length === 0 ? (
+                <div className="rounded-2xl border border-border bg-white/90 p-8 text-center">
+                  <Search className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <h2 className="mt-4 text-2xl font-semibold">No opportunities found yet</h2>
+                  <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                    Try South Africa, Johannesburg, remote work, learnerships, bursaries, or graduate programmes.
+                  </p>
+                  <Button className="mt-5" onClick={() => search('internship learnership graduate programme South Africa', { page: 1 })}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Retry with local signals
+                  </Button>
+                </div>
+              ) : null}
+
               <AnimatePresence mode="popLayout">
                 {personalized.map((opportunity, index) => (
                   <motion.article
@@ -277,28 +413,63 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                   >
                     <button onClick={() => setSelected(opportunity)} className="block w-full text-left">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0">
+                        <div className="flex min-w-0 gap-4">
+                          <CompanyMark opportunity={opportunity} />
+                          <div className="min-w-0">
                           <div className="flex flex-wrap gap-2">
-                            <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase text-muted-foreground">{opportunity.provider}</span>
+                            <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase text-muted-foreground">{opportunity.source || opportunity.provider}</span>
                             {opportunity.remote && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-emerald-700">Remote</span>}
                             {index < 3 && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase text-primary">Best match</span>}
+                            {/learnership|bursary|graduate|intern/i.test(`${opportunity.title} ${opportunity.description}`) && <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-sky-700">Youth pathway</span>}
                           </div>
                           <h2 className="mt-3 text-2xl font-semibold leading-tight">{opportunity.title}</h2>
                           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                             <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" /> {opportunity.company}</span>
                             <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" /> {opportunity.location}</span>
+                            <span className="inline-flex items-center gap-1"><CalendarDays className="h-4 w-4" /> {formatPostedDate(opportunity.postedAt)}</span>
+                            {opportunity.salary && <span className="inline-flex items-center gap-1"><Wallet className="h-4 w-4" /> {opportunity.salary}</span>}
                           </p>
                           <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">{opportunity.description}</p>
+                          </div>
                         </div>
                         <div className="flex shrink-0 gap-2">
                           <Button variant="outline" onClick={(event) => { event.stopPropagation(); saveOpportunity(opportunity) }}><Bookmark className="mr-2 h-4 w-4" />Save</Button>
-                          {opportunity.url && <Button asChild><a href={opportunity.url} target="_blank" rel="noreferrer">Apply</a></Button>}
+                          {opportunity.url && <Button asChild><a href={opportunity.url} target="_blank" rel="noreferrer">Apply <ExternalLink className="ml-2 h-4 w-4" /></a></Button>}
                         </div>
                       </div>
                     </button>
                   </motion.article>
                 ))}
               </AnimatePresence>
+
+              {personalized.length > 0 ? (
+                <div className="rounded-2xl border border-border bg-white/90 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Page <span className="font-semibold text-foreground">{page}</span> / Browse more internships, learnerships, remote roles, bursaries, and junior jobs.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" disabled={page <= 1 || loading} onClick={() => search(query, { page: Math.max(1, page - 1) })}>
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        Previous
+                      </Button>
+                      {[Math.max(1, page - 1), page, page + 1].filter((item, index, arr) => arr.indexOf(item) === index).map((item) => (
+                        <Button key={item} variant={item === page ? 'default' : 'outline'} disabled={loading || loadingMore} onClick={() => search(query, { page: item })}>
+                          {item}
+                        </Button>
+                      ))}
+                      <Button variant="outline" disabled={!hasMore || loading} onClick={() => search(query, { page: page + 1 })}>
+                        Next
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                      <Button disabled={!hasMore || loadingMore} onClick={() => search(query, { page: page + 1, append: true })}>
+                        {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <TrendingUp className="mr-2 h-4 w-4" />}
+                        Load more
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
 

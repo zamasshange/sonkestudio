@@ -20,6 +20,7 @@ function parseSearch(request: NextRequest): CareerSearchParams {
     salaryMin: params.get('salaryMin')?.trim() || undefined,
     company: params.get('company')?.trim() || undefined,
     page: Math.max(1, Number(params.get('page')) || 1),
+    perPage: Math.min(30, Math.max(8, Number(params.get('perPage')) || 20)),
   }
 }
 
@@ -52,8 +53,17 @@ function mergeOpportunities(live: CareerOpportunity[]) {
 export async function GET(request: NextRequest) {
   const params = parseSearch(request)
   const settled = await Promise.allSettled([fetchJSearchOpportunities(params), fetchAdzunaOpportunities(params)])
+  const providerCounts = {
+    jsearch: settled[0].status === 'fulfilled' ? settled[0].value.length : 0,
+    adzuna: settled[1].status === 'fulfilled' ? settled[1].value.length : 0,
+  }
   const live = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
   const opportunities = mergeOpportunities(live)
+  settled.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.error(`[career:provider:${index === 0 ? 'jsearch' : 'adzuna'}]`, result.reason)
+    }
+  })
 
   return NextResponse.json({
     opportunities: opportunities.length ? opportunities : localFallbackOpportunities(params),
@@ -69,6 +79,13 @@ export async function GET(request: NextRequest) {
         : settled[1].status === 'rejected' ? settled[1].reason?.message || 'Adzuna failed' : null,
     } : undefined,
     source: opportunities.length ? 'live' : 'fallback',
+    meta: {
+      page: params.page,
+      perPage: params.perPage,
+      returned: opportunities.length,
+      providerCounts,
+      hasMore: opportunities.length >= Math.min(8, params.perPage),
+    },
     requiredEnv: {
       jsearch: 'JSEARCH_API_KEY + JSEARCH_API_HOST',
       adzuna: 'ADZUNA_APP_ID + ADZUNA_API_KEY',

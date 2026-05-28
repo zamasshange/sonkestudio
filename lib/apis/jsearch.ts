@@ -1,4 +1,4 @@
-import { buildCareerQuery, CareerOpportunity, CareerSearchParams } from '@/lib/career-opportunities'
+import { buildCareerQuery, CareerOpportunity, CareerSearchParams, resolveCompanyBrand } from '@/lib/career-opportunities'
 
 function env(...names: string[]) {
   for (const name of names) {
@@ -44,7 +44,8 @@ export async function fetchJSearchOpportunities(params: CareerSearchParams): Pro
   })
 
   if (!response.ok) {
-    throw new Error(`JSearch returned ${response.status}`)
+    const detail = await response.text().catch(() => '')
+    throw new Error(`JSearch returned ${response.status}${detail ? `: ${detail.slice(0, 160)}` : ''}`)
   }
 
   const data = await response.json()
@@ -55,6 +56,7 @@ export async function fetchJSearchOpportunities(params: CareerSearchParams): Pro
     source: 'JSearch',
     title: item.job_title || 'Untitled role',
     company: item.employer_name || 'Unknown company',
+    ...resolveCompanyBrand(item.employer_name || 'Unknown company', item.employer_logo),
     location: formatLocation(item, params.location),
     country: item.job_country,
     remote: Boolean(item.job_is_remote),
