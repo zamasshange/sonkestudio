@@ -9,8 +9,12 @@ import {
 
 export const runtime = 'nodejs'
 
-function env(name: string) {
-  return process.env[name]?.trim()
+function env(...names: string[]) {
+  for (const name of names) {
+    const value = process.env[name]?.trim()
+    if (value) return value
+  }
+  return undefined
 }
 
 function parseSearch(request: NextRequest): CareerSearchParams {
@@ -27,7 +31,7 @@ function parseSearch(request: NextRequest): CareerSearchParams {
 }
 
 async function fetchJSearch(params: CareerSearchParams): Promise<CareerOpportunity[]> {
-  const key = env('JSEARCH_RAPIDAPI_KEY')
+  const key = env('JSEARCH_RAPIDAPI_KEY', 'RAPIDAPI_KEY', 'RAPID_API_KEY', 'X_RAPIDAPI_KEY')
   if (!key) return []
 
   const query = [buildCareerQuery(params), params.location].filter(Boolean).join(' in ')
@@ -46,7 +50,9 @@ async function fetchJSearch(params: CareerSearchParams): Promise<CareerOpportuni
     },
     next: { revalidate: 900 },
   })
-  if (!response.ok) return []
+  if (!response.ok) {
+    throw new Error(`JSearch returned ${response.status}`)
+  }
   const data = await response.json()
 
   return (data.data || []).map((item: any): CareerOpportunity => ({
@@ -69,8 +75,8 @@ async function fetchJSearch(params: CareerSearchParams): Promise<CareerOpportuni
 }
 
 async function fetchAdzuna(params: CareerSearchParams): Promise<CareerOpportunity[]> {
-  const appId = env('ADZUNA_APP_ID')
-  const appKey = env('ADZUNA_APP_KEY')
+  const appId = env('ADZUNA_APP_ID', 'ADZUNA_APPLICATION_ID')
+  const appKey = env('ADZUNA_APP_KEY', 'ADZUNA_API_KEY')
   if (!appId || !appKey) return []
 
   const country = normalizeCountry(params.country)
@@ -84,7 +90,9 @@ async function fetchAdzuna(params: CareerSearchParams): Promise<CareerOpportunit
   if (params.salaryMin) url.searchParams.set('salary_min', params.salaryMin)
 
   const response = await fetch(url, { next: { revalidate: 900 } })
-  if (!response.ok) return []
+  if (!response.ok) {
+    throw new Error(`Adzuna returned ${response.status}`)
+  }
   const data = await response.json()
 
   return (data.results || []).map((item: any): CareerOpportunity => ({
@@ -121,8 +129,17 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     opportunities: opportunities.length ? opportunities : localFallbackOpportunities(params),
     providers: {
-      jsearch: Boolean(env('JSEARCH_RAPIDAPI_KEY')),
-      adzuna: Boolean(env('ADZUNA_APP_ID') && env('ADZUNA_APP_KEY')),
+      jsearch: Boolean(env('JSEARCH_RAPIDAPI_KEY', 'RAPIDAPI_KEY', 'RAPID_API_KEY', 'X_RAPIDAPI_KEY')),
+      adzuna: Boolean(env('ADZUNA_APP_ID', 'ADZUNA_APPLICATION_ID') && env('ADZUNA_APP_KEY', 'ADZUNA_API_KEY')),
+    },
+    providerErrors: process.env.NODE_ENV === 'development' ? {
+      jsearch: settled[0].status === 'rejected' ? settled[0].reason?.message || 'JSearch failed' : null,
+      adzuna: settled[1].status === 'rejected' ? settled[1].reason?.message || 'Adzuna failed' : null,
+    } : undefined,
+    source: opportunities.length ? 'live' : 'fallback',
+    requiredEnv: {
+      jsearch: 'JSEARCH_RAPIDAPI_KEY or RAPIDAPI_KEY',
+      adzuna: 'ADZUNA_APP_ID + ADZUNA_APP_KEY',
     },
   })
 }

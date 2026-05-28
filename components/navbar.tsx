@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Compass, Flame, Grid2X2, Menu, Rocket, Sparkles, X } from 'lucide-react'
+import { ArrowRight, BriefcaseBusiness, Compass, Grid2X2, Home, Menu, Rocket, Sparkles, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import logoImage from '@/app/images/logo.png'
 import faviconImage from '@/app/images/favicon.png'
@@ -11,9 +11,9 @@ import { NavbarAuth } from '@/components/auth/navbar-auth'
 import { navCategories, navTrendingTools } from '@/lib/nav-data'
 
 const navLinks = [
-  { href: '/tools', label: 'All Tools', description: 'Browse every workspace', icon: Grid2X2 },
-  { href: '/#services', label: 'Systems', description: 'Pick a tool category', icon: Compass },
-  { href: '/#featured', label: 'Popular', description: 'Start with top tools', icon: Flame },
+  { href: '/', label: 'Home', description: 'SONKE Studio home', icon: Home },
+  { href: '/tools', label: 'Tools', description: 'Browse every workspace', icon: Grid2X2 },
+  { href: '/career', label: 'Careers', description: 'Jobs, internships, and career AI', icon: BriefcaseBusiness },
 ]
 
 export function Navbar() {

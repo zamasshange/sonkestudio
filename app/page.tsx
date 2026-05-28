@@ -7,6 +7,7 @@ import {
   LogoMarquee,
   ServicesSection,
   FeaturedWorkSection,
+  CareersSection,
   StatsSection,
   CTASection
 } from '@/components/home-sections'
@@ -30,6 +31,9 @@ export default function HomePage() {
       
       {/* Featured Work/Tools */}
       <FeaturedWorkSection />
+
+      {/* Careers Ecosystem */}
+      <CareersSection />
       
       {/* Stats Section */}
       <StatsSection />

@@ -32,6 +32,7 @@ const categoryVisuals: Record<string, { tint: string; mark: string; pattern: str
   everyday: { tint: 'from-amber-500/20 via-white to-primary/20', mark: 'UT', pattern: 'Fast / Clean / Useful' },
   developer: { tint: 'from-slate-500/20 via-white to-zinc-400/20', mark: 'DEV', pattern: '{ format: true }' },
   business: { tint: 'from-indigo-500/20 via-white to-blue-400/20', mark: 'BIZ', pattern: 'Plan / Pitch / Decide' },
+  career: { tint: 'from-blue-500/20 via-white to-emerald-400/20', mark: 'JOB', pattern: 'Search / Save / Apply' },
   explain: { tint: 'from-fuchsia-500/20 via-white to-pink-400/20', mark: 'WHY', pattern: 'Paste / Decode / Understand' },
 }
 

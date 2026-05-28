@@ -4,7 +4,7 @@ import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { useMemo } from 'react'
-import { ArrowRight, Check, Code2, FileText, GraduationCap, PenTool, Search, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, BriefcaseBusiness, Check, Code2, FileText, GraduationCap, MapPin, PenTool, Search, Sparkles, Target, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { sortToolsForUser } from '@/lib/filter-tools'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
@@ -837,6 +837,116 @@ export function FeaturedWorkSection() {
               </span>
             </Link>
           </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const careerSignals = [
+  { title: 'Graduate Software Intern', company: 'Fintech studio', place: 'Johannesburg', tag: 'Featured internship' },
+  { title: 'Remote Junior Data Analyst', company: 'Analytics partner', place: 'Remote Africa', tag: 'Trending' },
+  { title: 'Marketing Graduate Programme', company: 'Growth team', place: 'Cape Town', tag: 'Graduate program' },
+]
+
+export function CareersSection() {
+  return (
+    <section id="careers" className="overflow-hidden bg-background px-5 py-16 sm:px-8 lg:py-20">
+      <div className="mx-auto grid max-w-[1720px] gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.7 }}
+          className="relative min-h-[520px] overflow-hidden rounded-md border border-border bg-foreground p-6 text-background sm:p-8"
+        >
+          <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:30px_30px]" />
+          <div className="relative z-10 flex h-full flex-col justify-between">
+            <div>
+              <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase text-background/65">
+                <span className="h-2.5 w-2.5 bg-primary" />
+                Career Hub
+              </p>
+              <h2 className="mt-6 max-w-3xl text-5xl font-semibold leading-[0.95] sm:text-7xl">
+                Opportunity search with real momentum.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-8 text-background/72">
+                Internships, remote junior roles, learnerships, graduate programs, saved applications, and AI guidance shaped for South African builders.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-3 sm:grid-cols-3">
+              {[
+                ['Live jobs', 'JSearch + Adzuna'],
+                ['SA context', 'Local signals'],
+                ['AI assist', 'CV, cover, interview'],
+              ].map(([value, label]) => (
+                <div key={value} className="border border-background/15 bg-background/5 p-4">
+                  <p className="text-2xl font-semibold">{value}</p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-background/50">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="grid gap-5">
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, delay: 0.08 }}
+            className="grid gap-4 md:grid-cols-3"
+          >
+            {[
+              { icon: BriefcaseBusiness, label: 'Featured internships', text: 'Early career roles surfaced with smart relevance.' },
+              { icon: Target, label: 'Smart recommendations', text: 'Track, save, and prioritize matches that fit your path.' },
+              { icon: FileText, label: 'CV optimization', text: 'Upload only inside CV-focused workflows when it helps.' },
+            ].map((item) => (
+              <Link key={item.label} href="/career" className="group rounded-md border border-border bg-white p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_24px_70px_-52px_rgba(0,0,0,.65)]">
+                <item.icon className="h-6 w-6 text-primary" />
+                <p className="mt-5 text-xl font-semibold">{item.label}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold uppercase text-foreground">
+                  Open Careers <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, delay: 0.14 }}
+            className="rounded-md border border-border bg-white p-5 sm:p-6"
+          >
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase text-muted-foreground">Trending opportunities</p>
+                <h3 className="mt-2 text-3xl font-semibold">Built for browsing, not uploading.</h3>
+              </div>
+              <Sparkles className="hidden h-8 w-8 text-primary sm:block" />
+            </div>
+            <div className="grid gap-3">
+              {careerSignals.map((role, index) => (
+                <Link key={role.title} href="/career" className="group grid gap-4 rounded-md border border-border bg-background p-4 transition hover:border-primary/50 hover:bg-white md:grid-cols-[48px_1fr_auto] md:items-center">
+                  <span className="flex h-12 w-12 items-center justify-center bg-foreground text-background">{String(index + 1).padStart(2, '0')}</span>
+                  <span>
+                    <span className="block text-lg font-semibold">{role.title}</span>
+                    <span className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                      <span>{role.company}</span>
+                      <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {role.place}</span>
+                    </span>
+                  </span>
+                  <span className="inline-flex items-center justify-between gap-3 text-sm font-semibold uppercase text-primary">
+                    {role.tag}
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

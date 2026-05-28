@@ -11,13 +11,14 @@ import {
 } from 'lucide-react'
 
 export const navCategories = [
-  { id: 'ai-text', name: 'AI Text Tools', icon: Brain },
   { id: 'student', name: 'Student Tools', icon: GraduationCap },
-  { id: 'document', name: 'Document Tools', icon: FileText },
-  { id: 'creator', name: 'Creator Tools', icon: Palette },
-  { id: 'everyday', name: 'Everyday Utilities', icon: Wrench },
   { id: 'developer', name: 'Developer Tools', icon: Code2 },
+  { id: 'creator', name: 'Creator Tools', icon: Palette },
   { id: 'business', name: 'Business Tools', icon: Briefcase },
+  { id: 'career', name: 'Career Hub', icon: Briefcase },
+  { id: 'ai-text', name: 'AI Text Tools', icon: Brain },
+  { id: 'document', name: 'Document Tools', icon: FileText },
+  { id: 'everyday', name: 'Everyday Utilities', icon: Wrench },
   { id: 'explain', name: 'Explain This', icon: HelpCircle },
 ] as const
 

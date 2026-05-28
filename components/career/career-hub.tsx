@@ -58,6 +58,7 @@ export function CareerHub() {
   const [loading, setLoading] = useState(false)
   const [aiOutput, setAiOutput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
+  const [showCvContext, setShowCvContext] = useState(false)
 
   useEffect(() => {
     const savedRaw = window.localStorage.getItem(storageKey('saved'))
@@ -114,6 +115,7 @@ export function CareerHub() {
   }, [activeTrack, opportunities])
 
   const runAi = async (action: string, opportunity = selected) => {
+    if (/resume|cv|cover letter|portfolio/i.test(action)) setShowCvContext(true)
     setAiLoading(true)
     try {
       const prompt = `SONKE Career Copilot action: ${action}
@@ -231,8 +233,6 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
               </div>
             </div>
 
-            <SmartUploadPanel tool={careerTool} assets={assets} onAssetsChange={setAssets} compact />
-
             <div className="rounded-2xl border border-border bg-white/85 p-4">
               <p className="mb-3 text-sm font-semibold">Personalization</p>
               <div className="grid grid-cols-2 gap-2">
@@ -314,6 +314,15 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                   </Button>
                 ))}
               </div>
+              <Button type="button" variant="outline" className="mt-3 w-full justify-start" onClick={() => setShowCvContext((value) => !value)}>
+                <FileText className="mr-2 h-4 w-4" />
+                {showCvContext ? 'Hide CV context' : 'Add CV or portfolio context'}
+              </Button>
+              {showCvContext ? (
+                <div className="mt-3">
+                  <SmartUploadPanel tool={careerTool} assets={assets} onAssetsChange={setAssets} compact />
+                </div>
+              ) : null}
               <Textarea value={aiOutput} onChange={(event) => setAiOutput(event.target.value)} className="mt-3 min-h-[260px]" placeholder={aiLoading ? 'SONKE Career Copilot is thinking...' : 'AI career guidance appears here.'} />
               {aiLoading ? <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing guidance</p> : null}
               <div className="mt-3">

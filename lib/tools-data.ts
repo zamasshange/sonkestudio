@@ -167,10 +167,18 @@ export const categories: Category[] = [
   {
     id: 'business',
     name: 'Business Tools',
-    description: 'Grow your career and business',
+    description: 'Plan, pitch, and grow your business',
     icon: FaBriefcase,
     color: 'from-indigo-500 to-blue-600',
     gradient: 'bg-gradient-to-br from-indigo-500/10 to-blue-600/10'
+  },
+  {
+    id: 'career',
+    name: 'Career Hub',
+    description: 'Discover opportunities and apply with AI',
+    icon: FaBriefcase,
+    color: 'from-blue-500 to-emerald-500',
+    gradient: 'bg-gradient-to-br from-blue-500/10 to-emerald-500/10'
   },
   {
     id: 'explain',
@@ -199,7 +207,7 @@ export const tools: Tool[] = [
   { id: 'ai-simplify', name: 'AI Text Simplifier', description: 'Make complex text simple', icon: FaLayerGroup, iconColor: '#0891B2', iconBg: '#ecfeff', category: 'ai-text', tags: ['ai', 'simplify', 'clarity'], href: '/tools/ai/simplify', usageCount: 51000 },
   { id: 'ai-resume', name: 'AI Resume Improver', description: 'Optimize your resume with AI', icon: FaAward, iconColor: '#D97706', iconBg: '#fffbeb', category: 'ai-text', tags: ['ai', 'resume', 'career'], featured: true, href: '/tools/ai/resume', usageCount: 87000 },
   { id: 'ai-cold-email', name: 'AI Cold Email Generator', description: 'Write cold emails that convert', icon: FaEnvelopeOpenText, iconColor: '#EA4335', iconBg: '#fff1f1', category: 'ai-text', tags: ['ai', 'cold email', 'sales'], href: '/tools/ai/cold-email', usageCount: 32000 },
-  { id: 'ai-cover-letter-career', name: 'AI Cover Letter Career Kit', description: 'Generate tailored cover letters from live job listings', icon: FaEnvelope, iconColor: '#EA4335', iconBg: '#fff1f1', category: 'ai-text', tags: ['cover letter', 'jobs', 'career'], new: true, href: '/career', usageCount: 58000 },
+  { id: 'ai-cover-letter-career', name: 'AI Cover Letter Career Kit', description: 'Generate tailored cover letters from live job listings', icon: FaEnvelope, iconColor: '#EA4335', iconBg: '#fff1f1', category: 'career', tags: ['cover letter', 'jobs', 'career'], new: true, href: '/career', usageCount: 58000 },
   { id: 'ai-reply', name: 'AI Chat Reply Generator', description: 'Generate smart chat responses', icon: FaComments, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'ai-text', tags: ['ai', 'chat', 'reply'], href: '/tools/ai/reply', usageCount: 41000 },
   { id: 'ai-tweet', name: 'AI Tweet Rewriter', description: 'Optimize your tweets for engagement', icon: SiX, iconColor: '#111111', category: 'ai-text', tags: ['ai', 'twitter', 'social'], href: '/tools/ai/tweet', usageCount: 28000 },
   { id: 'ai-script', name: 'AI Script Writer', description: 'Write video scripts easily', icon: FaVideo, iconColor: '#DC2626', iconBg: '#fff1f1', category: 'ai-text', tags: ['ai', 'script', 'video'], href: '/tools/ai/script', usageCount: 35000 },
@@ -220,8 +228,8 @@ export const tools: Tool[] = [
   { id: 'paper-simplifier', name: 'Research Paper Simplifier', description: 'Make papers easy to understand', icon: FaFileAlt, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'student', tags: ['paper', 'research', 'simplify'], href: '/tools/student/paper', usageCount: 43000 },
   { id: 'formula-explainer', name: 'Formula Explainer', description: 'Understand any formula', icon: FaAtom, iconColor: '#0891B2', iconBg: '#ecfeff', category: 'student', tags: ['formula', 'math', 'science'], href: '/tools/student/formula', usageCount: 56000 },
   { id: 'assignment-planner', name: 'Assignment Planner', description: 'Plan and track assignments', icon: FaClipboardList, iconColor: '#DB2777', iconBg: '#fdf2f8', category: 'student', tags: ['assignment', 'planner', 'organize'], href: '/tools/student/assignment', usageCount: 34000 },
-  { id: 'career-opportunity-hub', name: 'Career Opportunity Hub', description: 'Find internships, learnerships, graduate programs, and remote junior roles', icon: FaBriefcase, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'student', tags: ['career', 'internship', 'learnership', 'jobs'], new: true, featured: true, href: '/career', usageCount: 82000 },
-  { id: 'internship-finder', name: 'Internship Finder', description: 'Discover student internships, entry-level jobs, and graduate opportunities', icon: FaSearch, iconColor: '#0EA5E9', iconBg: '#eff6ff', category: 'student', tags: ['internship', 'graduate', 'student jobs'], trending: true, href: '/career', usageCount: 74000 },
+  { id: 'career-opportunity-hub', name: 'Career Opportunity Hub', description: 'Find internships, learnerships, graduate programs, and remote junior roles', icon: FaBriefcase, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'career', tags: ['career', 'internship', 'learnership', 'jobs'], new: true, featured: true, href: '/career', usageCount: 82000 },
+  { id: 'internship-finder', name: 'Internship Finder', description: 'Discover student internships, entry-level jobs, and graduate opportunities', icon: FaSearch, iconColor: '#0EA5E9', iconBg: '#eff6ff', category: 'career', tags: ['internship', 'graduate', 'student jobs'], trending: true, href: '/career', usageCount: 74000 },
 
   // DOCUMENT TOOLS
   { id: 'pdf-summarizer', name: 'PDF Summarizer', description: 'Summarize any PDF instantly', icon: FaFilePdf, iconColor: '#E5322D', iconBg: '#fff1f1', category: 'document', tags: ['pdf', 'summary', 'ai'], trending: true, featured: true, href: '/tools/pdf/summarize', usageCount: 145000 },
@@ -232,7 +240,7 @@ export const tools: Tool[] = [
   { id: 'compress-pdfs', name: 'Compress PDFs', description: 'Reduce PDF file size', icon: FaFileArchive, iconColor: '#7C3AED', iconBg: '#f5f3ff', category: 'document', tags: ['pdf', 'compress', 'reduce'], href: '/tools/pdf', usageCount: 156000 },
   { id: 'ocr-extractor', name: 'OCR Text Extractor', description: 'Extract text from images', icon: FaFileImage, iconColor: '#0EA5E9', iconBg: '#eff6ff', category: 'document', tags: ['ocr', 'text', 'extract'], new: true, href: '/tools/document/ocr', usageCount: 67000 },
   { id: 'resume-optimizer', name: 'Resume Optimizer', description: 'Optimize your resume for ATS', icon: FaFileAlt, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'document', tags: ['resume', 'ats', 'optimize'], href: '/tools/document/resume', usageCount: 89000 },
-  { id: 'ai-resume-feedback', name: 'AI Resume Feedback', description: 'Upload your CV for ATS, formatting, and keyword improvements', icon: FaAward, iconColor: '#D97706', iconBg: '#fffbeb', category: 'document', tags: ['cv', 'resume', 'ats', 'career'], new: true, href: '/career', usageCount: 62000 },
+  { id: 'ai-resume-feedback', name: 'AI Resume Feedback', description: 'Upload your CV for ATS, formatting, and keyword improvements', icon: FaAward, iconColor: '#D97706', iconBg: '#fffbeb', category: 'career', tags: ['cv', 'resume', 'ats', 'career'], new: true, href: '/career', usageCount: 62000 },
   { id: 'contract-simplifier', name: 'Contract Simplifier', description: 'Understand contracts easily', icon: FaFileContract, iconColor: '#111827', iconBg: '#f3f4f6', category: 'document', tags: ['contract', 'legal', 'simplify'], href: '/tools/document/contract', usageCount: 45000 },
   { id: 'terms-simplifier', name: 'T&C Simplifier', description: 'Decode terms and conditions', icon: FaFileSignature, iconColor: '#111827', iconBg: '#f3f4f6', category: 'document', tags: ['terms', 'legal', 'simplify'], href: '/tools/document/terms', usageCount: 38000 },
   { id: 'invoice-generator', name: 'Invoice Generator', description: 'Create professional invoices', icon: FaFileInvoice, iconColor: '#16A34A', iconBg: '#f0fdf4', category: 'document', tags: ['invoice', 'business', 'generate'], href: '/tools/document/invoice', usageCount: 76000 },
@@ -292,7 +300,7 @@ export const tools: Tool[] = [
   { id: 'biz-resume', name: 'Resume Optimizer', description: 'Optimize for applicant tracking', icon: FaAward, iconColor: '#D97706', iconBg: '#fffbeb', category: 'business', tags: ['resume', 'ats', 'job'], trending: true, featured: true, href: '/tools/business/resume', usageCount: 156000 },
   { id: 'cover-letter', name: 'Cover Letter Generator', description: 'Create compelling cover letters', icon: FaPenNib, iconColor: '#7C3AED', iconBg: '#f5f3ff', category: 'business', tags: ['cover letter', 'job', 'career'], href: '/tools/business/cover-letter', usageCount: 123000 },
   { id: 'meeting-notes', name: 'Meeting Notes Summarizer', description: 'Summarize meeting notes', icon: FaSearch, iconColor: '#0EA5E9', iconBg: '#eff6ff', category: 'business', tags: ['meeting', 'notes', 'summary'], href: '/tools/business/meeting-notes', usageCount: 89000 },
-  { id: 'career-application-tracker', name: 'Career Application Tracker', description: 'Save opportunities, track applications, and prepare interviews', icon: FaTasks, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'business', tags: ['career', 'applications', 'interview'], new: true, href: '/career', usageCount: 52000 },
+  { id: 'career-application-tracker', name: 'Career Application Tracker', description: 'Save opportunities, track applications, and prepare interviews', icon: FaTasks, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'career', tags: ['career', 'applications', 'interview'], new: true, href: '/career', usageCount: 52000 },
   { id: 'spreadsheet-formula', name: 'Spreadsheet Formula Generator', description: 'Generate Excel formulas', icon: FaTable, iconColor: '#16A34A', iconBg: '#f0fdf4', category: 'business', tags: ['spreadsheet', 'formula', 'excel'], new: true, href: '/tools/business/formula', usageCount: 67000 },
   { id: 'startup-idea', name: 'Startup Idea Generator', description: 'Generate startup ideas', icon: FaRocket, iconColor: '#DC2626', iconBg: '#fff1f1', category: 'business', tags: ['startup', 'idea', 'business'], href: '/tools/business/startup-idea', usageCount: 78000 },
   { id: 'swot-generator', name: 'SWOT Generator', description: 'Create SWOT analyses', icon: FaBullseye, iconColor: '#DB2777', iconBg: '#fdf2f8', category: 'business', tags: ['swot', 'analysis', 'strategy'], href: '/tools/business/swot', usageCount: 56000 },

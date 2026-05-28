@@ -23,6 +23,28 @@ async function askAi(tool: Tool, text: string) {
   return data.result || data.choices?.[0]?.message?.content || ''
 }
 
+const uploadEnabledToolIds = new Set([
+  'ai-resume',
+  'resume-optimizer',
+  'ai-resume-feedback',
+  'pdf-summarizer',
+  'ocr-extractor',
+  'doc-scanner',
+  'agreement-analyzer',
+  'legal-simplifier',
+  'contract-simplifier',
+  'terms-simplifier',
+  'explain-screenshot',
+  'explain-contract',
+  'explain-legal',
+  'explain-chart',
+  'explain-spreadsheet',
+])
+
+function shouldShowUpload(tool: Tool) {
+  return uploadEnabledToolIds.has(tool.id)
+}
+
 export function UtilityPurposeLayout({ tool }: { tool: Tool }) {
   const [inputA, setInputA] = useState('')
   const [inputB, setInputB] = useState('')
@@ -137,7 +159,7 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Developer Lab" eyebrow="DEV" statusTitle={tool.name} statusText="Purpose-built engineering workflow for this specific developer tool." />
       <div className="mx-auto max-w-[1400px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[1fr_1fr]">
         <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
           {tool.id === 'regex-tester' && <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regex pattern" />}
           <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="min-h-[320px]" placeholder="Input" />
           <Button onClick={() => run()}>Execute</Button>
@@ -169,7 +191,7 @@ export function CreatorPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Creator Studio" eyebrow="SOCIAL" statusTitle={`${platform} / ${tool.name}`} statusText="Social-first workflow with trend-aware generation and performance framing." />
       <div className="mx-auto max-w-[1500px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
           <select value={platform} onChange={(e) => setPlatform(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>X</option><option>LinkedIn</option></select>
           <Input value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="Audience" />
           <Button onClick={() => run()}>Generate</Button>
@@ -205,7 +227,7 @@ export function BusinessPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Business Console" eyebrow="BIZ" statusTitle={`${tool.name} / ${kpi}`} statusText="Strategic business workflow with KPI-centered recommendations and action plans." />
       <div className="mx-auto max-w-[1450px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
           <select value={kpi} onChange={(e) => setKpi(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Revenue</option><option>Conversion</option><option>CAC</option><option>Retention</option><option>Brand Reach</option></select>
           <Button onClick={() => run()}>Run Analysis</Button>
           {sa.isSouthAfrica && (
@@ -240,7 +262,7 @@ export function ExplainPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Explain Engine" eyebrow="EXPLAIN" statusTitle={`${level} mode`} statusText="Contextual explanation engine with analogy, step-by-step teaching, and follow-up guidance." />
       <div className="mx-auto max-w-[1400px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[1fr_1fr]">
         <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
           <select value={level} onChange={(e) => setLevel(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Simple</option><option>Step-by-step</option><option>Advanced</option><option>ELI5</option></select>
           <Textarea value={thing} onChange={(e) => setThing(e.target.value)} className="min-h-[220px]" placeholder="Paste the thing to explain" />
           <Button onClick={() => run()}>Explain</Button>
@@ -270,7 +292,7 @@ export function DocumentPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Document Specialist" eyebrow="DOC" statusTitle={`${tool.name} / ${mode}`} statusText="Document-specific workflow focused on legal, resume, OCR, and summary analysis." />
       <div className="mx-auto max-w-[1500px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
           <select value={mode} onChange={(e) => setMode(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Analyze</option><option>Simplify</option><option>Risk flags</option><option>Rewrite</option></select>
           <Button onClick={() => run()}>Run</Button>
         </aside>
@@ -301,7 +323,7 @@ export function AITextPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="AI Text Copilot" eyebrow="AI TEXT" statusTitle={tool.name} statusText="Purpose-tuned AI text workflow with instruction-driven transformations and iterative refinements." />
       <div className="mx-auto max-w-[1450px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
           <Input value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Instruction" />
           <Button onClick={() => run()}>Transform</Button>
           <Button variant="outline" onClick={() => run('Give 3 alternative versions')}>3 Alternatives</Button>
