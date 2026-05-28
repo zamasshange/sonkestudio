@@ -14,6 +14,7 @@ import { SocialGeneratorLayout } from './layouts/social-generator-layouts'
 import { ExplainWorkspaceLayout } from './layouts/explain-workspace-layout'
 import { BusinessNameGeneratorLayout } from './layouts/business-name-generator-layout'
 import { DocumentWorkspaceLayout } from './layouts/document-workspace-layout'
+import { DocumentSoftwareWorkspaceLayout } from './layouts/document-software-workspace-layout'
 import { PasswordWorkspaceLayout } from './layouts/password-workspace-layout'
 import { LinkShortenerLayout } from './layouts/link-shortener-layout'
 import { TempNotesLayout } from './layouts/temp-notes-layout'
@@ -112,6 +113,18 @@ export function ToolExperienceSystem({ tool }: ToolExperienceProps) {
 
   if (sonkeDocumentToolIds.has(tool.id)) {
     return <DocumentAiWorkspaceLayout tool={tool} />
+  }
+
+  const documentSoftwareIds = new Set([
+    'pdf-to-word',
+    'word-to-pdf',
+    'merge-pdfs',
+    'split-pdfs',
+    'compress-pdfs',
+    'ocr-extractor',
+  ])
+  if (documentSoftwareIds.has(tool.id)) {
+    return <DocumentSoftwareWorkspaceLayout tool={tool} />
   }
 
   if (tool.id === 'json-formatter') {

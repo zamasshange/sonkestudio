@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -217,6 +217,10 @@ export function CareerHub({
   const [aiLoading, setAiLoading] = useState(false)
   const [resumeFiles, setResumeFiles] = useState<File[]>([])
   const [resumeScore, setResumeScore] = useState(76)
+  const [refreshTick, setRefreshTick] = useState(0)
+  const [recentKeys, setRecentKeys] = useState<string[]>([])
+  const recentKeysRef = useRef<string[]>([])
+  const refreshTickRef = useRef(0)
 
   useEffect(() => {
     const tool = new URLSearchParams(window.location.search).get('tool') as CareerMode | null
@@ -226,15 +230,26 @@ export function CareerHub({
   useEffect(() => {
     const savedRaw = window.localStorage.getItem(storageKey('saved'))
     if (savedRaw) setSaved(JSON.parse(savedRaw))
+    const recentRaw = window.localStorage.getItem(storageKey('recent-opportunities'))
+    if (recentRaw) {
+      const parsed = JSON.parse(recentRaw)
+      setRecentKeys(parsed)
+      recentKeysRef.current = parsed
+    }
   }, [])
 
   useEffect(() => {
     window.localStorage.setItem(storageKey('saved'), JSON.stringify(saved))
   }, [saved])
 
+  useEffect(() => {
+    recentKeysRef.current = recentKeys
+    window.localStorage.setItem(storageKey('recent-opportunities'), JSON.stringify(recentKeys.slice(0, 24)))
+  }, [recentKeys])
+
   const search = async (
     nextQuery = query,
-    options: { page?: number; append?: boolean; location?: string; remoteOnly?: boolean; company?: string; seed?: number } = {},
+    options: { page?: number; append?: boolean; location?: string; remoteOnly?: boolean; company?: string; seed?: number; recent?: string[] } = {},
   ) => {
     const targetPage = options.page || 1
     const append = Boolean(options.append)
@@ -248,13 +263,24 @@ export function CareerHub({
         remoteOnly: String(options.remoteOnly ?? remoteOnly),
         page: String(targetPage),
         perPage: '20',
-        seed: String(options.seed ?? Math.floor(Date.now() / 300000)),
+        seed: String(options.seed ?? Math.floor(Date.now() / 300000) + refreshTickRef.current),
       })
+      const recent = options.recent ?? recentKeysRef.current
+      if (recent.length) params.set('recent', recent.slice(0, 18).join(','))
       const nextCompany = options.company ?? company
       if (nextCompany) params.set('company', nextCompany)
       const response = await fetch(`/api/career/opportunities?${params}`, { cache: 'no-store' })
       const data: CareerApiResponse = await response.json()
       const nextOpportunities = data.opportunities || []
+      if (nextOpportunities.length) {
+        setRecentKeys((current) => {
+          const rotated = [
+            ...nextOpportunities.slice(0, 8).map((item) => `${item.provider}-${item.id}`),
+            ...current,
+          ].filter((value, index, array) => array.indexOf(value) === index)
+          return rotated.slice(0, 24)
+        })
+      }
       setOpportunities((current) => {
         if (!append) return nextOpportunities
         const seen = new Set(current.map((item) => `${item.provider}-${item.id}`))
@@ -275,11 +301,13 @@ export function CareerHub({
   useEffect(() => {
     search()
     const timer = window.setInterval(() => {
-      search(query, { page: 1, seed: Math.floor(Date.now() / 60000) })
+      refreshTickRef.current += 1
+      setRefreshTick(refreshTickRef.current)
+      search(query, { page: 1, seed: Math.floor(Date.now() / 60000) + refreshTickRef.current, recent: recentKeysRef.current })
     }, 120000)
     return () => window.clearInterval(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [query, location, country, remoteOnly, company])
 
   const internships = useMemo(
     () => opportunities.filter((item) => /intern|learnership|graduate|student|bursary/i.test(`${item.title} ${item.description} ${item.category}`)),

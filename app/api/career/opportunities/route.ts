@@ -27,6 +27,13 @@ function parseSearch(request: NextRequest): CareerSearchParams {
   }
 }
 
+function parseRecent(request: NextRequest) {
+  return (request.nextUrl.searchParams.get('recent') || '')
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+}
+
 function opportunityKey(item: CareerOpportunity) {
   return `${item.title}-${item.company}-${item.location}`.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 }
@@ -50,16 +57,26 @@ function seededNoise(key: string, seed = 1) {
   return hash / 9973
 }
 
-function mergeOpportunities(live: CareerOpportunity[], seed = 1) {
+function mergeOpportunities(live: CareerOpportunity[], seed = 1, recent: string[] = []) {
   const seen = new Set<string>()
-  return live
+  const recentSet = new Set(recent)
+  const rotated = live
     .filter((item) => {
       const key = opportunityKey(item)
       if (seen.has(key)) return false
       seen.add(key)
       return true
     })
-    .sort((a, b) => (scoreOpportunity(b) + seededNoise(opportunityKey(b), seed)) - (scoreOpportunity(a) + seededNoise(opportunityKey(a), seed)))
+    .sort((a, b) => {
+      const aKey = opportunityKey(a)
+      const bKey = opportunityKey(b)
+      const aScore = scoreOpportunity(a) + seededNoise(aKey, seed) - (recentSet.has(aKey) ? 25 : 0)
+      const bScore = scoreOpportunity(b) + seededNoise(bKey, seed) - (recentSet.has(bKey) ? 25 : 0)
+      return bScore - aScore
+    })
+
+  const refreshed = rotated.filter((item) => !recentSet.has(opportunityKey(item)))
+  return refreshed.length >= Math.min(8, live.length) ? refreshed : rotated
 }
 
 async function loadProvider(
@@ -80,6 +97,7 @@ async function loadProvider(
 
 export async function GET(request: NextRequest) {
   const params = parseSearch(request)
+  const recent = parseRecent(request)
   const [jsearchResult, adzunaResult] = await Promise.all([
     loadProvider('jsearch', () => fetchJSearchOpportunities(params)),
     loadProvider('adzuna', () => fetchAdzunaOpportunities(params)),
@@ -89,7 +107,7 @@ export async function GET(request: NextRequest) {
     adzuna: adzunaResult.opportunities.length,
   }
   const live = [...jsearchResult.opportunities, ...adzunaResult.opportunities]
-  const opportunities = mergeOpportunities(live, params.seed)
+  const opportunities = mergeOpportunities(live, params.seed, recent)
   const locationCounts = opportunities.reduce<Record<string, number>>((acc, item) => {
     const location = item.remote ? 'Remote' : (item.location.split(',')[0] || 'South Africa')
     acc[location] = (acc[location] || 0) + 1

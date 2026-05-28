@@ -3,7 +3,7 @@
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, BriefcaseBusiness, Check, Code2, FileText, GraduationCap, MapPin, PenTool, Search, Sparkles, Target, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { sortToolsForUser } from '@/lib/filter-tools'
@@ -876,16 +876,39 @@ const fallbackCareerSignals = [
 export function CareersSection() {
   const [careerSignals, setCareerSignals] = useState(fallbackCareerSignals)
   const [careerLive, setCareerLive] = useState(false)
+  const recentSignalsRef = useRef<string[]>([])
+  const refreshTickRef = useRef(0)
 
   useEffect(() => {
+    const storedRecent = window.localStorage.getItem('sonke-career-home-recent')
+    if (storedRecent) {
+      try {
+        recentSignalsRef.current = JSON.parse(storedRecent)
+      } catch {
+        recentSignalsRef.current = []
+      }
+    }
+
     let active = true
     const loadSignals = async () => {
       try {
-        const response = await fetch('/api/career/opportunities?query=internship%20graduate%20learnership%20remote%20South%20Africa&location=South%20Africa&country=za&perPage=12', { cache: 'no-store' })
+        refreshTickRef.current += 1
+        const params = new URLSearchParams({
+          query: 'internship graduate learnership remote South Africa',
+          location: 'South Africa',
+          country: 'za',
+          perPage: '12',
+          seed: String(Math.floor(Date.now() / 300000) + refreshTickRef.current),
+        })
+        if (recentSignalsRef.current.length) {
+          params.set('recent', recentSignalsRef.current.slice(0, 12).join(','))
+        }
+        const response = await fetch(`/api/career/opportunities?${params}`, { cache: 'no-store' })
         const data = await response.json()
         const opportunities = Array.isArray(data.opportunities) ? data.opportunities : []
         if (!active || !opportunities.length) return
-        setCareerSignals(opportunities.slice(0, 3).map((item: any, index: number) => ({
+        const top = opportunities.slice(0, 3)
+        setCareerSignals(top.map((item: any, index: number) => ({
           title: item.title || 'Career opportunity',
           company: item.company || 'Hiring company',
           place: item.location || 'South Africa',
@@ -893,6 +916,11 @@ export function CareersSection() {
           provider: item.source || item.provider || 'Live',
         })))
         setCareerLive(data.source === 'live')
+        recentSignalsRef.current = [
+          ...top.map((item: any) => `${item.provider || 'live'}-${item.id || item.title}`.toLowerCase()),
+          ...recentSignalsRef.current,
+        ].filter((value, index, array) => array.indexOf(value) === index).slice(0, 16)
+        window.localStorage.setItem('sonke-career-home-recent', JSON.stringify(recentSignalsRef.current))
       } catch {
         setCareerLive(false)
       }

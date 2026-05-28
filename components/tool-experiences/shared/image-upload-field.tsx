@@ -1,9 +1,9 @@
 "use client"
 
 import { ChangeEvent, useState } from 'react'
-import Image from 'next/image'
 import { FileUp, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SafeImage } from '@/components/safe-image'
 import { uploadToCloudinary } from '@/lib/upload-client'
 
 export type UploadedImageAsset = {
@@ -52,7 +52,13 @@ export function ImageUploadField({ onUploaded, onClear, accept = 'image/*', fold
       {preview && (
         <div className="flex items-center gap-3 rounded-md border border-border bg-background p-2">
           <div className="relative h-14 w-20 overflow-hidden rounded">
-            <Image src={preview.url} alt={preview.name} fill className="object-cover" />
+            <SafeImage
+              src={preview.url}
+              alt={preview.name}
+              className="h-full w-full"
+              imgClassName="object-cover"
+              fallbackContent={<span className="flex h-full w-full items-center justify-center bg-muted text-[10px] text-muted-foreground">Preview</span>}
+            />
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{preview.name}</p>

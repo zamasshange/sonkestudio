@@ -283,6 +283,7 @@ export function DocumentPurposeLayout({ tool }: { tool: Tool }) {
   const [mode, setMode] = useState('Analyze')
   const [output, setOutput] = useState('')
   const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const fileCount = assets.length
   const run = async (followUp?: string) => {
     setOutput(await askAi(tool, `Document task for ${tool.name}. Mode:${mode}\n${followUp ? `Follow-up:${followUp}\n` : ''}${sa.isSouthAfrica ? 'Use SA-ready conventions where relevant (ZAR, VAT, local legal/business wording).' : ''}\n${doc}\n${describeAssets(assets)}`))
   }
@@ -290,17 +291,93 @@ export function DocumentPurposeLayout({ tool }: { tool: Tool }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <ToolWorkspaceHero tool={tool} label="Document Specialist" eyebrow="DOC" statusTitle={`${tool.name} / ${mode}`} statusText="Document-specific workflow focused on legal, resume, OCR, and summary analysis." />
-      <div className="mx-auto max-w-[1500px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
-          <select value={mode} onChange={(e) => setMode(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Analyze</option><option>Simplify</option><option>Risk flags</option><option>Rewrite</option></select>
-          <Button onClick={() => run()}>Run</Button>
-        </aside>
-        <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          <Textarea value={doc} onChange={(e) => setDoc(e.target.value)} className="min-h-[180px]" placeholder="Paste document content" />
-          <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px]" placeholder="Document output" />
-          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
-        </main>
+      <div className="mx-auto max-w-[1600px] px-5 pb-10 sm:px-8">
+        <div className="mb-4 grid gap-3 md:grid-cols-4">
+          {[
+            { label: 'Workspace', value: tool.name },
+            { label: 'Mode', value: mode },
+            { label: 'Files', value: String(fileCount).padStart(2, '0') },
+            { label: 'Region', value: sa.isSouthAfrica ? 'SA aware' : 'Global' },
+          ].map((item) => (
+            <div key={item.label} className="rounded-2xl border border-border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{item.label}</p>
+              <p className="mt-2 text-lg font-semibold text-foreground">{item.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)_320px]">
+          <aside className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">File queue</p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">Upload or attach context</h3>
+            </div>
+            {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Workflow stage</p>
+              <select value={mode} onChange={(e) => setMode(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-border bg-white px-3 text-sm">
+                <option>Analyze</option>
+                <option>Simplify</option>
+                <option>Risk flags</option>
+                <option>Rewrite</option>
+              </select>
+            </div>
+            <Button onClick={() => run()} className="w-full">Run document workflow</Button>
+            <div className="rounded-xl border border-border bg-background p-3 text-xs text-muted-foreground">
+              This workspace keeps document logic in one place: upload queue, structured extraction, and follow-up review.
+            </div>
+          </aside>
+
+          <main className="space-y-4">
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Document canvas</p>
+                  <h3 className="mt-1 text-lg font-semibold text-foreground">Paste the text or instructions</h3>
+                </div>
+                <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">{tool.category}</span>
+              </div>
+              <Textarea value={doc} onChange={(e) => setDoc(e.target.value)} className="min-h-[250px] rounded-xl border-border bg-background/60" placeholder="Paste document content, clause text, scanned copy notes, or OCR output." />
+              <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <span className="rounded-full border border-border px-2 py-1">Side-by-side preview</span>
+                <span className="rounded-full border border-border px-2 py-1">Page and clause awareness</span>
+                <span className="rounded-full border border-border px-2 py-1">Copy-ready result</span>
+              </div>
+            </section>
+
+            <section className="grid gap-4 lg:grid-cols-[1fr_360px]">
+              <div className="rounded-2xl border border-border bg-white p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-foreground">Analysis output</p>
+                  <Button variant="outline" onClick={() => run('Refine the output with clearer headings and a cleaner document focus.')}>Refine</Button>
+                </div>
+                <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px] rounded-xl border-border bg-background/60 font-mono text-xs" placeholder="Document output appears here." />
+              </div>
+              <div className="rounded-2xl border border-border bg-white p-4">
+                <p className="text-sm font-semibold text-foreground">Document signals</p>
+                <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  <p>• Format scan and extraction flow</p>
+                  <p>• Risk flag and rewrite assistance</p>
+                  <p>• Summary, simplification, or OCR-style output</p>
+                  <p>• Short follow-up prompts for the next pass</p>
+                </div>
+                <div className="mt-4 rounded-xl border border-border bg-background p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Recent context</p>
+                  <div className="mt-2 space-y-2 text-xs text-muted-foreground">
+                    {assets.length ? assets.map((asset) => (
+                      <div key={`${asset.name}-${asset.url}`} className="rounded-md border border-border bg-white p-2">
+                        <p className="truncate font-medium text-foreground">{asset.name}</p>
+                        <p className="truncate">{asset.url}</p>
+                      </div>
+                    )) : <p>No attachments yet.</p>}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
+          </main>
+        </div>
       </div>
     </motion.div>
   )
@@ -314,6 +391,7 @@ export function AITextPurposeLayout({ tool }: { tool: Tool }) {
   const [instruction, setInstruction] = useState('Improve clarity')
   const [output, setOutput] = useState('')
   const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const [draftMode, setDraftMode] = useState('Conversation')
   const run = async (nextInstruction = instruction) => {
     setOutput(await askAi(tool, `Tool:${tool.name}\nInstruction:${nextInstruction}\nInput:${input}\n${describeAssets(assets)}`))
   }
@@ -321,30 +399,118 @@ export function AITextPurposeLayout({ tool }: { tool: Tool }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <ToolWorkspaceHero tool={tool} label="AI Text Copilot" eyebrow="AI TEXT" statusTitle={tool.name} statusText="Purpose-tuned AI text workflow with instruction-driven transformations and iterative refinements." />
-      <div className="mx-auto max-w-[1450px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
-          <Input value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Instruction" />
-          <Button onClick={() => run()}>Transform</Button>
-          <Button variant="outline" onClick={() => run('Give 3 alternative versions')}>3 Alternatives</Button>
-          {sa.isSouthAfrica && (
-            <select value={instruction} onChange={(e) => setInstruction(e.target.value)} className="h-9 w-full rounded-sm border border-border bg-background px-2 text-sm">
-              {sa.toneModes.map((item) => <option key={item}>{item}</option>)}
-            </select>
-          )}
-          <div className="grid gap-1">
-            {localizedPrompts.slice(0, 4).map((item) => (
-              <button key={item} onClick={() => setInstruction(item)} className="rounded-md border border-border bg-background px-2 py-1 text-left text-xs text-muted-foreground hover:text-foreground">
-                {item}
-              </button>
-            ))}
-          </div>
-        </aside>
-        <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="min-h-[180px]" placeholder="Text input" />
-          <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px]" placeholder="AI output" />
-          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
-        </main>
+      <div className="mx-auto max-w-[1600px] px-5 pb-10 sm:px-8">
+        <div className="mb-4 grid gap-3 md:grid-cols-4">
+          {[
+            { label: 'Mode', value: draftMode },
+            { label: 'Instruction', value: instruction },
+            { label: 'Assets', value: String(assets.length).padStart(2, '0') },
+            { label: 'Locale', value: sa.isSouthAfrica ? 'South Africa aware' : 'Global' },
+          ].map((item) => (
+            <div key={item.label} className="rounded-2xl border border-border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{item.label}</p>
+              <p className="mt-2 text-lg font-semibold text-foreground">{item.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+          <aside className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Copilot controls</p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">Shape the rewrite path</h3>
+            </div>
+            {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
+            <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+              <Input value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Instruction" />
+              <select value={draftMode} onChange={(e) => setDraftMode(e.target.value)} className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm">
+                <option>Conversation</option>
+                <option>Rewrite</option>
+                <option>Shorten</option>
+                <option>Expand</option>
+                <option>Polish</option>
+              </select>
+              {sa.isSouthAfrica && (
+                <select value={instruction} onChange={(e) => setInstruction(e.target.value)} className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm">
+                  {sa.toneModes.map((item) => <option key={item}>{item}</option>)}
+                </select>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Button onClick={() => run()} className="w-full">Transform</Button>
+              <Button variant="outline" onClick={() => run('Give 3 alternative versions')} className="w-full">3 alternatives</Button>
+            </div>
+            <div className="grid gap-1">
+              {localizedPrompts.slice(0, 4).map((item) => (
+                <button key={item} onClick={() => setInstruction(item)} className="rounded-md border border-border bg-background px-2 py-2 text-left text-xs text-muted-foreground hover:text-foreground">
+                  {item}
+                </button>
+              ))}
+            </div>
+          </aside>
+
+          <main className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+              <section className="rounded-2xl border border-border bg-background p-4">
+                <p className="text-sm font-semibold text-foreground">Prompt canvas</p>
+                <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="mt-3 min-h-[260px] rounded-xl border-border bg-white" placeholder="Paste the text you want to transform or refine." />
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                  <span className="rounded-full border border-border px-2 py-1">Live preview</span>
+                  <span className="rounded-full border border-border px-2 py-1">Iterative generation</span>
+                  <span className="rounded-full border border-border px-2 py-1">Conversation memory</span>
+                </div>
+              </section>
+              <section className="rounded-2xl border border-border bg-white p-4">
+                <p className="text-sm font-semibold text-foreground">Suggestion lane</p>
+                <div className="mt-3 space-y-2">
+                  {[
+                    'Make it more concise',
+                    'Sound more human',
+                    'Give me a formal version',
+                    'Add one strong opening line',
+                  ].map((item) => (
+                    <button key={item} onClick={() => setInstruction(item)} className="block w-full rounded-lg border border-border bg-background px-3 py-2 text-left text-sm text-muted-foreground hover:text-foreground">
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <section className="rounded-2xl border border-border bg-background p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-foreground">AI output</p>
+                <Button variant="outline" onClick={() => run('Give 3 alternative versions with distinct tones.')}>Refresh variants</Button>
+              </div>
+              <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="mt-3 min-h-[320px] rounded-xl border-border bg-white font-mono text-xs" placeholder="AI output appears here." />
+            </section>
+
+            <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
+          </main>
+
+          <aside className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Guidance</p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">Refinement stack</h3>
+            </div>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>• Conversational instructions</p>
+              <p>• Immediate follow-up rewrites</p>
+              <p>• Platform, audience, and tone-aware suggestions</p>
+              <p>• Multiple alternatives on demand</p>
+            </div>
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Prompt shortcuts</p>
+              <div className="mt-2 grid gap-2">
+                {localizedPrompts.slice(0, 5).map((item) => (
+                  <button key={item} onClick={() => setInstruction(item)} className="rounded-md border border-border bg-white px-3 py-2 text-left text-xs text-muted-foreground hover:text-foreground">
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </motion.div>
   )
