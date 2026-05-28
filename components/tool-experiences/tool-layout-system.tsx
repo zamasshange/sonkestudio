@@ -225,7 +225,7 @@ export function ToolExperienceSystem({ tool }: ToolExperienceProps) {
     'explain-screenshot', 'explain-error', 'explain-code', 'explain-contract', 'explain-legal',
     'explain-chart', 'explain-homework', 'explain-email', 'explain-spreadsheet', 'explain-api-error',
   ])
-  if (explainPurposeIds.has(tool.id)) return <ExplainPurposeLayout tool={tool} />
+  if (explainPurposeIds.has(tool.id)) return <ExplainWorkspaceLayout tool={tool} />
 
   const aiTextPurposeIds = new Set([
     'ai-humanizer', 'ai-paraphraser', 'ai-rewriter', 'ai-grammar', 'ai-tone', 'ai-hook', 'ai-prompt',

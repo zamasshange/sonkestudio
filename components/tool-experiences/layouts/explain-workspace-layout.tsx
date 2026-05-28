@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle2, Copy, FileUp, Loader2, Sparkles } from 'lucide-react'
+import { Bot, CheckCircle2, ChevronDown, Copy, FileUp, Loader2, Sparkles } from 'lucide-react'
 import { Tool } from '@/lib/tools-data'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -146,6 +146,7 @@ export function ExplainWorkspaceLayout({ tool }: { tool: Tool }) {
   const [fileName, setFileName] = useState('')
   const [uploadedImage, setUploadedImage] = useState<UploadedImageAsset | null>(null)
   const [output, setOutput] = useState('')
+  const [conversation, setConversation] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [context, setContext] = useState<Record<string, string>>(() =>
@@ -163,11 +164,11 @@ export function ExplainWorkspaceLayout({ tool }: { tool: Tool }) {
     if (file) setFileName(file.name)
   }
 
-  const explain = async () => {
+  const explain = async (followUp?: string) => {
     if (!input.trim() && !fileName) return
     setLoading(true)
     setError('')
-    setOutput('')
+    if (!followUp) setOutput('')
 
     const prompt = `Tool: ${tool.name}
 Mode: ${mode}
@@ -175,6 +176,10 @@ Depth: ${depth}
 Context: ${contextSummary || 'General'}
 Uploaded file: ${fileName || 'none'}
 Uploaded image URL: ${uploadedImage?.url || 'none'}
+Previous explanation:
+${output || 'none'}
+Follow-up request:
+${followUp || 'none'}
 
 User material:
 ${input || 'The user uploaded a file and needs explanation based on the selected context.'}
@@ -199,6 +204,10 @@ Make it specific, actionable, and avoid generic filler.`
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Explanation failed.')
       setOutput(data.result || data.choices?.[0]?.message?.content || '')
+      setConversation((current) => [
+        `${followUp ? `Follow-up: ${followUp}` : `Explained in ${mode} mode`} / ${new Date().toLocaleTimeString()}`,
+        ...current,
+      ].slice(0, 6))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Explanation failed.')
     } finally {
@@ -298,7 +307,7 @@ Make it specific, actionable, and avoid generic filler.`
                     disabled={loading}
                     className="rounded-none"
                   />
-                  <Button onClick={explain} disabled={loading || (!input.trim() && !fileName)} className="rounded-none bg-primary">
+                  <Button onClick={() => explain()} disabled={loading || (!input.trim() && !fileName)} className="rounded-none bg-primary">
                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                     Explain
                   </Button>
@@ -321,22 +330,50 @@ Make it specific, actionable, and avoid generic filler.`
               <div className="mt-5 min-h-[260px] rounded-none border border-border bg-muted p-5 text-sm leading-7 whitespace-pre-wrap">
                 {output || 'Choose a mode, add context, and SONKE will build a focused explanation here.'}
               </div>
+              <div className="mt-5 rounded-none border border-border bg-background p-4">
+                <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Bot className="h-4 w-4 text-primary" />
+                  Keep learning
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {['Explain simpler', 'Give real-life example', 'Explain for beginners', 'Summarize this', 'Go deeper', 'Show visual breakdown'].map((action) => (
+                    <Button key={action} variant="outline" onClick={() => explain(action)} disabled={loading || !output} className="h-auto min-h-9 rounded-none whitespace-normal px-3 py-2 text-xs">
+                      <Sparkles className="mr-2 h-3.5 w-3.5" />
+                      {action}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </section>
           </main>
 
-          <aside className="rounded-none border border-border bg-white p-6 h-fit">
+          <aside className="space-y-6">
+          <section className="rounded-none border border-border bg-white p-6 h-fit">
             <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">Output plan</p>
             <div className="mt-5 space-y-3">
               {config.outputSections.map((section) => (
-                <div key={section} className="flex items-start gap-3 rounded-none border border-border bg-background p-3 text-sm">
+                <details key={section} className="group rounded-none border border-border bg-background p-3 text-sm" open>
+                  <summary className="flex cursor-pointer list-none items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
                   <span>{section}</span>
-                </div>
+                  <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-3 pl-7 text-xs leading-5 text-muted-foreground">SONKE structures this part as a teachable step, then keeps it available for follow-up refinement.</p>
+                </details>
               ))}
             </div>
             <div className="mt-6 rounded-none border border-border bg-background p-4 text-sm text-muted-foreground">
               {contextSummary || 'General explanation'} / {depth}
             </div>
+          </section>
+          <section className="rounded-none border border-border bg-white p-6">
+            <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">Learning thread</p>
+            <div className="mt-5 space-y-2 text-sm text-muted-foreground">
+              {conversation.length ? conversation.map((item) => (
+                <div key={item} className="rounded-none border border-border bg-background p-3">{item}</div>
+              )) : <p>No follow-ups yet. Ask SONKE to simplify, go deeper, or show examples after the first explanation.</p>}
+            </div>
+          </section>
           </aside>
         </div>
       </div>

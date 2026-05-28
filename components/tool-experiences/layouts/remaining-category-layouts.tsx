@@ -7,6 +7,22 @@ import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  BarChart3,
+  Bot,
+  BriefcaseBusiness,
+  CheckCircle2,
+  ChevronDown,
+  Code2,
+  Copy,
+  Gauge,
+  GitCompareArrows,
+  LineChart,
+  Palette,
+  Play,
+  Sparkles,
+  Terminal,
+} from 'lucide-react'
 import { useLocation } from '@/hooks/use-location'
 import { getLocalizedPromptSuggestions } from '@/lib/smart-recommendations'
 import { getSAContextSignal } from '@/lib/sa-intelligence'
@@ -43,6 +59,172 @@ const uploadEnabledToolIds = new Set([
 
 function shouldShowUpload(tool: Tool) {
   return uploadEnabledToolIds.has(tool.id)
+}
+
+function getDeveloperWorkbenchConfig(toolId: string) {
+  const configs: Record<string, {
+    badge: string
+    statusTitle: string
+    statusText: string
+    panelTitle: string
+    editorTitle: string
+    placeholder: string
+    outputPlaceholder: string
+    helper: string
+    modes: string[]
+    signals: string[]
+  }> = {
+    'regex-tester': {
+      badge: 'REGEX',
+      statusTitle: 'Pattern debugger',
+      statusText: 'Pattern, sample text, match diagnostics, and follow-up refinement in one focused regex bench.',
+      panelTitle: 'Match strategy',
+      editorTitle: 'Sample text',
+      placeholder: 'Paste the text you want to test against the regex pattern...',
+      outputPlaceholder: 'Matches, groups, and pattern issues appear here.',
+      helper: 'Use global matching by default. Add a pattern in the sidebar, then inspect matched tokens and edge cases.',
+      modes: ['Inspect', 'Find matches', 'Explain pattern', 'Generate test cases'],
+      signals: ['Global match scan', 'Edge-case review', 'Copy-ready pattern'],
+    },
+    'sql-formatter': {
+      badge: 'SQL',
+      statusTitle: 'Query workbench',
+      statusText: 'Format, explain, and tune SQL with a database-oriented editor and diagnostics panel.',
+      panelTitle: 'Query task',
+      editorTitle: 'SQL editor',
+      placeholder: 'SELECT customers.id, SUM(total) FROM orders JOIN customers ON ...',
+      outputPlaceholder: 'Formatted SQL, query explanation, risks, or optimization notes appear here.',
+      helper: 'Designed for query cleanup, readability, joins, indexes, and production review.',
+      modes: ['Format', 'Explain query', 'Optimize', 'Find risks'],
+      signals: ['Clause structure', 'Join review', 'Index suggestions'],
+    },
+    'jwt-decoder': {
+      badge: 'JWT',
+      statusTitle: 'Token inspector',
+      statusText: 'Decode headers and payloads with security-focused validation cues.',
+      panelTitle: 'Token review',
+      editorTitle: 'JWT input',
+      placeholder: 'Paste a JWT token...',
+      outputPlaceholder: 'Decoded header and payload appear here.',
+      helper: 'This decodes client-side only. Treat real tokens as sensitive and avoid sharing secrets.',
+      modes: ['Decode', 'Inspect claims', 'Security review', 'Explain token'],
+      signals: ['Header payload split', 'Claim inspection', 'Expiry awareness'],
+    },
+    'markdown-preview': {
+      badge: 'MD',
+      statusTitle: 'Markdown preview',
+      statusText: 'Draft Markdown with responsive preview modes and AI-assisted structure cleanup.',
+      panelTitle: 'Preview mode',
+      editorTitle: 'Markdown editor',
+      placeholder: '# Release notes\n\n- Added...\n- Fixed...',
+      outputPlaceholder: 'Preview notes, rewritten Markdown, or structural suggestions appear here.',
+      helper: 'Use the viewport selector to think through how docs read across surfaces.',
+      modes: ['Preview', 'Clean structure', 'Summarize', 'Make docs-ready'],
+      signals: ['Heading hierarchy', 'Link readiness', 'Responsive preview'],
+    },
+    'color-palette': {
+      badge: 'COLOR',
+      statusTitle: 'Design token lab',
+      statusText: 'Generate palettes as implementation-ready tokens with accessibility guidance.',
+      panelTitle: 'Palette goal',
+      editorTitle: 'Brand or UI context',
+      placeholder: 'Describe the product, brand mood, accessibility needs, and colors to avoid...',
+      outputPlaceholder: 'Palette tokens, contrast notes, and usage guidance appear here.',
+      helper: 'Great palettes include roles: background, surface, primary, accent, success, warning, and danger.',
+      modes: ['Generate palette', 'Check contrast', 'Create tokens', 'Refine mood'],
+      signals: ['Token roles', 'Contrast notes', 'Usage mapping'],
+    },
+    'code-diff': {
+      badge: 'DIFF',
+      statusTitle: 'Change review',
+      statusText: 'Compare code changes with reviewer-style summaries and regression cues.',
+      panelTitle: 'Review task',
+      editorTitle: 'Before / after code',
+      placeholder: 'Paste before and after code separated by --- or describe the change...',
+      outputPlaceholder: 'Diff summary, risks, and review notes appear here.',
+      helper: 'Paste both versions to get behavior-focused review notes instead of generic comments.',
+      modes: ['Review diff', 'Find regression', 'Summarize changes', 'Suggest tests'],
+      signals: ['Behavior changes', 'Risk scan', 'Test suggestions'],
+    },
+  }
+
+  return configs[toolId] || {
+    badge: 'DEV',
+    statusTitle: 'Code workspace',
+    statusText: 'A technical editor-first workflow with execution, diagnostics, and AI follow-up actions.',
+    panelTitle: 'Developer task',
+    editorTitle: 'Code editor',
+    placeholder: 'Paste code, configuration, logs, CSS, HTML, curl, or technical input...',
+    outputPlaceholder: 'Formatted output, preview notes, generated command, or diagnostics appear here.',
+    helper: 'This workspace is tuned for developer ergonomics: editor first, diagnostics next, follow-up actions always available.',
+    modes: ['Inspect', 'Format', 'Debug', 'Generate'],
+    signals: ['Syntax-aware pass', 'Copy-ready output', 'Follow-up actions'],
+  }
+}
+
+function getBusinessWorkbenchConfig(toolId: string) {
+  const defaults = {
+    badge: 'BIZ',
+    statusTitle: 'Strategy dashboard',
+    statusText: 'A management-style workspace with KPI controls, projections, workflow lanes, and executive output.',
+    panelTitle: 'Strategy controls',
+    briefTitle: 'Market context, constraints, and goals',
+    placeholder: 'Describe the business, market, audience, pricing, current traction, constraints, and the decision you need to make...',
+    outputBrief: 'Return an executive summary, KPI assumptions, projections, risks, and a next-action plan.',
+    stages: ['Strategy', 'Planning', 'Launch', 'Optimization'],
+    kpis: ['Revenue', 'Conversion', 'CAC', 'Retention', 'Brand Reach'],
+    projections: [
+      { label: 'Revenue confidence', value: 'Medium', score: 62 },
+      { label: 'Execution clarity', value: 'High', score: 78 },
+      { label: 'Market risk', value: 'Needs review', score: 42 },
+    ],
+    lanes: ['Inputs and assumptions', 'Analysis and projections', 'Risks and tradeoffs', 'Next operating actions'],
+  }
+
+  const configs: Record<string, Partial<typeof defaults>> = {
+    'startup-idea': {
+      badge: 'STARTUP',
+      statusTitle: 'Opportunity builder',
+      panelTitle: 'Venture controls',
+      briefTitle: 'Founder brief',
+      placeholder: 'Describe your skills, target customers, local problem, budget, unfair advantage, and markets you want to explore...',
+      outputBrief: 'Return startup ideas with customer pain, MVP, revenue model, validation tests, and launch plan.',
+      stages: ['Ideation', 'Validation', 'MVP', 'Go-to-market'],
+      kpis: ['Problem urgency', 'Revenue potential', 'Build effort', 'Market size', 'Validation speed'],
+    },
+    'swot-generator': {
+      badge: 'SWOT',
+      statusTitle: 'Decision matrix',
+      panelTitle: 'Analysis controls',
+      briefTitle: 'Company or project context',
+      placeholder: 'Describe the business, competitor pressure, market conditions, internal strengths, weak points, and strategic question...',
+      outputBrief: 'Return a SWOT matrix, strategic implications, priority moves, risk mitigations, and KPI tracking.',
+      stages: ['Discovery', 'SWOT matrix', 'Prioritization', 'Action plan'],
+      kpis: ['Competitive strength', 'Market timing', 'Operational risk', 'Brand moat', 'Execution priority'],
+    },
+    'market-research': {
+      badge: 'MARKET',
+      statusTitle: 'Research command center',
+      panelTitle: 'Research controls',
+      briefTitle: 'Market data and question',
+      placeholder: 'Paste notes, survey findings, competitor observations, customer quotes, pricing data, or the market question...',
+      outputBrief: 'Return market insights, segments, trends, buyer pains, evidence quality, and recommended next research.',
+      stages: ['Data intake', 'Segmentation', 'Insight synthesis', 'Recommendation'],
+      kpis: ['Market demand', 'Segment fit', 'Pricing signal', 'Evidence quality', 'Growth potential'],
+    },
+    'competitor-analyzer': {
+      badge: 'COMPETE',
+      statusTitle: 'Competitive intelligence',
+      panelTitle: 'Competitor controls',
+      briefTitle: 'Competitor set and positioning',
+      placeholder: 'List competitors, their offers, pricing, content, strengths, weaknesses, customer complaints, and your current positioning...',
+      outputBrief: 'Return competitor map, differentiation gaps, pricing opportunities, positioning moves, and counter-strategy.',
+      stages: ['Competitor map', 'Gap analysis', 'Positioning', 'Action plan'],
+      kpis: ['Differentiation', 'Pricing power', 'Channel strength', 'Threat level', 'Opportunity gap'],
+    },
+  }
+
+  return { ...defaults, ...(configs[toolId] || {}) }
 }
 
 export function UtilityPurposeLayout({ tool }: { tool: Tool }) {
@@ -119,6 +301,8 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
   const [pattern, setPattern] = useState('')
   const [output, setOutput] = useState('')
   const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const [activeMode, setActiveMode] = useState('Inspect')
+  const [previewMode, setPreviewMode] = useState('Desktop')
 
   const run = async (followUp?: string) => {
     const assetContext = describeAssets(assets)
@@ -154,20 +338,84 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
     setOutput(await askAi(tool, `Developer tool task for ${tool.name}:\n${followUp ? `Follow-up:${followUp}\n` : ''}${source}`))
   }
 
+  const config = getDeveloperWorkbenchConfig(tool.id)
+  const metrics = [
+    { label: 'Mode', value: activeMode },
+    { label: 'Input lines', value: String(Math.max(1, input.split('\n').length)).padStart(2, '0') },
+    { label: 'Output chars', value: String(output.length) },
+    { label: 'Workspace', value: config.badge },
+  ]
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
-      <ToolWorkspaceHero tool={tool} label="Developer Lab" eyebrow="DEV" statusTitle={tool.name} statusText="Purpose-built engineering workflow for this specific developer tool." />
-      <div className="mx-auto max-w-[1400px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[1fr_1fr]">
-        <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
-          {tool.id === 'regex-tester' && <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regex pattern" />}
-          <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="min-h-[320px]" placeholder="Input" />
-          <Button onClick={() => run()}>Execute</Button>
-        </section>
-        <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[380px] font-mono text-xs" placeholder="Output" />
-          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
-        </section>
+      <ToolWorkspaceHero tool={tool} label="Developer Lab" eyebrow={config.badge} statusTitle={config.statusTitle} statusText={config.statusText} />
+      <div className="mx-auto max-w-[1720px] px-5 pb-10 sm:px-8">
+        <div className="mb-4 grid gap-3 md:grid-cols-4">
+          {metrics.map((metric) => (
+            <div key={metric.label} className="rounded-xl border border-border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</p>
+              <p className="mt-2 truncate text-lg font-semibold text-foreground">{metric.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)_380px]">
+          <aside className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Workflow</p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">{config.panelTitle}</h3>
+            </div>
+            <div className="grid gap-2">
+              {config.modes.map((mode) => (
+                <button key={mode} onClick={() => setActiveMode(mode)} className={`rounded-lg border px-3 py-2 text-left text-sm ${activeMode === mode ? 'border-foreground bg-foreground text-background' : 'border-border bg-background text-muted-foreground hover:text-foreground'}`}>
+                  {mode}
+                </button>
+              ))}
+            </div>
+            {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
+            {tool.id === 'regex-tester' && <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regex pattern, e.g. \\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b" />}
+            <div className="rounded-xl border border-border bg-background p-3 text-xs text-muted-foreground">
+              {config.helper}
+            </div>
+            <Button onClick={() => run(activeMode)} className="w-full"><Play className="mr-2 h-4 w-4" />Run {activeMode}</Button>
+          </aside>
+
+          <main className="rounded-2xl border border-border bg-white p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold"><Terminal className="h-4 w-4 text-primary" /> {config.editorTitle}</div>
+              {(tool.id === 'markdown-preview' || tool.id === 'html-formatter') && (
+                <select value={previewMode} onChange={(e) => setPreviewMode(e.target.value)} className="h-9 rounded-md border border-border bg-background px-3 text-xs">
+                  <option>Desktop</option>
+                  <option>Tablet</option>
+                  <option>Mobile</option>
+                </select>
+              )}
+            </div>
+            <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="min-h-[540px] resize-none rounded-xl border-border bg-zinc-950 font-mono text-xs leading-5 text-zinc-100" placeholder={config.placeholder} spellCheck={false} />
+          </main>
+
+          <aside className="space-y-4">
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="flex items-center gap-2 text-sm font-semibold"><Code2 className="h-4 w-4 text-primary" />Result panel</p>
+                <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(output)} disabled={!output}><Copy className="mr-2 h-4 w-4" />Copy</Button>
+              </div>
+              <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[340px] resize-none rounded-xl border-border bg-zinc-950 font-mono text-xs leading-5 text-zinc-100" placeholder={config.outputPlaceholder} />
+            </section>
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><Gauge className="h-4 w-4 text-primary" /> Diagnostics</p>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {config.signals.map((signal) => (
+                  <div key={signal} className="flex items-center gap-2 rounded-lg border border-border bg-background p-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>{signal}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
+          </aside>
+        </div>
       </div>
     </motion.div>
   )
@@ -216,31 +464,129 @@ export function BusinessPurposeLayout({ tool }: { tool: Tool }) {
   const sa = getSAContextSignal(location)
   const [context, setContext] = useState('')
   const [kpi, setKpi] = useState('Revenue')
+  const [stage, setStage] = useState('Strategy')
+  const [budget, setBudget] = useState(25000)
+  const [timeframe, setTimeframe] = useState('90 days')
   const [output, setOutput] = useState('')
   const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const config = getBusinessWorkbenchConfig(tool.id)
   const run = async (followUp?: string) => {
-    setOutput(await askAi(tool, `Business strategy for ${tool.name}. KPI:${kpi}\n${followUp ? `Follow-up:${followUp}\n` : ''}Context:${context}\n${describeAssets(assets)}`))
+    setOutput(await askAi(tool, `Business workflow for ${tool.name}.
+Stage: ${stage}
+Primary KPI: ${kpi}
+Budget: ${sa.isSouthAfrica ? 'R' : '$'}${budget}
+Timeframe: ${timeframe}
+Required output style: ${config.outputBrief}
+${followUp ? `Follow-up:${followUp}\n` : ''}Context:${context}
+${describeAssets(assets)}`))
   }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
-      <ToolWorkspaceHero tool={tool} label="Business Console" eyebrow="BIZ" statusTitle={`${tool.name} / ${kpi}`} statusText="Strategic business workflow with KPI-centered recommendations and action plans." />
-      <div className="mx-auto max-w-[1450px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
-          {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
-          <select value={kpi} onChange={(e) => setKpi(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Revenue</option><option>Conversion</option><option>CAC</option><option>Retention</option><option>Brand Reach</option></select>
-          <Button onClick={() => run()}>Run Analysis</Button>
-          {sa.isSouthAfrica && (
-            <div className="rounded-lg border border-border bg-background p-2 text-xs text-muted-foreground">
-              SA business mode active: ZAR pricing, VAT conventions, SME/township context.
+      <ToolWorkspaceHero tool={tool} label="Business Console" eyebrow={config.badge} statusTitle={`${config.statusTitle} / ${kpi}`} statusText={config.statusText} />
+      <div className="mx-auto max-w-[1720px] px-5 pb-10 sm:px-8">
+        <div className="mb-4 grid gap-3 md:grid-cols-4">
+          {[
+            { label: 'Budget', value: `${sa.isSouthAfrica ? 'R' : '$'}${budget.toLocaleString()}`, icon: BarChart3 },
+            { label: 'Timeframe', value: timeframe, icon: LineChart },
+            { label: 'Primary KPI', value: kpi, icon: Gauge },
+            { label: 'Workflow', value: stage, icon: BriefcaseBusiness },
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <div key={item.label} className="rounded-xl border border-border bg-white p-4">
+                <p className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground"><Icon className="h-4 w-4 text-primary" />{item.label}</p>
+                <p className="mt-2 truncate text-xl font-semibold text-foreground">{item.value}</p>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+          <aside className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Operating controls</p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">{config.panelTitle}</h3>
             </div>
-          )}
-        </aside>
-        <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
-          <Textarea value={context} onChange={(e) => setContext(e.target.value)} className="min-h-[180px]" placeholder="Market context, constraints, goals" />
-          <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px]" placeholder="Strategic output" />
-          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
-        </main>
+            {shouldShowUpload(tool) && <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />}
+            <label className="grid gap-2 text-sm font-medium">
+              Workflow stage
+              <select value={stage} onChange={(e) => setStage(e.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm font-normal">
+                {config.stages.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-medium">
+              Primary KPI
+              <select value={kpi} onChange={(e) => setKpi(e.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm font-normal">
+                {config.kpis.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-medium">
+              Budget
+              <input type="range" min={1000} max={250000} step={1000} value={budget} onChange={(e) => setBudget(Number(e.target.value))} />
+            </label>
+            <label className="grid gap-2 text-sm font-medium">
+              Timeframe
+              <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm font-normal">
+                <option>30 days</option><option>90 days</option><option>6 months</option><option>12 months</option>
+              </select>
+            </label>
+            <Button onClick={() => run()} className="w-full"><Sparkles className="mr-2 h-4 w-4" />Run workflow</Button>
+            {sa.isSouthAfrica && (
+              <div className="rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
+                SA business mode active: ZAR pricing, VAT conventions, SME and local market context.
+              </div>
+            )}
+          </aside>
+
+          <main className="space-y-4">
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Business brief</p>
+                  <h3 className="mt-1 text-lg font-semibold text-foreground">{config.briefTitle}</h3>
+                </div>
+                <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">{tool.name}</span>
+              </div>
+              <Textarea value={context} onChange={(e) => setContext(e.target.value)} className="min-h-[260px] rounded-xl border-border bg-background/60" placeholder={config.placeholder} />
+            </section>
+
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-foreground">Executive output</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => run('Make this more executive-ready with clearer metrics.')}>Executive-ready</Button>
+                  <Button variant="outline" onClick={() => navigator.clipboard.writeText(output)} disabled={!output}><Copy className="mr-2 h-4 w-4" />Copy</Button>
+                </div>
+              </div>
+              <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[340px] rounded-xl border-border bg-background/60 font-mono text-xs" placeholder="Business analysis, projections, action plan, and risks appear here." />
+            </section>
+
+            <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
+          </main>
+
+          <aside className="space-y-4">
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <p className="mb-3 text-sm font-semibold text-foreground">Projection snapshot</p>
+              <div className="space-y-3">
+                {config.projections.map((item, index) => (
+                  <div key={item.label}>
+                    <div className="mb-1 flex justify-between text-xs text-muted-foreground"><span>{item.label}</span><span>{item.value}</span></div>
+                    <div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, item.score + index * 8)}%` }} /></div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <p className="mb-3 text-sm font-semibold text-foreground">Workflow lanes</p>
+              <div className="space-y-2">
+                {config.lanes.map((lane) => (
+                  <div key={lane} className="rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">{lane}</div>
+                ))}
+              </div>
+            </section>
+          </aside>
+        </div>
       </div>
     </motion.div>
   )
