@@ -4,10 +4,12 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { ToolExperienceSystem } from '@/components/tool-experiences/tool-layout-system'
-import type { Tool } from '@/lib/tools-data'
+import { tools } from '@/lib/tools-data'
 import { trackToolOpen } from '@/lib/gamification'
 
-export function ToolRuntimePage({ tool }: { tool?: Tool }) {
+export function ToolRuntimePage({ toolId }: { toolId?: string }) {
+  const tool = toolId ? tools.find((item) => item.id === toolId) : undefined
+
   useEffect(() => {
     if (tool) {
       trackToolOpen(tool.id, tool.name, tool.category)

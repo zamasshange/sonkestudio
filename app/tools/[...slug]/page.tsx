@@ -50,7 +50,7 @@ export default async function ToolFallbackPage({ params }: ToolPageProps) {
           { name: tool.name, url: absoluteUrl(tool.href) },
         ])}
       />
-      <ToolRuntimePage tool={tool} />
+      <ToolRuntimePage toolId={tool.id} />
     </>
   )
 }
