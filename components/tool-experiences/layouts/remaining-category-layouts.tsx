@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import QRCode from 'qrcode'
 import { Tool } from '@/lib/tools-data'
 import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-shell'
 import { Button } from '@/components/ui/button'
@@ -18,10 +19,15 @@ import {
   Gauge,
   GitCompareArrows,
   LineChart,
+  QrCode,
+  RefreshCw,
   Palette,
   Play,
+  Ruler,
   Sparkles,
+  Shuffle,
   Terminal,
+  Type,
 } from 'lucide-react'
 import { useLocation } from '@/hooks/use-location'
 import { getLocalizedPromptSuggestions } from '@/lib/smart-recommendations'
@@ -227,55 +233,297 @@ function getBusinessWorkbenchConfig(toolId: string) {
   return { ...defaults, ...(configs[toolId] || {}) }
 }
 
+function getTextStats(text: string) {
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0
+  const characters = text.length
+  const charactersNoSpaces = text.replace(/\s/g, '').length
+  const sentences = text.trim() ? text.split(/[.!?]+/).filter((item) => item.trim()).length : 0
+  const paragraphs = text.trim() ? text.split(/\n\s*\n/).filter((item) => item.trim()).length : 0
+  return {
+    words,
+    characters,
+    charactersNoSpaces,
+    sentences,
+    paragraphs,
+    readingTime: Math.max(1, Math.ceil(words / 220)),
+  }
+}
+
+function getCompareStats(aText: string, bText: string) {
+  const normalize = (text: string) => text.toLowerCase().split(/\W+/).filter(Boolean)
+  const a = new Set(normalize(aText))
+  const b = new Set(normalize(bText))
+  const onlyA = [...a].filter((word) => !b.has(word)).slice(0, 60)
+  const onlyB = [...b].filter((word) => !a.has(word)).slice(0, 60)
+  const common = [...a].filter((word) => b.has(word)).slice(0, 60)
+  const total = new Set([...a, ...b]).size || 1
+  return { onlyA, onlyB, common, similarity: Math.round((common.length / total) * 100) }
+}
+
+function transformCase(text: string, mode: string) {
+  if (mode === 'UPPERCASE') return text.toUpperCase()
+  if (mode === 'lowercase') return text.toLowerCase()
+  if (mode === 'Title Case') return text.replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+  if (mode === 'Sentence case') return text.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, (match) => match.toUpperCase())
+  if (mode === 'kebab-case') return text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  if (mode === 'snake_case') return text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+  return text
+}
+
+function convertUnit(value: string, mode: string) {
+  const amount = Number(value)
+  if (!Number.isFinite(amount)) return ''
+  const conversions: Record<string, (n: number) => string> = {
+    'cm -> inches': (n) => `${n} cm = ${(n / 2.54).toFixed(3)} in`,
+    'inches -> cm': (n) => `${n} in = ${(n * 2.54).toFixed(3)} cm`,
+    'kg -> lb': (n) => `${n} kg = ${(n * 2.20462).toFixed(3)} lb`,
+    'lb -> kg': (n) => `${n} lb = ${(n / 2.20462).toFixed(3)} kg`,
+    'Celsius -> Fahrenheit': (n) => `${n} C = ${((n * 9) / 5 + 32).toFixed(2)} F`,
+    'Fahrenheit -> Celsius': (n) => `${n} F = ${(((n - 32) * 5) / 9).toFixed(2)} C`,
+    'km -> miles': (n) => `${n} km = ${(n * 0.621371).toFixed(3)} mi`,
+    'miles -> km': (n) => `${n} mi = ${(n / 0.621371).toFixed(3)} km`,
+  }
+  return conversions[mode]?.(amount) || ''
+}
+
+function getUtilityConfig(toolId: string) {
+  const defaults = {
+    badge: 'UTILITY',
+    statusTitle: 'Focused utility bench',
+    statusText: 'A precise utility workspace with live metrics, mode-specific controls, and copy-ready output.',
+    panelTitle: 'Utility mode',
+    editorTitle: 'Input workspace',
+    placeholder: 'Paste or type the input for this utility...',
+    outputTitle: 'Result',
+    outputPlaceholder: 'Run the utility to create a copy-ready result.',
+    signalTitle: 'Utility signals',
+    helper: 'This workspace is built for fast, repeatable everyday utility work.',
+    action: 'Run utility',
+    icon: <Play className="mr-2 h-4 w-4" />,
+    modes: ['Default'],
+    signals: ['Fast input flow', 'Copy-ready result', 'Session-level workflow'],
+  }
+
+  const configs: Record<string, Partial<typeof defaults>> = {
+    'qr-generator': {
+      badge: 'QR',
+      statusTitle: 'Payload builder',
+      statusText: 'Build scan-ready QR payloads with type modes, reliability checks, preview, and copy actions.',
+      panelTitle: 'QR payload type',
+      editorTitle: 'QR payload',
+      placeholder: 'Paste a URL, Wi-Fi note, contact info, event details, or any text payload...',
+      outputTitle: 'QR diagnostics',
+      signalTitle: 'Scan readiness',
+      helper: 'Short payloads scan faster. Use a short link when the destination URL is long.',
+      action: 'Generate QR',
+      icon: <QrCode className="mr-2 h-4 w-4" />,
+      modes: ['URL', 'Text', 'Contact', 'Wi-Fi', 'Event'],
+      signals: ['Payload preview', 'Scan reliability check', 'Download-ready QR image'],
+    },
+    'unit-converter': {
+      badge: 'UNIT',
+      statusTitle: 'Conversion cockpit',
+      statusText: 'Convert common measurements instantly with clear units and live results.',
+      panelTitle: 'Conversion pair',
+      outputTitle: 'Converted value',
+      helper: 'Choose the conversion pair, enter a number, and the result updates instantly.',
+      action: 'Capture conversion',
+      icon: <Ruler className="mr-2 h-4 w-4" />,
+      modes: ['cm -> inches', 'inches -> cm', 'kg -> lb', 'lb -> kg', 'Celsius -> Fahrenheit', 'Fahrenheit -> Celsius', 'km -> miles', 'miles -> km'],
+      signals: ['Live conversion', 'Clear source and target units', 'Copy-ready result'],
+    },
+    'word-counter': {
+      badge: 'WORDS',
+      statusTitle: 'Writing meter',
+      statusText: 'Measure words, characters, reading time, sentences, and paragraphs in a writing-focused layout.',
+      panelTitle: 'Text analysis mode',
+      editorTitle: 'Writing canvas',
+      placeholder: 'Paste an article, essay, caption, email, or document text...',
+      outputTitle: 'Text report',
+      action: 'Snapshot counts',
+      icon: <Type className="mr-2 h-4 w-4" />,
+      modes: ['Full report', 'SEO copy', 'Academic', 'Social post'],
+      signals: ['Live word count', 'Reading time estimate', 'Paragraph structure'],
+    },
+    'char-counter': {
+      badge: 'CHARS',
+      statusTitle: 'Character inspector',
+      statusText: 'Track character limits, whitespace, lines, and compact copy constraints.',
+      panelTitle: 'Limit mode',
+      editorTitle: 'Text limit canvas',
+      placeholder: 'Paste text for a bio, headline, SMS, meta description, or post...',
+      outputTitle: 'Character report',
+      action: 'Snapshot characters',
+      icon: <Type className="mr-2 h-4 w-4" />,
+      modes: ['All characters', 'No spaces', 'SMS length', 'Meta description'],
+      signals: ['Live character count', 'Whitespace awareness', 'Limit-friendly report'],
+    },
+    'case-converter': {
+      badge: 'CASE',
+      statusTitle: 'Text transform lab',
+      statusText: 'Convert text into naming, headline, slug, and developer-friendly case formats.',
+      panelTitle: 'Case transform',
+      editorTitle: 'Source text',
+      placeholder: 'Paste names, headings, labels, filenames, or messy casing...',
+      outputTitle: 'Transformed text',
+      action: 'Transform case',
+      icon: <RefreshCw className="mr-2 h-4 w-4" />,
+      modes: ['UPPERCASE', 'lowercase', 'Title Case', 'Sentence case', 'kebab-case', 'snake_case'],
+      signals: ['Slug-ready output', 'Copy naming cleanup', 'Developer case formats'],
+    },
+    'text-compare': {
+      badge: 'DIFF',
+      statusTitle: 'Side-by-side compare',
+      statusText: 'Compare two text versions with similarity, unique terms, and shared language.',
+      panelTitle: 'Comparison mode',
+      outputTitle: 'Difference report',
+      action: 'Compare text',
+      icon: <GitCompareArrows className="mr-2 h-4 w-4" />,
+      modes: ['Word diff', 'Revision review', 'SEO overlap', 'Plagiarism-style scan'],
+      signals: ['Side-by-side input', 'Similarity score', 'Unique/common term lists'],
+    },
+    'uuid-generator': {
+      badge: 'UUID',
+      statusTitle: 'Identifier factory',
+      statusText: 'Generate clean UUID batches for databases, mocks, tests, and records.',
+      panelTitle: 'ID batch controls',
+      editorTitle: 'Namespace or note',
+      placeholder: 'Optional note for what this ID batch is for...',
+      outputTitle: 'Generated IDs',
+      action: 'Generate UUIDs',
+      icon: <RefreshCw className="mr-2 h-4 w-4" />,
+      modes: ['UUID v4', 'Database IDs', 'Test fixtures', 'Session keys'],
+      signals: ['Batch quantity control', 'Cryptographic browser UUIDs', 'Copy-ready list'],
+    },
+    'random-generator': {
+      badge: 'RANDOM',
+      statusTitle: 'Randomization lab',
+      statusText: 'Generate number sets with range and quantity controls for sampling, tests, and quick decisions.',
+      panelTitle: 'Random output type',
+      outputTitle: 'Generated values',
+      action: 'Generate values',
+      icon: <Shuffle className="mr-2 h-4 w-4" />,
+      modes: ['Integer set', 'Raffle numbers', 'Test data', 'Sampling'],
+      signals: ['Min/max range', 'Batch output', 'Decision-ready values'],
+    },
+  }
+
+  return { ...defaults, ...(configs[toolId] || {}) }
+}
+
+function getUtilityMetrics(
+  toolId: string,
+  inputA: string,
+  inputB: string,
+  textStats: ReturnType<typeof getTextStats>,
+  compareStats: ReturnType<typeof getCompareStats>,
+  quantity: number,
+) {
+  if (toolId === 'word-counter' || toolId === 'char-counter') {
+    return [
+      { label: 'Words', value: String(textStats.words) },
+      { label: 'Characters', value: String(textStats.characters) },
+      { label: 'Reading', value: `${textStats.readingTime} min` },
+      { label: 'Paragraphs', value: String(textStats.paragraphs) },
+    ]
+  }
+  if (toolId === 'text-compare') {
+    return [
+      { label: 'Similarity', value: `${compareStats.similarity}%` },
+      { label: 'Only A', value: String(compareStats.onlyA.length) },
+      { label: 'Only B', value: String(compareStats.onlyB.length) },
+      { label: 'Common', value: String(compareStats.common.length) },
+    ]
+  }
+  if (toolId === 'random-generator' || toolId === 'uuid-generator') {
+    return [
+      { label: 'Quantity', value: String(quantity) },
+      { label: 'Input A', value: inputA || '-' },
+      { label: 'Input B', value: inputB || '-' },
+      { label: 'Format', value: toolId === 'uuid-generator' ? 'UUID v4' : 'Integer' },
+    ]
+  }
+  return [
+    { label: 'Input chars', value: String(inputA.length) },
+    { label: 'Lines', value: String(Math.max(1, inputA.split('\n').length)) },
+    { label: 'Mode', value: getUtilityConfig(toolId).modes[0] },
+    { label: 'Status', value: inputA ? 'Ready' : 'Waiting' },
+  ]
+}
+
+function getLiveUtilityOutput(toolId: string, input: string, mode: string, unitResult: string) {
+  if (toolId === 'case-converter') return transformCase(input, mode)
+  if (toolId === 'unit-converter') return unitResult
+  return ''
+}
+
+function UtilityTextPanel({
+  title,
+  value,
+  onChange,
+  placeholder,
+}: {
+  title: string
+  value: string
+  onChange: (value: string) => void
+  placeholder: string
+}) {
+  return (
+    <section className="rounded-2xl border border-border bg-white p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <span className="rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">{value.length} chars</span>
+      </div>
+      <Textarea value={value} onChange={(event) => onChange(event.target.value)} className="min-h-[360px] rounded-xl border-border bg-background/60 text-sm leading-6" placeholder={placeholder} />
+    </section>
+  )
+}
+
 export function UtilityPurposeLayout({ tool }: { tool: Tool }) {
+  const config = getUtilityConfig(tool.id)
   const [inputA, setInputA] = useState('')
   const [inputB, setInputB] = useState('')
   const [output, setOutput] = useState('')
+  const [mode, setMode] = useState(config.modes[0])
+  const [quantity, setQuantity] = useState(5)
+  const [qrDataUrl, setQrDataUrl] = useState('')
+
+  const textStats = useMemo(() => getTextStats(inputA), [inputA])
+  const compareStats = useMemo(() => getCompareStats(inputA, inputB), [inputA, inputB])
+  const unitResult = useMemo(() => convertUnit(inputA, mode), [inputA, mode])
 
   const run = async () => {
     if (tool.id === 'word-counter' || tool.id === 'char-counter') {
-      const words = inputA.trim() ? inputA.trim().split(/\s+/).length : 0
-      const chars = inputA.length
-      const lines = inputA ? inputA.split('\n').length : 0
-      setOutput(`Words: ${words}\nCharacters: ${chars}\nLines: ${lines}`)
+      setOutput(`Words: ${textStats.words}\nCharacters: ${textStats.characters}\nCharacters without spaces: ${textStats.charactersNoSpaces}\nSentences: ${textStats.sentences}\nParagraphs: ${textStats.paragraphs}\nReading time: ${textStats.readingTime} min`)
       return
     }
     if (tool.id === 'case-converter') {
-      setOutput(`UPPER:\n${inputA.toUpperCase()}\n\nlower:\n${inputA.toLowerCase()}\n\nTitle:\n${inputA.replace(/\w\S*/g, (t) => t[0].toUpperCase() + t.slice(1).toLowerCase())}`)
+      setOutput(transformCase(inputA, mode))
       return
     }
     if (tool.id === 'text-compare') {
-      const a = new Set(inputA.split(/\s+/).filter(Boolean))
-      const b = new Set(inputB.split(/\s+/).filter(Boolean))
-      const onlyA = [...a].filter((x) => !b.has(x)).slice(0, 50)
-      const onlyB = [...b].filter((x) => !a.has(x)).slice(0, 50)
-      setOutput(`Only in A:\n${onlyA.join(', ') || '-'}\n\nOnly in B:\n${onlyB.join(', ') || '-'}`)
+      setOutput(`Similarity: ${compareStats.similarity}%\nOnly in A:\n${compareStats.onlyA.join(', ') || '-'}\n\nOnly in B:\n${compareStats.onlyB.join(', ') || '-'}\n\nCommon terms:\n${compareStats.common.join(', ') || '-'}`)
       return
     }
     if (tool.id === 'uuid-generator') {
-      const list = Array.from({ length: Math.max(1, Number(inputA) || 1) }, () => crypto.randomUUID())
-      setOutput(list.join('\n'))
+      setOutput(Array.from({ length: quantity }, () => crypto.randomUUID()).join('\n'))
       return
     }
     if (tool.id === 'random-generator') {
       const max = Number(inputA) || 100
       const min = Number(inputB) || 1
-      setOutput(String(Math.floor(Math.random() * (max - min + 1)) + min))
-      return
-    }
-    if (tool.id === 'password-generator' || tool.id === 'password-checker') {
-      const prompt = tool.id === 'password-generator'
-        ? `Generate a secure password pack based on this request: ${inputA || 'length 16, symbols yes'}`
-        : `Evaluate password strength and give improvements: ${inputA}`
-      setOutput(await askAi(tool, prompt))
+      setOutput(Array.from({ length: quantity }, () => String(Math.floor(Math.random() * (max - min + 1)) + min)).join('\n'))
       return
     }
     if (tool.id === 'qr-generator') {
-      setOutput(`QR payload ready:\n${inputA}\n\nTip: Use short links for better scan reliability.`)
+      const payload = inputA || 'https://sonkestudio.co.za'
+      const nextQr = await QRCode.toDataURL(payload, { margin: 2, width: 320, color: { dark: '#111827', light: '#ffffff' } })
+      setQrDataUrl(nextQr)
+      setOutput(`QR payload ready:\n${payload}\n\nType: ${mode}\nScan reliability: ${payload.length < 80 ? 'High' : payload.length < 180 ? 'Medium' : 'Use a shorter link for best results'}`)
       return
     }
     if (tool.id === 'unit-converter') {
-      setOutput(await askAi(tool, `Convert with clear steps: ${inputA}`))
+      setOutput(unitResult || await askAi(tool, `Convert with clear steps: ${inputA}`))
       return
     }
     setOutput(await askAi(tool, `Utility task:\nA:${inputA}\nB:${inputB}`))
@@ -283,13 +531,100 @@ export function UtilityPurposeLayout({ tool }: { tool: Tool }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
-      <ToolWorkspaceHero tool={tool} label="Utility Tool" eyebrow="FAST" statusTitle="Instant Mode" statusText="Purpose-built quick utility flow with direct input-output behavior." />
-      <div className="mx-auto max-w-[1100px] px-5 pb-10 sm:px-8">
-        <div className="rounded-2xl border border-border bg-white p-5 space-y-3">
-          <Input value={inputA} onChange={(e) => setInputA(e.target.value)} placeholder="Primary input" />
-          {(tool.id === 'text-compare' || tool.id === 'random-generator') && <Input value={inputB} onChange={(e) => setInputB(e.target.value)} placeholder={tool.id === 'text-compare' ? 'Second text' : 'Min value'} />}
-          <Button onClick={run}>Run</Button>
-          <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[280px]" placeholder="Result" />
+      <ToolWorkspaceHero tool={tool} label="Everyday Utility" eyebrow={config.badge} statusTitle={config.statusTitle} statusText={config.statusText} />
+      <div className="mx-auto max-w-[1720px] px-5 pb-10 sm:px-8">
+        <div className="mb-4 grid gap-3 md:grid-cols-4">
+          {getUtilityMetrics(tool.id, inputA, inputB, textStats, compareStats, quantity).map((metric) => (
+            <div key={metric.label} className="rounded-xl border border-border bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</p>
+              <p className="mt-2 truncate text-xl font-semibold text-foreground">{metric.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)_380px]">
+          <aside className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Utility controls</p>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">{config.panelTitle}</h3>
+            </div>
+            <div className="grid gap-2">
+              {config.modes.map((item) => (
+                <button key={item} onClick={() => setMode(item)} className={`rounded-lg border px-3 py-2 text-left text-sm ${mode === item ? 'border-foreground bg-foreground text-background' : 'border-border bg-background text-muted-foreground hover:text-foreground'}`}>
+                  {item}
+                </button>
+              ))}
+            </div>
+            {(tool.id === 'uuid-generator' || tool.id === 'random-generator') && (
+              <label className="grid gap-2 text-sm font-medium">
+                Quantity: {quantity}
+                <input type="range" min={1} max={50} value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
+              </label>
+            )}
+            <div className="rounded-xl border border-border bg-background p-3 text-xs leading-5 text-muted-foreground">{config.helper}</div>
+            <Button onClick={run} className="w-full">{config.icon}{config.action}</Button>
+          </aside>
+
+          <main className="space-y-4">
+            {tool.id === 'text-compare' ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                <UtilityTextPanel title="Text A" value={inputA} onChange={setInputA} placeholder="Paste the first version..." />
+                <UtilityTextPanel title="Text B" value={inputB} onChange={setInputB} placeholder="Paste the second version..." />
+              </div>
+            ) : tool.id === 'random-generator' ? (
+              <section className="rounded-2xl border border-border bg-white p-4">
+                <div className="mb-3 grid gap-3 sm:grid-cols-2">
+                  <Input value={inputB} onChange={(e) => setInputB(e.target.value)} placeholder="Minimum value" />
+                  <Input value={inputA} onChange={(e) => setInputA(e.target.value)} placeholder="Maximum value" />
+                </div>
+                <div className="rounded-xl border border-border bg-background p-4 text-sm text-muted-foreground">Generate number sets for quick decisions, testing ranges, raffles, and sampling.</div>
+              </section>
+            ) : tool.id === 'unit-converter' ? (
+              <section className="rounded-2xl border border-border bg-white p-4">
+                <label className="grid gap-2 text-sm font-medium">
+                  Value to convert
+                  <Input value={inputA} onChange={(e) => setInputA(e.target.value)} placeholder="Example: 12" />
+                </label>
+                <div className="mt-4 rounded-xl border border-border bg-background p-5 font-mono text-lg">{unitResult || 'Choose a conversion mode and enter a number.'}</div>
+              </section>
+            ) : (
+              <UtilityTextPanel title={config.editorTitle} value={inputA} onChange={setInputA} placeholder={config.placeholder} />
+            )}
+
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-foreground">{config.outputTitle}</p>
+                <Button variant="outline" onClick={() => navigator.clipboard.writeText(output || getLiveUtilityOutput(tool.id, inputA, mode, unitResult))} disabled={!output && !inputA && !unitResult}><Copy className="mr-2 h-4 w-4" />Copy</Button>
+              </div>
+              <Textarea value={output || getLiveUtilityOutput(tool.id, inputA, mode, unitResult)} onChange={(e) => setOutput(e.target.value)} className="min-h-[240px] rounded-xl border-border bg-background/60 font-mono text-xs" placeholder={config.outputPlaceholder} />
+            </section>
+          </main>
+
+          <aside className="space-y-4">
+            {tool.id === 'qr-generator' && (
+              <section className="rounded-2xl border border-border bg-white p-4 text-center">
+                <p className="mb-3 text-sm font-semibold text-foreground">QR preview</p>
+                <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-border bg-background p-4">
+                  {qrDataUrl ? <img src={qrDataUrl} alt="Generated QR code" className="h-64 w-64" /> : <QrCode className="h-28 w-28 text-muted-foreground" />}
+                </div>
+              </section>
+            )}
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <p className="mb-3 text-sm font-semibold text-foreground">{config.signalTitle}</p>
+              <div className="space-y-2">
+                {config.signals.map((signal) => (
+                  <div key={signal} className="flex items-center gap-2 rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>{signal}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="rounded-2xl border border-border bg-white p-4">
+              <p className="mb-3 text-sm font-semibold text-foreground">Recent result</p>
+              <pre className="max-h-[220px] overflow-auto rounded-xl border border-border bg-background p-3 text-xs whitespace-pre-wrap">{output || 'Run the utility to capture a result here.'}</pre>
+            </section>
+          </aside>
         </div>
       </div>
     </motion.div>
