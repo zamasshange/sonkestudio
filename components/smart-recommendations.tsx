@@ -3,10 +3,12 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, MapPin, Sparkles, TrendingUp, Clock, Zap } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from '@/hooks/use-location'
 import { getSmartRecommendations } from '@/lib/smart-recommendations'
 import { useSavedHistory } from '@/hooks/use-saved-history'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
+import { tools } from '@/lib/tools-data'
 
 const sectionIcons: Record<string, React.ReactNode> = {
   'exam-season': <Zap className="h-4 w-4" />,
@@ -26,6 +28,8 @@ export function SmartRecommendations() {
   const { location, season, loading } = useLocation()
   const { recentTools } = useSavedHistory()
   const { prefs, persona } = useUserPreferences()
+  const [liveRecommendations, setLiveRecommendations] = useState<ReturnType<typeof getSmartRecommendations> | null>(null)
+  const [refreshedAt, setRefreshedAt] = useState<string | null>(null)
 
   if (loading) {
     return (
@@ -45,13 +49,59 @@ export function SmartRecommendations() {
   // Use persona label as role for recommendations (e.g., 'Student', 'Creator')
   const userRole = persona?.label?.toLowerCase() || prefs?.persona
 
-  const recommendations = getSmartRecommendations(
+  const fallbackRecommendations = getSmartRecommendations(
     location,
     season || { season: 'summer', isExamSeason: false, isHolidaySeason: false, isBackToSchool: false, month: 1, hemisphere: 'northern' },
     userRole,
     recentTools,
   )
 
+  const toolMap = useMemo(() => new Map(tools.map((tool) => [tool.id, tool])), [])
+
+  useEffect(() => {
+    if (loading) return
+    let active = true
+    const loadRecommendations = async () => {
+      const params = new URLSearchParams({
+        country: location?.country || '',
+        city: location?.city || '',
+        role: userRole || '',
+        recent: recentTools.join(','),
+        exam: String(Boolean(season?.isExamSeason)),
+        holiday: String(Boolean(season?.isHolidaySeason)),
+        backToSchool: String(Boolean(season?.isBackToSchool)),
+        seed: String(Math.floor(Date.now() / 300000)),
+      })
+      try {
+        const response = await fetch(`/api/tools/recommendations?${params}`, { cache: 'no-store' })
+        const data = await response.json()
+        if (!active || !Array.isArray(data.sections)) return
+        const sections = data.sections.map((section: any) => ({
+          id: section.id,
+          title: section.title,
+          subtitle: section.subtitle,
+          badge: section.badge,
+          priority: section.priority || 0,
+          tools: (section.tools || []).map((id: string) => toolMap.get(id)).filter(Boolean),
+        })).filter((section: any) => section.tools.length)
+        if (sections.length) {
+          setLiveRecommendations(sections)
+          setRefreshedAt(data.refreshedAt || null)
+        }
+      } catch {
+        setLiveRecommendations(null)
+      }
+    }
+
+    loadRecommendations()
+    const timer = window.setInterval(loadRecommendations, 180000)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
+  }, [loading, location?.country, location?.city, recentTools, season?.isBackToSchool, season?.isExamSeason, season?.isHolidaySeason, toolMap, userRole])
+
+  const recommendations = liveRecommendations || fallbackRecommendations
   const topRecs = recommendations.slice(0, 3)
 
   return (
@@ -80,6 +130,11 @@ export function SmartRecommendations() {
                 </span>
               )}
             </div>
+            {refreshedAt && sectionIndex === 0 ? (
+              <p className="-mt-3 mb-5 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                Live SONKE pulse / refreshed {new Date(refreshedAt).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            ) : null}
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {rec.tools.slice(0, 6).map((tool, index) => {
