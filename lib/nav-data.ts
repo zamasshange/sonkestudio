@@ -31,5 +31,6 @@ export const navTrendingTools: {
   { id: 'ai-humanizer', name: 'AI Humanizer', href: '/tools/ai/humanizer', icon: Brain, iconColor: '#7C3AED' },
   { id: 'pdf-to-word', name: 'PDF to Word', href: '/tools/pdf/to-word', icon: FileText, iconColor: '#DC2626' },
   { id: 'math-solver', name: 'Math Solver', href: '/tools/student/math', icon: GraduationCap, iconColor: '#16A34A' },
+  { id: 'career-opportunity-hub', name: 'Career Hub', href: '/career', icon: Briefcase, iconColor: '#2563EB' },
   { id: 'qr-generator', name: 'QR Generator', href: '/tools/qr', icon: Wrench, iconColor: '#111827' },
 ]
