@@ -31,7 +31,7 @@ import { tools } from '@/lib/tools-data'
 
 const careerTool = tools.find((tool) => tool.id === 'career-opportunity-hub') || tools.find((tool) => tool.id === 'cv-generator') || tools[0]
 
-type Providers = { jsearch: boolean; adzuna: boolean }
+type Providers = { jsearch: boolean; adzuna: boolean; adzunaMissing?: string[] }
 
 type SavedApplication = CareerOpportunity & {
   stage: 'Saved' | 'Applied' | 'Interview' | 'Offer'
@@ -159,6 +159,10 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
     }
   }
 
+  const adzunaStatus = providers.adzuna
+    ? 'connected'
+    : providers.adzunaMissing?.includes('ADZUNA_APP_ID') ? 'needs app id' : 'ready for key'
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="px-5 pb-8 pt-28 sm:px-8">
@@ -197,7 +201,7 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                 <div>
                   <p className="text-4xl font-semibold">{personalized.length || opportunities.length || 'AI'} matches</p>
                   <p className="mt-3 text-sm leading-6 text-background/75">
-                    JSearch {providers.jsearch ? 'connected' : 'ready for key'} / Adzuna {providers.adzuna ? 'connected' : 'ready for key'} with local fallback signals.
+                    JSearch {providers.jsearch ? 'connected' : 'ready for key'} / Adzuna {adzunaStatus} with local fallback signals.
                   </p>
                 </div>
               </div>

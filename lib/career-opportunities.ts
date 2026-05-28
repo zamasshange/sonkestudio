@@ -3,6 +3,7 @@ export type CareerProvider = 'jsearch' | 'adzuna' | 'sonke'
 export type CareerOpportunity = {
   id: string
   provider: CareerProvider
+  source?: string
   title: string
   company: string
   location: string

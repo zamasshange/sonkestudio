@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, BriefcaseBusiness, Compass, Grid2X2, Home, Menu, Rocket, Sparkles, X } from 'lucide-react'
+import { ArrowRight, BriefcaseBusiness, Grid2X2, Home, Menu, Rocket, Sparkles, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import logoImage from '@/app/images/logo.png'
 import faviconImage from '@/app/images/favicon.png'
