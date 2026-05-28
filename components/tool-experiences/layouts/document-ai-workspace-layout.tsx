@@ -8,6 +8,12 @@ import { ToolWorkspaceHero } from '@/components/tool-experiences/tool-workspace-
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { VoiceNoteButton } from '@/components/tool-experiences/shared/voice-note-button'
+import {
+  ContextualFollowUps,
+  describeAssets,
+  InteractionAsset,
+  SmartUploadPanel,
+} from '@/components/tool-experiences/shared/ai-interaction-panel'
 
 type ChatMessage = { role: 'user' | 'assistant'; text: string }
 
@@ -98,6 +104,7 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
   const [chat, setChat] = useState<ChatMessage[]>([{ role: 'assistant', text: `I am your ${config.workflowLabel.toLowerCase()} copilot. Paste content or ask me to start from scratch.` }])
   const [chatInput, setChatInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
   const docRef = useRef<HTMLTextAreaElement>(null)
 
   const quickMetrics = useMemo(() => {
@@ -109,7 +116,7 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
   const applyAi = async (instruction: string, selectedText?: string) => {
     setLoading(true)
     try {
-      const prompt = `You are an AI document copilot in a collaborative editor.\nTool: ${tool.name}\nTone: ${tone}\nLanguage: ${language}\nInstruction: ${instruction}\n\nCurrent document:\n${documentText || '(empty)'}\n\nSelected text:\n${selectedText || '(none)'}\n\nReturn:\n1) Updated document text\n2) One short follow-up question.`
+      const prompt = `You are an AI document copilot in a collaborative editor.\nTool: ${tool.name}\nTone: ${tone}\nLanguage: ${language}\nInstruction: ${instruction}\n\nCurrent document:\n${documentText || '(empty)'}\n\nSelected text:\n${selectedText || '(none)'}\n\nUploaded context:\n${describeAssets(assets) || '(none)'}\n\nReturn:\n1) Updated document text\n2) One short follow-up question.`
 
       const response = await fetch('/api/ai', {
         method: 'POST',
@@ -172,6 +179,9 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
         <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)_320px]">
           <aside className="rounded-2xl border border-border/60 bg-white/70 p-4 backdrop-blur xl:sticky xl:top-32 h-fit">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><Bot className="h-4 w-4" />AI Collaboration</div>
+            <div className="mb-3">
+              <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
+            </div>
             <div className="mb-3 grid grid-cols-2 gap-2">
               {config.proactive.map((item) => (
                 <Button
@@ -225,6 +235,9 @@ export function DocumentAiWorkspaceLayout({ tool }: { tool: Tool }) {
               placeholder={config.starterPrompt}
               className="min-h-[740px] resize-y rounded-xl border-border bg-white p-5 text-sm leading-7"
             />
+            <div className="mt-3">
+              <ContextualFollowUps tool={tool} output={documentText} onAction={(action) => applyAi(action)} />
+            </div>
           </main>
 
           <aside className="rounded-2xl border border-border/60 bg-white/70 p-4 backdrop-blur xl:sticky xl:top-32 h-fit">

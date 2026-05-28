@@ -9,6 +9,12 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { BadgeCheck, Brain, Calculator, Clock3, ListChecks, Play, Sparkles, Target } from 'lucide-react'
 import { educationLevels, southAfricanLanguages, southAfricanSubjects } from '@/lib/context-options'
+import {
+  ContextualFollowUps,
+  describeAssets,
+  InteractionAsset,
+  SmartUploadPanel,
+} from '@/components/tool-experiences/shared/ai-interaction-panel'
 
 type QuizQuestion = {
   question: string
@@ -52,6 +58,7 @@ export function QuizArenaLayout({ tool }: { tool: Tool }) {
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [index, setIndex] = useState(0)
   const [answers, setAnswers] = useState<number[]>([])
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
   useEffect(() => {
     if (!started || timeLeft <= 0) return
@@ -81,6 +88,8 @@ Subject: ${subject}
 Topic: ${topic}
 Difficulty: ${difficulty}
 Questions: ${count}
+Uploaded study context:
+${describeAssets(assets) || 'None'}
 
 Return strict JSON array with fields:
 question, options (4), answerIndex (0-3), explanation`
@@ -110,6 +119,7 @@ question, options (4), answerIndex (0-3), explanation`
           <aside className="rounded-2xl border border-border bg-white p-4">
             <p className="mb-3 text-sm font-semibold">Quiz Setup</p>
             <div className="grid gap-2 text-sm">
+              <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
               <select value={grade} onChange={(e) => setGrade(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{educationLevels.map((v) => <option key={v}>{v}</option>)}</select>
               <select value={subject} onChange={(e) => setSubject(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{southAfricanSubjects.map((v) => <option key={v}>{v}</option>)}</select>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{southAfricanLanguages.map((v) => <option key={v}>{v}</option>)}</select>
@@ -177,9 +187,10 @@ export function MathSolverStudioLayout({ tool }: { tool: Tool }) {
   const [steps, setSteps] = useState('')
   const [hint, setHint] = useState('')
   const [loading, setLoading] = useState(false)
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
   const run = async (mode: 'solve' | 'hint' | 'practice') => {
-    if (!problem.trim()) return
+    if (!problem.trim() && !assets.length) return
     setLoading(true)
     try {
       const prompt = `You are a CAPS math tutor.
@@ -187,6 +198,8 @@ Grade: ${grade}
 Language: ${language}
 Mode: ${mode}
 Problem: ${problem}
+Uploaded study context:
+${describeAssets(assets) || 'None'}
 
 If mode=solve return step-by-step solution with final answer.
 If mode=hint return 2 hints only.
@@ -213,13 +226,14 @@ If mode=practice return 2 similar practice questions with answers.`
           <aside className="rounded-2xl border border-border bg-white p-4">
             <p className="mb-3 text-sm font-semibold">Context</p>
             <div className="grid gap-2">
+              <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
               <select value={grade} onChange={(e) => setGrade(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{educationLevels.map((v) => <option key={v}>{v}</option>)}</select>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{southAfricanLanguages.map((v) => <option key={v}>{v}</option>)}</select>
             </div>
             <div className="mt-4 grid gap-2">
-              <Button onClick={() => run('solve')} disabled={loading || !problem.trim()}><Calculator className="mr-2 h-4 w-4" />Solve Step-by-Step</Button>
-              <Button variant="outline" onClick={() => run('hint')} disabled={loading || !problem.trim()}><Sparkles className="mr-2 h-4 w-4" />Give Hint</Button>
-              <Button variant="outline" onClick={() => run('practice')} disabled={loading || !problem.trim()}><Play className="mr-2 h-4 w-4" />Practice Variants</Button>
+              <Button onClick={() => run('solve')} disabled={loading || (!problem.trim() && !assets.length)}><Calculator className="mr-2 h-4 w-4" />Solve Step-by-Step</Button>
+              <Button variant="outline" onClick={() => run('hint')} disabled={loading || (!problem.trim() && !assets.length)}><Sparkles className="mr-2 h-4 w-4" />Give Hint</Button>
+              <Button variant="outline" onClick={() => run('practice')} disabled={loading || (!problem.trim() && !assets.length)}><Play className="mr-2 h-4 w-4" />Practice Variants</Button>
             </div>
           </aside>
           <main className="space-y-4">
@@ -234,6 +248,9 @@ If mode=practice return 2 similar practice questions with answers.`
             <section className="rounded-2xl border border-border bg-white p-4">
               <p className="mb-2 text-sm font-semibold">Solution Workspace</p>
               <div className="min-h-[260px] whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-sm">{steps || 'Step-by-step solution and practice output will appear here.'}</div>
+              <div className="mt-3">
+                <ContextualFollowUps tool={tool} output={steps} onAction={(action) => run(action.includes('Hint') ? 'hint' : 'practice')} />
+              </div>
             </section>
           </main>
         </div>
@@ -248,9 +265,10 @@ export function NotesSummaryStudyLayout({ tool }: { tool: Tool }) {
   const [subject, setSubject] = useState('Physical Sciences')
   const [output, setOutput] = useState('')
   const [mode, setMode] = useState('Key points')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
   const run = async (nextMode: string) => {
-    if (!notes.trim()) return
+    if (!notes.trim() && !assets.length) return
     setMode(nextMode)
     const prompt = `Convert notes into study material.
 Grade: ${grade}
@@ -259,6 +277,8 @@ Mode: ${nextMode}
 
 Notes:
 ${notes}
+Uploaded study context:
+${describeAssets(assets) || 'None'}
 
 If mode is key points -> concise summary.
 If flashcards -> Q/A flashcards.
@@ -281,6 +301,7 @@ If explain hard parts -> simple explanations.`
           <aside className="rounded-2xl border border-border bg-white p-4">
             <p className="mb-2 text-sm font-semibold">Study Context</p>
             <div className="grid gap-2">
+              <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
               <select value={grade} onChange={(e) => setGrade(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{educationLevels.map((v) => <option key={v}>{v}</option>)}</select>
               <select value={subject} onChange={(e) => setSubject(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{southAfricanSubjects.map((v) => <option key={v}>{v}</option>)}</select>
             </div>
@@ -294,6 +315,9 @@ If explain hard parts -> simple explanations.`
             <div className="mt-4 rounded-xl border border-border bg-background p-4">
               <p className="mb-2 text-sm font-semibold">Output: {mode}</p>
               <div className="min-h-[240px] whitespace-pre-wrap text-sm">{output || 'Choose a mode to generate study-ready material.'}</div>
+              <div className="mt-3">
+                <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
+              </div>
             </div>
           </main>
           <aside className="rounded-2xl border border-border bg-white p-4">
@@ -374,9 +398,10 @@ export function HomeworkCoachLayout({ tool }: { tool: Tool }) {
   const [question, setQuestion] = useState('')
   const [output, setOutput] = useState('')
   const [mode, setMode] = useState('Hint first')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
   const run = async (nextMode: string) => {
-    if (!question.trim()) return
+    if (!question.trim() && !assets.length) return
     setMode(nextMode)
     const prompt = `You are a CAPS homework coach.
 Grade: ${grade}
@@ -385,6 +410,8 @@ Language: ${language}
 Mode: ${nextMode}
 Question:
 ${question}
+Uploaded homework context:
+${describeAssets(assets) || 'None'}
 
 If mode=Hint first, provide hints only.
 If mode=Step-by-step, show full working.
@@ -403,6 +430,7 @@ If mode=Teach concept, explain underlying concept with example.`
           <aside className="rounded-2xl border border-border bg-white p-4">
             <p className="mb-2 text-sm font-semibold">Learning Context</p>
             <div className="grid gap-2">
+              <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
               <select value={grade} onChange={(e) => setGrade(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{educationLevels.map((v) => <option key={v}>{v}</option>)}</select>
               <select value={subject} onChange={(e) => setSubject(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{southAfricanSubjects.map((v) => <option key={v}>{v}</option>)}</select>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2">{southAfricanLanguages.map((v) => <option key={v}>{v}</option>)}</select>
@@ -419,6 +447,9 @@ If mode=Teach concept, explain underlying concept with example.`
             <section className="rounded-2xl border border-border bg-white p-4">
               <p className="mb-2 text-sm font-semibold">Coach Output</p>
               <div className="min-h-[280px] whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-sm">{output || 'Select a coaching mode to begin.'}</div>
+              <div className="mt-3">
+                <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
+              </div>
             </section>
           </main>
         </div>
@@ -537,14 +568,17 @@ export function ResearchSimplifierLayout({ tool }: { tool: Tool }) {
   const [paperText, setPaperText] = useState('')
   const [simplified, setSimplified] = useState('')
   const [mode, setMode] = useState('Plain language')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
   const run = async (nextMode: string) => {
-    if (!paperText.trim()) return
+    if (!paperText.trim() && !assets.length) return
     setMode(nextMode)
     const prompt = `Simplify research content.
 Mode: ${nextMode}
 Text:
 ${paperText}
+Uploaded research context:
+${describeAssets(assets) || 'None'}
 
 If plain language: simplify.
 If key findings: extract findings.
@@ -563,6 +597,7 @@ If critique: provide limitations and questions.`
           <aside className="rounded-2xl border border-border bg-white p-4">
             <p className="mb-2 text-sm font-semibold">Simplification Modes</p>
             <div className="grid gap-2">
+              <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
               {['Plain language', 'Key findings', 'Study guide', 'Critique mode'].map((item) => <Button key={item} variant={mode === item ? 'default' : 'outline'} onClick={() => run(item)}>{item}</Button>)}
             </div>
           </aside>
@@ -572,6 +607,9 @@ If critique: provide limitations and questions.`
             </section>
             <section className="rounded-2xl border border-border bg-white p-4">
               <div className="min-h-[260px] whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-sm">{simplified || 'Run a mode to simplify and analyze.'}</div>
+              <div className="mt-3">
+                <ContextualFollowUps tool={tool} output={simplified} onAction={(action) => run(action)} />
+              </div>
             </section>
           </main>
         </div>

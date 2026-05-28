@@ -10,6 +10,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { useLocation } from '@/hooks/use-location'
 import { getLocalizedPromptSuggestions } from '@/lib/smart-recommendations'
 import { getSAContextSignal } from '@/lib/sa-intelligence'
+import {
+  ContextualFollowUps,
+  describeAssets,
+  InteractionAsset,
+  SmartUploadPanel,
+} from '@/components/tool-experiences/shared/ai-interaction-panel'
 
 async function askAi(tool: Tool, text: string) {
   const res = await fetch('/api/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tool: tool.id, text }) })
@@ -90,8 +96,11 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
   const [input, setInput] = useState('')
   const [pattern, setPattern] = useState('')
   const [output, setOutput] = useState('')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
-  const run = async () => {
+  const run = async (followUp?: string) => {
+    const assetContext = describeAssets(assets)
+    const source = [input, assetContext].filter(Boolean).join('\n\n')
     if (tool.id === 'regex-tester') {
       try {
         const re = new RegExp(pattern, 'g')
@@ -103,7 +112,7 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
       return
     }
     if (tool.id === 'sql-formatter') {
-      setOutput(await askAi(tool, `Format and validate SQL:\n${input}`))
+      setOutput(await askAi(tool, `Format and validate SQL:\n${source}`))
       return
     }
     if (tool.id === 'jwt-decoder') {
@@ -120,7 +129,7 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
       }
       return
     }
-    setOutput(await askAi(tool, `Developer tool task for ${tool.name}:\n${input}`))
+    setOutput(await askAi(tool, `Developer tool task for ${tool.name}:\n${followUp ? `Follow-up:${followUp}\n` : ''}${source}`))
   }
 
   return (
@@ -128,12 +137,14 @@ export function DeveloperPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Developer Lab" eyebrow="DEV" statusTitle={tool.name} statusText="Purpose-built engineering workflow for this specific developer tool." />
       <div className="mx-auto max-w-[1400px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[1fr_1fr]">
         <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
+          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
           {tool.id === 'regex-tester' && <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regex pattern" />}
           <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="min-h-[320px]" placeholder="Input" />
-          <Button onClick={run}>Execute</Button>
+          <Button onClick={() => run()}>Execute</Button>
         </section>
-        <section className="rounded-2xl border border-border bg-white p-4">
+        <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
           <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[380px] font-mono text-xs" placeholder="Output" />
+          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
         </section>
       </div>
     </motion.div>
@@ -147,9 +158,10 @@ export function CreatorPurposeLayout({ tool }: { tool: Tool }) {
   const [platform, setPlatform] = useState('Instagram')
   const [audience, setAudience] = useState('Gen Z')
   const [output, setOutput] = useState('')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
 
-  const run = async () => {
-    setOutput(await askAi(tool, `Creator workflow for ${tool.name}.\nPlatform:${platform}\nAudience:${audience}\nBrief:${brief}\nReturn: options + engagement prediction + hook improvements.`))
+  const run = async (followUp?: string) => {
+    setOutput(await askAi(tool, `Creator workflow for ${tool.name}.\nPlatform:${platform}\nAudience:${audience}\n${followUp ? `Follow-up:${followUp}\n` : ''}Brief:${brief}\n${describeAssets(assets)}\nReturn: options + engagement prediction + hook improvements.`))
   }
 
   return (
@@ -157,9 +169,10 @@ export function CreatorPurposeLayout({ tool }: { tool: Tool }) {
       <ToolWorkspaceHero tool={tool} label="Creator Studio" eyebrow="SOCIAL" statusTitle={`${platform} / ${tool.name}`} statusText="Social-first workflow with trend-aware generation and performance framing." />
       <div className="mx-auto max-w-[1500px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
+          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
           <select value={platform} onChange={(e) => setPlatform(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>X</option><option>LinkedIn</option></select>
           <Input value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="Audience" />
-          <Button onClick={run}>Generate</Button>
+          <Button onClick={() => run()}>Generate</Button>
           {sa.isSouthAfrica && (
             <div className="rounded-lg border border-border bg-background p-2 text-xs text-muted-foreground">
               SA creator cues: local hashtags, Amapiano culture hooks, Johannesburg audience phrasing.
@@ -169,6 +182,7 @@ export function CreatorPurposeLayout({ tool }: { tool: Tool }) {
         <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
           <Textarea value={brief} onChange={(e) => setBrief(e.target.value)} className="min-h-[180px]" placeholder="Campaign/content brief" />
           <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[280px]" placeholder="Creator output" />
+          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
         </main>
       </div>
     </motion.div>
@@ -181,14 +195,19 @@ export function BusinessPurposeLayout({ tool }: { tool: Tool }) {
   const [context, setContext] = useState('')
   const [kpi, setKpi] = useState('Revenue')
   const [output, setOutput] = useState('')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const run = async (followUp?: string) => {
+    setOutput(await askAi(tool, `Business strategy for ${tool.name}. KPI:${kpi}\n${followUp ? `Follow-up:${followUp}\n` : ''}Context:${context}\n${describeAssets(assets)}`))
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <ToolWorkspaceHero tool={tool} label="Business Console" eyebrow="BIZ" statusTitle={`${tool.name} / ${kpi}`} statusText="Strategic business workflow with KPI-centered recommendations and action plans." />
       <div className="mx-auto max-w-[1450px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
+          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
           <select value={kpi} onChange={(e) => setKpi(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Revenue</option><option>Conversion</option><option>CAC</option><option>Retention</option><option>Brand Reach</option></select>
-          <Button onClick={async () => setOutput(await askAi(tool, `Business strategy for ${tool.name}. KPI:${kpi}\nContext:${context}`))}>Run Analysis</Button>
+          <Button onClick={() => run()}>Run Analysis</Button>
           {sa.isSouthAfrica && (
             <div className="rounded-lg border border-border bg-background p-2 text-xs text-muted-foreground">
               SA business mode active: ZAR pricing, VAT conventions, SME/township context.
@@ -198,6 +217,7 @@ export function BusinessPurposeLayout({ tool }: { tool: Tool }) {
         <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
           <Textarea value={context} onChange={(e) => setContext(e.target.value)} className="min-h-[180px]" placeholder="Market context, constraints, goals" />
           <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px]" placeholder="Strategic output" />
+          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
         </main>
       </div>
     </motion.div>
@@ -210,18 +230,24 @@ export function ExplainPurposeLayout({ tool }: { tool: Tool }) {
   const [thing, setThing] = useState('')
   const [level, setLevel] = useState('Simple')
   const [output, setOutput] = useState('')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const run = async (followUp?: string) => {
+    setOutput(await askAi(tool, `Explain this in ${level} mode with examples and analogies.\n${followUp ? `Follow-up:${followUp}\n` : ''}${sa.isSouthAfrica ? 'When relevant, include SA context like VAT, SARS, NSFAS, load shedding, matric systems.' : ''}\n${thing}\n${describeAssets(assets)}`))
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <ToolWorkspaceHero tool={tool} label="Explain Engine" eyebrow="EXPLAIN" statusTitle={`${level} mode`} statusText="Contextual explanation engine with analogy, step-by-step teaching, and follow-up guidance." />
       <div className="mx-auto max-w-[1400px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[1fr_1fr]">
         <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
+          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
           <select value={level} onChange={(e) => setLevel(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Simple</option><option>Step-by-step</option><option>Advanced</option><option>ELI5</option></select>
           <Textarea value={thing} onChange={(e) => setThing(e.target.value)} className="min-h-[220px]" placeholder="Paste the thing to explain" />
-          <Button onClick={async () => setOutput(await askAi(tool, `Explain this in ${level} mode with examples and analogies.\n${sa.isSouthAfrica ? 'When relevant, include SA context like VAT, SARS, NSFAS, load shedding, matric systems.' : ''}\n${thing}`))}>Explain</Button>
+          <Button onClick={() => run()}>Explain</Button>
         </section>
-        <section className="rounded-2xl border border-border bg-white p-4">
+        <section className="rounded-2xl border border-border bg-white p-4 space-y-3">
           <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[340px]" placeholder="Explanation" />
+          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
         </section>
       </div>
     </motion.div>
@@ -234,18 +260,24 @@ export function DocumentPurposeLayout({ tool }: { tool: Tool }) {
   const [doc, setDoc] = useState('')
   const [mode, setMode] = useState('Analyze')
   const [output, setOutput] = useState('')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const run = async (followUp?: string) => {
+    setOutput(await askAi(tool, `Document task for ${tool.name}. Mode:${mode}\n${followUp ? `Follow-up:${followUp}\n` : ''}${sa.isSouthAfrica ? 'Use SA-ready conventions where relevant (ZAR, VAT, local legal/business wording).' : ''}\n${doc}\n${describeAssets(assets)}`))
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <ToolWorkspaceHero tool={tool} label="Document Specialist" eyebrow="DOC" statusTitle={`${tool.name} / ${mode}`} statusText="Document-specific workflow focused on legal, resume, OCR, and summary analysis." />
       <div className="mx-auto max-w-[1500px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
+          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
           <select value={mode} onChange={(e) => setMode(e.target.value)} className="h-9 rounded-sm border border-border bg-background px-2"><option>Analyze</option><option>Simplify</option><option>Risk flags</option><option>Rewrite</option></select>
-          <Button onClick={async () => setOutput(await askAi(tool, `Document task for ${tool.name}. Mode:${mode}\n${sa.isSouthAfrica ? 'Use SA-ready conventions where relevant (ZAR, VAT, local legal/business wording).' : ''}\n${doc}`))}>Run</Button>
+          <Button onClick={() => run()}>Run</Button>
         </aside>
         <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
           <Textarea value={doc} onChange={(e) => setDoc(e.target.value)} className="min-h-[180px]" placeholder="Paste document content" />
           <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px]" placeholder="Document output" />
+          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
         </main>
       </div>
     </motion.div>
@@ -259,15 +291,20 @@ export function AITextPurposeLayout({ tool }: { tool: Tool }) {
   const [input, setInput] = useState('')
   const [instruction, setInstruction] = useState('Improve clarity')
   const [output, setOutput] = useState('')
+  const [assets, setAssets] = useState<InteractionAsset[]>([])
+  const run = async (nextInstruction = instruction) => {
+    setOutput(await askAi(tool, `Tool:${tool.name}\nInstruction:${nextInstruction}\nInput:${input}\n${describeAssets(assets)}`))
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <ToolWorkspaceHero tool={tool} label="AI Text Copilot" eyebrow="AI TEXT" statusTitle={tool.name} statusText="Purpose-tuned AI text workflow with instruction-driven transformations and iterative refinements." />
       <div className="mx-auto max-w-[1450px] px-5 pb-10 sm:px-8 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-border bg-white p-4 space-y-2">
+          <SmartUploadPanel tool={tool} assets={assets} onAssetsChange={setAssets} compact />
           <Input value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Instruction" />
-          <Button onClick={async () => setOutput(await askAi(tool, `Tool:${tool.name}\nInstruction:${instruction}\nInput:${input}`))}>Transform</Button>
-          <Button variant="outline" onClick={async () => setOutput(await askAi(tool, `Tool:${tool.name}\nInstruction:Give 3 alternative versions\nInput:${input}`))}>3 Alternatives</Button>
+          <Button onClick={() => run()}>Transform</Button>
+          <Button variant="outline" onClick={() => run('Give 3 alternative versions')}>3 Alternatives</Button>
           {sa.isSouthAfrica && (
             <select value={instruction} onChange={(e) => setInstruction(e.target.value)} className="h-9 w-full rounded-sm border border-border bg-background px-2 text-sm">
               {sa.toneModes.map((item) => <option key={item}>{item}</option>)}
@@ -284,6 +321,7 @@ export function AITextPurposeLayout({ tool }: { tool: Tool }) {
         <main className="rounded-2xl border border-border bg-white p-4 space-y-3">
           <Textarea value={input} onChange={(e) => setInput(e.target.value)} className="min-h-[180px]" placeholder="Text input" />
           <Textarea value={output} onChange={(e) => setOutput(e.target.value)} className="min-h-[320px]" placeholder="AI output" />
+          <ContextualFollowUps tool={tool} output={output} onAction={(action) => run(action)} />
         </main>
       </div>
     </motion.div>
