@@ -3,7 +3,7 @@
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, BriefcaseBusiness, Check, Code2, FileText, GraduationCap, MapPin, PenTool, Search, Sparkles, Target, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { sortToolsForUser } from '@/lib/filter-tools'
@@ -843,13 +843,44 @@ export function FeaturedWorkSection() {
   )
 }
 
-const careerSignals = [
-  { title: 'Graduate Software Intern', company: 'Fintech studio', place: 'Johannesburg', tag: 'Featured internship' },
-  { title: 'Remote Junior Data Analyst', company: 'Analytics partner', place: 'Remote Africa', tag: 'Trending' },
-  { title: 'Marketing Graduate Programme', company: 'Growth team', place: 'Cape Town', tag: 'Graduate program' },
+const fallbackCareerSignals = [
+  { title: 'Graduate Software Intern', company: 'Fintech studio', place: 'Johannesburg', tag: 'Featured internship', provider: 'SONKE' },
+  { title: 'Remote Junior Data Analyst', company: 'Analytics partner', place: 'Remote Africa', tag: 'Trending', provider: 'SONKE' },
+  { title: 'Marketing Graduate Programme', company: 'Growth team', place: 'Cape Town', tag: 'Graduate program', provider: 'SONKE' },
 ]
 
 export function CareersSection() {
+  const [careerSignals, setCareerSignals] = useState(fallbackCareerSignals)
+  const [careerLive, setCareerLive] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    const loadSignals = async () => {
+      try {
+        const response = await fetch('/api/career/opportunities?query=internship%20graduate%20learnership%20remote%20South%20Africa&location=South%20Africa&country=za&perPage=12', { cache: 'no-store' })
+        const data = await response.json()
+        const opportunities = Array.isArray(data.opportunities) ? data.opportunities : []
+        if (!active || !opportunities.length) return
+        setCareerSignals(opportunities.slice(0, 3).map((item: any, index: number) => ({
+          title: item.title || 'Career opportunity',
+          company: item.company || 'Hiring company',
+          place: item.location || 'South Africa',
+          tag: item.remote ? 'Remote signal' : index === 0 ? 'Latest live role' : /intern|learnership|graduate/i.test(`${item.title} ${item.description}`) ? 'Student pathway' : 'Trending now',
+          provider: item.source || item.provider || 'Live',
+        })))
+        setCareerLive(data.source === 'live')
+      } catch {
+        setCareerLive(false)
+      }
+    }
+    loadSignals()
+    const timer = window.setInterval(loadSignals, 180000)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
+  }, [])
+
   return (
     <section id="careers" className="overflow-hidden bg-background px-5 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto grid max-w-[1720px] gap-5 xl:grid-cols-[0.95fr_1.05fr]">
@@ -877,7 +908,7 @@ export function CareersSection() {
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
               {[
-                ['Live jobs', 'JSearch + Adzuna'],
+                [careerLive ? 'Live jobs' : 'Career feed', careerLive ? 'JSearch + Adzuna' : 'Fallback ready'],
                 ['SA context', 'Local signals'],
                 ['AI assist', 'CV, cover, interview'],
               ].map(([value, label]) => (
@@ -924,7 +955,7 @@ export function CareersSection() {
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase text-muted-foreground">Trending opportunities</p>
-                <h3 className="mt-2 text-3xl font-semibold">Built for browsing, not uploading.</h3>
+                <h3 className="mt-2 text-3xl font-semibold">{careerLive ? 'Live roles moving right now.' : 'Built for browsing, not uploading.'}</h3>
               </div>
               <Sparkles className="hidden h-8 w-8 text-primary sm:block" />
             </div>
@@ -937,6 +968,7 @@ export function CareersSection() {
                     <span className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
                       <span>{role.company}</span>
                       <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {role.place}</span>
+                      <span>{role.provider}</span>
                     </span>
                   </span>
                   <span className="inline-flex items-center justify-between gap-3 text-sm font-semibold uppercase text-primary">

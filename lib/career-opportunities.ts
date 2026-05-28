@@ -9,8 +9,10 @@ export type CareerOpportunity = {
   companyDomain?: string
   companyInitials?: string
   logoUrl?: string
+  logoFallbacks?: string[]
   location: string
   country?: string
+  countryCode?: string
   remote: boolean
   salary?: string
   description: string
@@ -29,6 +31,7 @@ export type CareerSearchParams = {
   company?: string
   page: number
   perPage: number
+  seed?: number
 }
 
 export const southAfricanCareerLocations = [
@@ -107,6 +110,12 @@ export function resolveCompanyBrand(company: string, logoUrl?: string) {
     companyDomain: domain,
     companyInitials: getCompanyInitials(company),
     logoUrl: logoUrl || (domain ? `https://logo.clearbit.com/${domain}` : undefined),
+    logoFallbacks: domain
+      ? [
+          `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+          `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+        ]
+      : [],
   }
 }
 
@@ -116,6 +125,23 @@ export function normalizeCountry(country: string) {
   if (value === 'united states' || value === 'usa' || value === 'us') return 'us'
   if (value === 'united kingdom' || value === 'uk' || value === 'gb') return 'gb'
   return value.slice(0, 2)
+}
+
+export function countryToFlagCode(country?: string) {
+  const value = (country || 'za').trim().toLowerCase()
+  if (value === 'south africa' || value === 'za' || value === 'zaf') return 'za'
+  if (value === 'united states' || value === 'usa' || value === 'us') return 'us'
+  if (value === 'united kingdom' || value === 'uk' || value === 'gb') return 'gb'
+  if (value.length === 2) return value
+  return 'za'
+}
+
+export function freshnessScore(postedAt?: string) {
+  if (!postedAt) return 0
+  const time = new Date(postedAt).getTime()
+  if (Number.isNaN(time)) return 0
+  const days = Math.max(0, (Date.now() - time) / 86_400_000)
+  return Math.max(0, 14 - days)
 }
 
 export function buildCareerQuery(params: CareerSearchParams) {
@@ -150,6 +176,7 @@ export function localFallbackOpportunities(params: CareerSearchParams): CareerOp
     ...resolveCompanyBrand(company),
     location: params.remoteOnly ? 'Remote Africa' : location || place,
     country: 'ZA',
+    countryCode: 'za',
     remote: params.remoteOnly || place.toLowerCase().includes('remote'),
     salary: 'Market related',
     description: `Curated ${query} pathway for students, graduates, junior talent, freelancers, and early-career builders. Use AI prep to tailor your CV and cover letter before applying.`,

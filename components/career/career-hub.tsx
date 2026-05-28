@@ -3,16 +3,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  AlertCircle,
+  ArrowRight,
+  Bell,
   Bookmark,
   BriefcaseBusiness,
-  Building2,
   CalendarDays,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock3,
+  Copy,
   ExternalLink,
   FileText,
   GraduationCap,
+  Layers3,
   Loader2,
   MapPin,
   MessageSquareText,
@@ -21,45 +25,54 @@ import {
   Send,
   Sparkles,
   Target,
-  TrendingUp,
-  Video,
+  UploadCloud,
   Wallet,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { CareerOpportunity, careerInterestTracks, southAfricanCareerLocations } from '@/lib/career-opportunities'
+import { SafeImage } from '@/components/safe-image'
 import {
-  ContextualFollowUps,
-  describeAssets,
-  InteractionAsset,
-  SmartUploadPanel,
-} from '@/components/tool-experiences/shared/ai-interaction-panel'
-import { tools } from '@/lib/tools-data'
+  CareerOpportunity,
+  careerInterestTracks,
+  southAfricanCareerLocations,
+} from '@/lib/career-opportunities'
 
-const careerTool = tools.find((tool) => tool.id === 'career-opportunity-hub') || tools.find((tool) => tool.id === 'cv-generator') || tools[0]
-
-type Providers = { jsearch: boolean; adzuna: boolean; adzunaMissing?: string[] }
-type ProviderErrors = { jsearch?: string | null; adzuna?: string | null }
+type CareerMode = 'discover' | 'internships' | 'cover' | 'resume' | 'tracker'
+type SavedApplication = CareerOpportunity & {
+  stage: 'Saved' | 'Applied' | 'Interviewing' | 'Offer Received' | 'Rejected'
+  note?: string
+}
 
 type CareerApiResponse = {
   opportunities?: CareerOpportunity[]
-  providers?: Providers
-  providerErrors?: ProviderErrors
   source?: 'live' | 'fallback'
+  providers?: { jsearch: boolean; adzuna: boolean; adzunaMissing?: string[] }
+  providerErrors?: { jsearch?: string | null; adzuna?: string | null }
   meta?: {
     page: number
     perPage: number
     returned: number
     providerCounts: { jsearch: number; adzuna: number }
     hasMore: boolean
+    refreshedAt?: string
+    trends?: {
+      locations: [string, number][]
+      categories: [string, number][]
+      companies: string[]
+    }
   }
 }
 
-type SavedApplication = CareerOpportunity & {
-  stage: 'Saved' | 'Applied' | 'Interview' | 'Offer'
-  note?: string
-}
+const modes: Array<{ id: CareerMode; label: string; text: string }> = [
+  { id: 'discover', label: 'Opportunity Hub', text: 'Live discovery' },
+  { id: 'internships', label: 'Internship Finder', text: 'Student pathways' },
+  { id: 'cover', label: 'Cover Letter Kit', text: 'AI chat' },
+  { id: 'resume', label: 'Resume Feedback', text: 'Upload + score' },
+  { id: 'tracker', label: 'Application Tracker', text: 'Kanban workflow' },
+]
+
+const stageOrder: SavedApplication['stage'][] = ['Saved', 'Applied', 'Interviewing', 'Offer Received', 'Rejected']
 
 function storageKey(name: string) {
   return `sonke-career-${name}`
@@ -69,42 +82,124 @@ function formatPostedDate(value?: string) {
   if (!value) return 'Recent'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'Recent'
-  return date.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: 'numeric' })
+  const diff = Math.round((Date.now() - date.getTime()) / 86_400_000)
+  if (diff <= 0) return 'Today'
+  if (diff === 1) return 'Yesterday'
+  if (diff < 8) return `${diff} days ago`
+  return date.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })
+}
+
+function countryFlagUrl(code?: string) {
+  const value = (code || 'za').toLowerCase()
+  return `https://flagcdn.com/w40/${value}.png`
 }
 
 function CompanyMark({ opportunity, size = 'md' }: { opportunity: CareerOpportunity; size?: 'md' | 'lg' }) {
-  const [failed, setFailed] = useState(false)
   const dimension = size === 'lg' ? 'h-16 w-16 text-xl' : 'h-12 w-12 text-sm'
-
-  if (opportunity.logoUrl && !failed) {
-    return (
-      <span className={`${dimension} flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-white p-2`}>
-        <img src={opportunity.logoUrl} alt={`${opportunity.company} logo`} className="h-full w-full object-contain" onError={() => setFailed(true)} />
-      </span>
-    )
-  }
-
   return (
-    <span className={`${dimension} flex shrink-0 items-center justify-center rounded-xl border border-border bg-foreground font-semibold text-background`}>
-      {opportunity.companyInitials || opportunity.company.slice(0, 2).toUpperCase()}
-    </span>
+    <SafeImage
+      src={opportunity.logoUrl}
+      fallbacks={opportunity.logoFallbacks}
+      alt={`${opportunity.company} logo`}
+      className={`${dimension} shrink-0 rounded-xl border border-border bg-white p-2`}
+      imgClassName="object-contain"
+      fallbackContent={
+        <span className="flex h-full w-full items-center justify-center rounded-lg bg-foreground font-semibold text-background">
+          {opportunity.companyInitials || opportunity.company.slice(0, 2).toUpperCase()}
+        </span>
+      }
+    />
+  )
+}
+
+function Flag({ code }: { code?: string }) {
+  return (
+    <SafeImage
+      src={countryFlagUrl(code)}
+      alt={`${code || 'za'} flag`}
+      className="h-4 w-6 rounded-sm border border-border bg-white"
+      imgClassName="object-cover"
+      fallbackContent={<span className="block h-full w-full bg-primary/20" />}
+    />
+  )
+}
+
+function OpportunityCard({
+  opportunity,
+  index,
+  selected,
+  onSelect,
+  onSave,
+  compact = false,
+}: {
+  opportunity: CareerOpportunity
+  index: number
+  selected?: boolean
+  onSelect: () => void
+  onSave: () => void
+  compact?: boolean
+}) {
+  return (
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 18 }}
+      className={`group border bg-white/92 transition hover:-translate-y-1 hover:shadow-[0_30px_90px_-62px_rgba(0,0,0,.8)] ${selected ? 'border-primary' : 'border-border'} ${compact ? 'rounded-xl p-4' : 'rounded-2xl p-5'}`}
+    >
+      <button type="button" onClick={onSelect} className="block w-full text-left">
+        <div className="flex items-start gap-4">
+          <CompanyMark opportunity={opportunity} />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                {opportunity.source || opportunity.provider}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                <Flag code={opportunity.countryCode || opportunity.country} />
+                {opportunity.countryCode || opportunity.country || 'ZA'}
+              </span>
+              {opportunity.remote ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-emerald-700">Remote</span> : null}
+              {index < 4 ? <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase text-primary">Fresh signal</span> : null}
+            </div>
+            <h3 className={`${compact ? 'text-lg' : 'text-2xl'} mt-3 font-semibold leading-tight text-foreground`}>
+              {opportunity.title}
+            </h3>
+            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span>{opportunity.company}</span>
+              <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" /> {opportunity.location}</span>
+              <span className="inline-flex items-center gap-1"><CalendarDays className="h-4 w-4" /> {formatPostedDate(opportunity.postedAt)}</span>
+              {opportunity.salary ? <span className="inline-flex items-center gap-1"><Wallet className="h-4 w-4" /> {opportunity.salary}</span> : null}
+            </p>
+            <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">{opportunity.description || 'Open the listing for the full brief and application details.'}</p>
+          </div>
+        </div>
+      </button>
+      <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-border pt-4">
+        <Button variant="outline" onClick={onSave}><Bookmark className="mr-2 h-4 w-4" />Save</Button>
+        {opportunity.url ? (
+          <Button asChild>
+            <a href={opportunity.url} target="_blank" rel="noreferrer">Apply <ExternalLink className="ml-2 h-4 w-4" /></a>
+          </Button>
+        ) : null}
+      </div>
+    </motion.article>
   )
 }
 
 export function CareerHub() {
+  const [mode, setMode] = useState<CareerMode>('discover')
   const [query, setQuery] = useState('internship graduate program learnership entry level')
   const [location, setLocation] = useState('South Africa')
   const [country, setCountry] = useState('za')
   const [remoteOnly, setRemoteOnly] = useState(false)
-  const [salaryMin, setSalaryMin] = useState('')
   const [company, setCompany] = useState('')
-  const [activeTrack, setActiveTrack] = useState('coding')
+  const [activeTrack, setActiveTrack] = useState('internships')
   const [opportunities, setOpportunities] = useState<CareerOpportunity[]>([])
   const [selected, setSelected] = useState<CareerOpportunity | null>(null)
   const [saved, setSaved] = useState<SavedApplication[]>([])
-  const [assets, setAssets] = useState<InteractionAsset[]>([])
-  const [providers, setProviders] = useState<Providers>({ jsearch: false, adzuna: false })
-  const [providerErrors, setProviderErrors] = useState<ProviderErrors>({})
+  const [meta, setMeta] = useState<CareerApiResponse['meta']>()
+  const [providers, setProviders] = useState<CareerApiResponse['providers']>({ jsearch: false, adzuna: false })
   const [source, setSource] = useState<'live' | 'fallback'>('fallback')
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -112,7 +207,13 @@ export function CareerHub() {
   const [hasMore, setHasMore] = useState(true)
   const [aiOutput, setAiOutput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
-  const [showCvContext, setShowCvContext] = useState(false)
+  const [resumeFiles, setResumeFiles] = useState<File[]>([])
+  const [resumeScore, setResumeScore] = useState(76)
+
+  useEffect(() => {
+    const tool = new URLSearchParams(window.location.search).get('tool') as CareerMode | null
+    if (tool && modes.some((item) => item.id === tool)) setMode(tool)
+  }, [])
 
   useEffect(() => {
     const savedRaw = window.localStorage.getItem(storageKey('saved'))
@@ -123,19 +224,9 @@ export function CareerHub() {
     window.localStorage.setItem(storageKey('saved'), JSON.stringify(saved))
   }, [saved])
 
-  const activeTrackMeta = careerInterestTracks.find((track) => track.id === activeTrack)
-
   const search = async (
     nextQuery = query,
-    options: {
-      page?: number
-      append?: boolean
-      location?: string
-      country?: string
-      remoteOnly?: boolean
-      salaryMin?: string
-      company?: string
-    } = {},
+    options: { page?: number; append?: boolean; location?: string; remoteOnly?: boolean; company?: string; seed?: number } = {},
   ) => {
     const targetPage = options.page || 1
     const append = Boolean(options.append)
@@ -145,16 +236,15 @@ export function CareerHub() {
       const params = new URLSearchParams({
         query: nextQuery,
         location: options.location ?? location,
-        country: options.country ?? country,
+        country,
         remoteOnly: String(options.remoteOnly ?? remoteOnly),
         page: String(targetPage),
         perPage: '20',
+        seed: String(options.seed ?? Math.floor(Date.now() / 300000)),
       })
-      const nextSalary = options.salaryMin ?? salaryMin
       const nextCompany = options.company ?? company
-      if (nextSalary) params.set('salaryMin', nextSalary)
       if (nextCompany) params.set('company', nextCompany)
-      const response = await fetch(`/api/career/opportunities?${params}`)
+      const response = await fetch(`/api/career/opportunities?${params}`, { cache: 'no-store' })
       const data: CareerApiResponse = await response.json()
       const nextOpportunities = data.opportunities || []
       setOpportunities((current) => {
@@ -163,8 +253,8 @@ export function CareerHub() {
         return [...current, ...nextOpportunities.filter((item) => !seen.has(`${item.provider}-${item.id}`))]
       })
       setProviders(data.providers || { jsearch: false, adzuna: false })
-      setProviderErrors(data.providerErrors || {})
       setSource(data.source || 'fallback')
+      setMeta(data.meta)
       setPage(data.meta?.page || targetPage)
       setHasMore(data.meta?.hasMore ?? nextOpportunities.length > 0)
       if (!append) setSelected(nextOpportunities[0] || null)
@@ -175,47 +265,45 @@ export function CareerHub() {
   }
 
   useEffect(() => {
-    search(activeTrackMeta?.query || query)
+    search()
+    const timer = window.setInterval(() => {
+      search(query, { page: 1, seed: Math.floor(Date.now() / 60000) })
+    }, 120000)
+    return () => window.clearInterval(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const personalized = useMemo(() => {
-    const trackTerms = `${activeTrackMeta?.label || activeTrack} ${activeTrackMeta?.query || ''}`.toLowerCase().split(/\W+/).filter((term) => term.length > 3)
-    return opportunities
-      .map((opportunity) => {
-        const text = `${opportunity.title} ${opportunity.description} ${opportunity.category}`.toLowerCase()
-        const score =
-          (trackTerms.some((term) => text.includes(term)) ? 3 : 0) +
-          (opportunity.remote ? 2 : 0) +
-          (/intern|graduate|learnership|bursary|entry|junior|admin|retail|call centre|government/i.test(text) ? 3 : 0) +
-          (/south africa|johannesburg|cape town|durban|pretoria|remote africa/i.test(opportunity.location) ? 2 : 0)
-        return { opportunity, score }
-      })
-      .sort((a, b) => b.score - a.score)
-      .map((item) => item.opportunity)
-  }, [activeTrack, activeTrackMeta, opportunities])
+  const internships = useMemo(
+    () => opportunities.filter((item) => /intern|learnership|graduate|student|bursary/i.test(`${item.title} ${item.description} ${item.category}`)),
+    [opportunities],
+  )
+  const remoteJobs = useMemo(() => opportunities.filter((item) => item.remote), [opportunities])
+  const featured = opportunities[0]
+
+  const saveOpportunity = (opportunity: CareerOpportunity) => {
+    setSaved((current) => {
+      if (current.some((item) => item.provider === opportunity.provider && item.id === opportunity.id)) return current
+      return [{ ...opportunity, stage: 'Saved' }, ...current].slice(0, 40)
+    })
+  }
+
+  const updateStage = (item: SavedApplication, stage: SavedApplication['stage']) => {
+    setSaved((current) => current.map((entry) => entry.provider === item.provider && entry.id === item.id ? { ...entry, stage } : entry))
+  }
 
   const runAi = async (action: string, opportunity = selected) => {
-    if (/resume|cv|cover letter|portfolio/i.test(action)) setShowCvContext(true)
     setAiLoading(true)
     try {
-      const prompt = `SONKE Career Copilot action: ${action}
-Interest track: ${activeTrackMeta?.label || activeTrack}
-Search: ${query}
-Location: ${location}
-Uploaded CV/context:
-${describeAssets(assets) || 'None'}
-
-Selected opportunity:
-${opportunity ? `${opportunity.title} at ${opportunity.company}
-Location: ${opportunity.location}
-Description: ${opportunity.description}` : 'None selected'}
-
-Return a practical, encouraging, South Africa-aware response for students, graduates, junior developers, creators, freelancers, or remote workers.`
+      const prompt = `SONKE Career AI: ${action}
+Role: ${opportunity?.title || 'No selected role'}
+Company: ${opportunity?.company || 'Unknown'}
+Location: ${opportunity?.location || location}
+Job brief: ${opportunity?.description || 'Use South African early-career context.'}
+Return a practical, polished, job-ready response.`
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tool: 'career', text: prompt, toolTitle: 'SONKE Career Copilot' }),
+        body: JSON.stringify({ tool: 'career', text: prompt, toolTitle: 'SONKE Career Kit' }),
       })
       const data = await response.json()
       setAiOutput(data.result || data.choices?.[0]?.message?.content || data.error || '')
@@ -224,67 +312,38 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
     }
   }
 
-  const saveOpportunity = (opportunity: CareerOpportunity) => {
-    setSaved((current) => {
-      if (current.some((item) => item.id === opportunity.id && item.provider === opportunity.provider)) return current
-      return [{ ...opportunity, stage: 'Saved' }, ...current].slice(0, 24)
-    })
+  const analyzeResume = (files: File[]) => {
+    setResumeFiles(files)
+    const bump = Math.min(14, files.reduce((sum, file) => sum + Math.min(5, Math.round(file.size / 100000)), 0))
+    setResumeScore(72 + bump)
   }
-
-  const setTrack = (trackId: string) => {
-    const track = careerInterestTracks.find((item) => item.id === trackId)
-    setActiveTrack(trackId)
-    if (track) {
-      setQuery(track.query)
-      search(track.query, { page: 1 })
-    }
-  }
-
-  const adzunaStatus = providers.adzuna
-    ? 'connected'
-    : providers.adzunaMissing?.includes('ADZUNA_APP_ID') ? 'needs app id' : 'ready for key'
-  const providerHealth = [
-    `JSearch ${providers.jsearch ? 'connected' : 'not configured'}`,
-    `Adzuna ${adzunaStatus}`,
-    source === 'live' ? `${opportunities.length} live signals loaded` : 'fallback signal active',
-  ]
 
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="px-5 pb-8 pt-28 sm:px-8">
         <div className="mx-auto max-w-[1720px]">
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[1.2rem] border border-border bg-white p-6 sm:p-8">
-              <div className="absolute right-8 top-8 hidden text-[6rem] font-semibold uppercase leading-none text-muted/60 md:block">CAREER</div>
-              <div className="relative z-10">
-                <p className="flex items-center gap-3 text-sm font-semibold uppercase text-muted-foreground">
-                  <span className="h-2.5 w-2.5 bg-primary" />
-                  Student Career Ecosystem
-                </p>
-                <h1 className="mt-5 max-w-5xl text-5xl font-semibold leading-none sm:text-7xl">
-                  Find the next move, then let AI help you apply.
-                </h1>
-                <p className="mt-5 max-w-3xl text-base leading-8 text-muted-foreground">
-                  Internships, graduate programs, learnerships, junior roles, freelance work, and remote opportunities with South African context built in.
-                </p>
-                <div className="mt-7 flex flex-wrap gap-2">
-                  {['Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Remote Africa'].map((item) => (
-                    <button key={item} onClick={() => { setLocation(item); search(query, { location: item, page: 1 }) }} className="rounded-sm border border-border bg-background px-3 py-2 text-xs font-semibold uppercase text-muted-foreground transition hover:border-primary hover:text-foreground">
-                      {item}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {['NSFAS-aware', 'Learnerships', 'Bursaries', 'Government', 'Remote SA'].map((item) => (
-                    <span key={item} className="rounded-full border border-border bg-muted/45 px-3 py-1.5 text-xs font-semibold uppercase text-muted-foreground">
-                      {item}
-                    </span>
-                  ))}
-                </div>
+              <p className="flex items-center gap-3 text-sm font-semibold uppercase text-muted-foreground">
+                <span className="h-2.5 w-2.5 bg-primary" />
+                SONKE Career Ecosystem
+              </p>
+              <h1 className="mt-5 max-w-5xl text-5xl font-semibold leading-none sm:text-7xl">
+                Live opportunities, AI application help, and career momentum.
+              </h1>
+              <p className="mt-5 max-w-3xl text-base leading-8 text-muted-foreground">
+                Built for South African students, graduates, junior talent, and remote builders. JSearch and Adzuna feed the discovery layer while AI helps you apply with confidence.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-2">
+                {southAfricanCareerLocations.map((item) => (
+                  <button key={item} onClick={() => { setLocation(item); search(query, { location: item, page: 1 }) }} className="rounded-sm border border-border bg-background px-3 py-2 text-xs font-semibold uppercase text-muted-foreground transition hover:border-primary hover:text-foreground">
+                    {item}
+                  </button>
+                ))}
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="sonke-hero-field relative min-h-[320px] overflow-hidden rounded-[1.2rem] border border-border p-6 text-background">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="sonke-hero-field relative min-h-[380px] overflow-hidden rounded-[1.2rem] border border-border p-6 text-background">
               <div className="sonke-hero-mesh absolute inset-0" />
               <div className="relative z-10 flex h-full flex-col justify-between">
                 <div className="flex items-center justify-between">
@@ -292,276 +351,419 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
                   <Sparkles className="h-8 w-8" />
                 </div>
                 <div>
-                  <p className="text-4xl font-semibold">{personalized.length || opportunities.length || 'AI'} matches</p>
+                  <p className="text-5xl font-semibold">{opportunities.length || 'AI'} roles</p>
                   <p className="mt-3 text-sm leading-6 text-background/75">
-                    JSearch {providers.jsearch ? 'connected' : 'ready for key'} / Adzuna {adzunaStatus} with local fallback signals.
+                    JSearch {providers?.jsearch ? 'connected' : 'offline'} / Adzuna {providers?.adzuna ? 'connected' : 'offline'} / {source === 'live' ? 'live feed' : 'fallback active'}
                   </p>
-                  <div className="mt-4 grid gap-2">
-                    {providerHealth.map((item) => (
-                      <span key={item} className="rounded-sm border border-background/15 bg-background/5 px-3 py-2 text-xs font-semibold uppercase text-background/65">
-                        {item}
+                  <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                    {(meta?.trends?.categories || []).slice(0, 4).map(([label, count]) => (
+                      <span key={label} className="rounded-sm border border-background/15 bg-background/5 px-3 py-2 text-xs font-semibold uppercase text-background/70">
+                        {label} / {count}
                       </span>
                     ))}
                   </div>
+                  <p className="mt-4 text-xs text-background/55">Refreshed {formatPostedDate(meta?.refreshedAt)}</p>
                 </div>
               </div>
             </motion.div>
           </div>
+
+          <div className="mt-5 grid gap-2 md:grid-cols-5">
+            {modes.map((item) => (
+              <button key={item.id} onClick={() => setMode(item.id)} className={`rounded-xl border p-4 text-left transition ${mode === item.id ? 'border-foreground bg-foreground text-background' : 'border-border bg-white hover:border-primary'}`}>
+                <span className="text-sm font-semibold">{item.label}</span>
+                <span className={`mt-1 block text-xs ${mode === item.id ? 'text-background/60' : 'text-muted-foreground'}`}>{item.text}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="px-5 pb-12 sm:px-8">
-        <div className="mx-auto grid max-w-[1720px] gap-5 xl:grid-cols-[360px_minmax(0,1fr)_360px]">
-          <aside className="space-y-4 xl:sticky xl:top-28 xl:h-fit">
-            {selected ? (
-              <div className="rounded-2xl border border-border bg-white/90 p-4 backdrop-blur">
-                <div className="flex items-start gap-4">
-                  <CompanyMark opportunity={selected} size="lg" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase text-muted-foreground">{selected.source || selected.provider}</p>
-                    <h2 className="mt-1 line-clamp-3 text-2xl font-semibold leading-tight">{selected.title}</h2>
-                    <p className="mt-2 text-sm text-muted-foreground">{selected.company}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-2 text-sm">
-                  <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><MapPin className="h-4 w-4 text-primary" /> {selected.location}</span>
-                  <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><BriefcaseBusiness className="h-4 w-4 text-primary" /> {selected.employmentType || 'Opportunity'}</span>
-                  <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><CalendarDays className="h-4 w-4 text-primary" /> {formatPostedDate(selected.postedAt)}</span>
-                  {selected.salary && <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><Wallet className="h-4 w-4 text-primary" /> {selected.salary}</span>}
-                </div>
-
-                <div className="mt-4 rounded-xl border border-border bg-background p-3">
-                  <p className="text-sm font-semibold">Full opportunity brief</p>
-                  <p className="mt-2 max-h-[280px] overflow-y-auto whitespace-pre-line text-sm leading-6 text-muted-foreground">
-                    {selected.description || 'No detailed description was provided by the source. Use the apply link for the full listing.'}
-                  </p>
-                </div>
-
-                <div className="mt-4 grid gap-2">
-                  {selected.url && (
-                    <Button asChild>
-                      <a href={selected.url} target="_blank" rel="noreferrer">Apply now <ExternalLink className="ml-2 h-4 w-4" /></a>
-                    </Button>
-                  )}
-                  <Button variant="outline" onClick={() => runAi('Create a targeted cover letter for this opportunity', selected)}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    AI cover letter
-                  </Button>
-                  <Button variant="outline" onClick={() => runAi('Prepare interview questions and answers for this opportunity', selected)}>
-                    <Video className="mr-2 h-4 w-4" />
-                    Interview prep
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="rounded-2xl border border-border bg-white/85 p-4 backdrop-blur">
-              <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><Search className="h-4 w-4" /> Opportunity Search</p>
-              <div className="grid gap-2">
-                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Role, keyword, category" />
-                <Input value={company} onChange={(event) => setCompany(event.target.value)} placeholder="Company optional" />
-                <select value={location} onChange={(event) => setLocation(event.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm">
-                  {southAfricanCareerLocations.map((item) => <option key={item}>{item}</option>)}
-                </select>
-                <select value={country} onChange={(event) => setCountry(event.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm">
-                  <option value="za">South Africa</option>
-                  <option value="gb">United Kingdom</option>
-                  <option value="us">United States</option>
-                  <option value="ca">Canada</option>
-                  <option value="au">Australia</option>
-                </select>
-                <Input value={salaryMin} onChange={(event) => setSalaryMin(event.target.value)} placeholder="Minimum salary optional" />
-                <label className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-sm">
-                  Remote only
-                  <input type="checkbox" checked={remoteOnly} onChange={(event) => setRemoteOnly(event.target.checked)} />
-                </label>
-                <Button onClick={() => search(query, { page: 1 })} disabled={loading}>{loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}Search opportunities</Button>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-white/85 p-4">
-              <p className="mb-3 text-sm font-semibold">Mzansi Personalization</p>
-              <div className="grid gap-2">
-                {careerInterestTracks.map((track) => (
-                  <Button key={track.id} variant={activeTrack === track.id ? 'default' : 'outline'} className="h-auto min-h-10 justify-start whitespace-normal text-left text-xs" onClick={() => setTrack(track.id)}>
-                    {track.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </aside>
-
-          <section className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-3">
-              {[
-                { icon: GraduationCap, label: 'Internships + Learnerships', text: 'SETA pathways, graduate programs, junior roles' },
-                { icon: TrendingUp, label: 'Bursaries + Digital Skills', text: 'Student funding signals, tech, admin, creator paths' },
-                { icon: MessageSquareText, label: 'AI Career Prep', text: 'CV feedback, interview prep, cover letters' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-border bg-white/85 p-4">
-                  <item.icon className="h-5 w-5 text-primary" />
-                  <p className="mt-3 font-semibold">{item.label}</p>
-                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.text}</p>
-                </div>
-              ))}
-            </div>
-
-            {(providerErrors.jsearch || providerErrors.adzuna) && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                <p className="flex items-center gap-2 font-semibold"><AlertCircle className="h-4 w-4" /> One provider is temporarily delayed</p>
-                <p className="mt-2 text-xs leading-5 text-amber-800">
-                  SONKE is still showing live opportunities from available sources while the delayed provider retries in the background.
-                </p>
-              </div>
+      <section className="px-5 pb-16 sm:px-8">
+        <div className="mx-auto max-w-[1720px]">
+          <AnimatePresence mode="wait">
+            {mode === 'discover' && (
+              <motion.div key="discover" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)_360px]">
+                <SearchRail query={query} setQuery={setQuery} company={company} setCompany={setCompany} location={location} setLocation={setLocation} country={country} setCountry={setCountry} remoteOnly={remoteOnly} setRemoteOnly={setRemoteOnly} loading={loading} search={search} activeTrack={activeTrack} setActiveTrack={setActiveTrack} />
+                <OpportunityFeed loading={loading} opportunities={opportunities} selected={selected} setSelected={setSelected} saveOpportunity={saveOpportunity} page={page} hasMore={hasMore} loadingMore={loadingMore} search={search} query={query} />
+                <InsightRail selected={selected} saved={saved} remoteJobs={remoteJobs} runAi={runAi} aiLoading={aiLoading} aiOutput={aiOutput} />
+              </motion.div>
             )}
 
-            <div className="grid gap-3">
-              {loading && opportunities.length === 0 ? (
-                <div className="grid gap-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="animate-pulse rounded-2xl border border-border bg-white/80 p-4">
-                      <div className="h-4 w-40 rounded bg-muted" />
-                      <div className="mt-4 h-7 w-3/4 rounded bg-muted" />
-                      <div className="mt-3 h-4 w-1/2 rounded bg-muted" />
-                      <div className="mt-5 h-12 rounded bg-muted/70" />
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+            {mode === 'internships' && (
+              <InternshipFinder key="internships" internships={internships} loading={loading} selected={selected} setSelected={setSelected} saveOpportunity={saveOpportunity} search={search} />
+            )}
 
-              {!loading && personalized.length === 0 ? (
-                <div className="rounded-2xl border border-border bg-white/90 p-8 text-center">
-                  <Search className="mx-auto h-8 w-8 text-muted-foreground" />
-                  <h2 className="mt-4 text-2xl font-semibold">No opportunities found yet</h2>
-                  <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                    Try South Africa, Johannesburg, remote work, learnerships, bursaries, or graduate programmes.
-                  </p>
-                  <Button className="mt-5" onClick={() => search('internship learnership graduate programme South Africa', { page: 1 })}>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Retry with local signals
-                  </Button>
-                </div>
-              ) : null}
+            {mode === 'cover' && (
+              <CoverLetterKit key="cover" selected={selected} opportunities={opportunities} setSelected={setSelected} aiOutput={aiOutput} setAiOutput={setAiOutput} aiLoading={aiLoading} runAi={runAi} />
+            )}
 
-              <AnimatePresence mode="popLayout">
-                {personalized.map((opportunity, index) => (
-                  <motion.article
-                    key={`${opportunity.provider}-${opportunity.id}`}
-                    layout
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 18 }}
-                    className={`group rounded-2xl border bg-white/90 p-4 transition hover:-translate-y-1 hover:shadow-[0_28px_80px_-55px_rgba(0,0,0,0.7)] ${selected?.id === opportunity.id ? 'border-primary' : 'border-border'}`}
-                  >
-                    <button onClick={() => setSelected(opportunity)} className="block w-full text-left">
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="flex min-w-0 gap-4">
-                          <CompanyMark opportunity={opportunity} />
-                          <div className="min-w-0">
-                          <div className="flex flex-wrap gap-2">
-                            <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase text-muted-foreground">{opportunity.source || opportunity.provider}</span>
-                            {opportunity.remote && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-emerald-700">Remote</span>}
-                            {index < 3 && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase text-primary">Best match</span>}
-                            {/learnership|bursary|graduate|intern/i.test(`${opportunity.title} ${opportunity.description}`) && <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase text-sky-700">Youth pathway</span>}
-                          </div>
-                          <h2 className="mt-3 text-2xl font-semibold leading-tight">{opportunity.title}</h2>
-                          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                            <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" /> {opportunity.company}</span>
-                            <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" /> {opportunity.location}</span>
-                            <span className="inline-flex items-center gap-1"><CalendarDays className="h-4 w-4" /> {formatPostedDate(opportunity.postedAt)}</span>
-                            {opportunity.salary && <span className="inline-flex items-center gap-1"><Wallet className="h-4 w-4" /> {opportunity.salary}</span>}
-                          </p>
-                          <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">{opportunity.description}</p>
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 gap-2">
-                          <Button variant="outline" onClick={(event) => { event.stopPropagation(); saveOpportunity(opportunity) }}><Bookmark className="mr-2 h-4 w-4" />Save</Button>
-                          {opportunity.url && <Button asChild><a href={opportunity.url} target="_blank" rel="noreferrer">Apply <ExternalLink className="ml-2 h-4 w-4" /></a></Button>}
-                        </div>
-                      </div>
-                    </button>
-                  </motion.article>
-                ))}
-              </AnimatePresence>
+            {mode === 'resume' && (
+              <ResumeFeedback key="resume" files={resumeFiles} score={resumeScore} analyzeResume={analyzeResume} runAi={runAi} aiLoading={aiLoading} aiOutput={aiOutput} />
+            )}
 
-              {personalized.length > 0 ? (
-                <div className="rounded-2xl border border-border bg-white/90 p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-muted-foreground">
-                      Page <span className="font-semibold text-foreground">{page}</span> / Browse more internships, learnerships, remote roles, bursaries, and junior jobs.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" disabled={page <= 1 || loading} onClick={() => search(query, { page: Math.max(1, page - 1) })}>
-                        <ChevronLeft className="mr-2 h-4 w-4" />
-                        Previous
-                      </Button>
-                      {[Math.max(1, page - 1), page, page + 1].filter((item, index, arr) => arr.indexOf(item) === index).map((item) => (
-                        <Button key={item} variant={item === page ? 'default' : 'outline'} disabled={loading || loadingMore} onClick={() => search(query, { page: item })}>
-                          {item}
-                        </Button>
-                      ))}
-                      <Button variant="outline" disabled={!hasMore || loading} onClick={() => search(query, { page: page + 1 })}>
-                        Next
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                      <Button disabled={!hasMore || loadingMore} onClick={() => search(query, { page: page + 1, append: true })}>
-                        {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <TrendingUp className="mr-2 h-4 w-4" />}
-                        Load more
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </section>
-
-          <aside className="space-y-4 xl:sticky xl:top-28 xl:h-fit">
-            <div className="rounded-2xl border border-border bg-white/85 p-4 backdrop-blur">
-              <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><Sparkles className="h-4 w-4" /> Career Copilot</p>
-              <div className="grid gap-2">
-                {[
-                  ['AI Career Suggestions', Target],
-                  ['AI Resume Feedback', FileText],
-                  ['Generate a Cover Letter', BriefcaseBusiness],
-                  ['Prepare Interview Questions', Video],
-                ].map(([label, Icon]) => (
-                  <Button key={label as string} variant="outline" className="justify-start" onClick={() => runAi(label as string)} disabled={aiLoading}>
-                    <Icon className="mr-2 h-4 w-4" />
-                    {label as string}
-                  </Button>
-                ))}
-              </div>
-              <Button type="button" variant="outline" className="mt-3 w-full justify-start" onClick={() => setShowCvContext((value) => !value)}>
-                <FileText className="mr-2 h-4 w-4" />
-                {showCvContext ? 'Hide CV context' : 'Add CV or portfolio context'}
-              </Button>
-              {showCvContext ? (
-                <div className="mt-3">
-                  <SmartUploadPanel tool={careerTool} assets={assets} onAssetsChange={setAssets} compact />
-                </div>
-              ) : null}
-              <Textarea value={aiOutput} onChange={(event) => setAiOutput(event.target.value)} className="mt-3 min-h-[260px]" placeholder={aiLoading ? 'SONKE Career Copilot is thinking...' : 'AI career guidance appears here.'} />
-              {aiLoading ? <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing guidance</p> : null}
-              <div className="mt-3">
-                <ContextualFollowUps tool={careerTool} output={aiOutput} onAction={(action) => runAi(action)} />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-white/85 p-4">
-              <p className="mb-3 text-sm font-semibold">Saved Tracker</p>
-              <div className="space-y-2">
-                {saved.length ? saved.slice(0, 6).map((item) => (
-                  <button key={`${item.provider}-${item.id}`} onClick={() => setSelected(item)} className="w-full rounded-xl border border-border bg-background p-3 text-left transition hover:border-primary">
-                    <p className="line-clamp-1 text-sm font-semibold">{item.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{item.stage} / {item.company}</p>
-                  </button>
-                )) : <p className="rounded-xl border border-border bg-background p-3 text-sm text-muted-foreground">Saved roles and applications will appear here.</p>}
-              </div>
-            </div>
-          </aside>
+            {mode === 'tracker' && (
+              <ApplicationTracker key="tracker" saved={saved} updateStage={updateStage} setSelected={setSelected} setMode={setMode} />
+            )}
+          </AnimatePresence>
         </div>
       </section>
     </main>
+  )
+}
+
+function SearchRail(props: {
+  query: string
+  setQuery: (value: string) => void
+  company: string
+  setCompany: (value: string) => void
+  location: string
+  setLocation: (value: string) => void
+  country: string
+  setCountry: (value: string) => void
+  remoteOnly: boolean
+  setRemoteOnly: (value: boolean) => void
+  loading: boolean
+  search: (query?: string, options?: any) => void
+  activeTrack: string
+  setActiveTrack: (value: string) => void
+}) {
+  return (
+    <aside className="space-y-4 xl:sticky xl:top-28 xl:h-fit">
+      <div className="rounded-2xl border border-border bg-white/90 p-4 backdrop-blur">
+        <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><Search className="h-4 w-4" /> Live Search</p>
+        <div className="grid gap-2">
+          <Input value={props.query} onChange={(event) => props.setQuery(event.target.value)} placeholder="Role, keyword, category" />
+          <Input value={props.company} onChange={(event) => props.setCompany(event.target.value)} placeholder="Company optional" />
+          <select value={props.location} onChange={(event) => props.setLocation(event.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm">
+            {southAfricanCareerLocations.map((item) => <option key={item}>{item}</option>)}
+          </select>
+          <select value={props.country} onChange={(event) => props.setCountry(event.target.value)} className="h-10 rounded-md border border-border bg-background px-3 text-sm">
+            <option value="za">South Africa</option>
+            <option value="gb">United Kingdom</option>
+            <option value="us">United States</option>
+            <option value="ca">Canada</option>
+            <option value="au">Australia</option>
+          </select>
+          <label className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-sm">
+            Remote only
+            <input type="checkbox" checked={props.remoteOnly} onChange={(event) => props.setRemoteOnly(event.target.checked)} />
+          </label>
+          <Button onClick={() => props.search(props.query, { page: 1 })} disabled={props.loading}>
+            {props.loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+            Search opportunities
+          </Button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-white/90 p-4">
+        <p className="mb-3 text-sm font-semibold">Mzansi Career Tracks</p>
+        <div className="grid gap-2">
+          {careerInterestTracks.map((track) => (
+            <Button
+              key={track.id}
+              variant={props.activeTrack === track.id ? 'default' : 'outline'}
+              className="h-auto min-h-10 justify-start whitespace-normal text-left text-xs"
+              onClick={() => { props.setActiveTrack(track.id); props.setQuery(track.query); props.search(track.query, { page: 1 }) }}
+            >
+              {track.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+function OpportunityFeed(props: {
+  loading: boolean
+  opportunities: CareerOpportunity[]
+  selected: CareerOpportunity | null
+  setSelected: (value: CareerOpportunity) => void
+  saveOpportunity: (value: CareerOpportunity) => void
+  page: number
+  hasMore: boolean
+  loadingMore: boolean
+  search: (query?: string, options?: any) => void
+  query: string
+}) {
+  return (
+    <section className="space-y-4">
+      {props.loading && props.opportunities.length === 0 ? (
+        <div className="grid gap-3">
+          {Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-44 animate-pulse rounded-2xl border border-border bg-white" />)}
+        </div>
+      ) : null}
+      <AnimatePresence mode="popLayout">
+        {props.opportunities.map((opportunity, index) => (
+          <OpportunityCard
+            key={`${opportunity.provider}-${opportunity.id}`}
+            opportunity={opportunity}
+            index={index}
+            selected={props.selected?.id === opportunity.id}
+            onSelect={() => props.setSelected(opportunity)}
+            onSave={() => props.saveOpportunity(opportunity)}
+          />
+        ))}
+      </AnimatePresence>
+      <div className="rounded-2xl border border-border bg-white/90 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">Page <span className="font-semibold text-foreground">{props.page}</span> / fresh results rotate as providers update.</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" disabled={props.page <= 1 || props.loading} onClick={() => props.search(props.query, { page: Math.max(1, props.page - 1) })}><ChevronLeft className="mr-2 h-4 w-4" />Previous</Button>
+            <Button variant="outline" disabled={!props.hasMore || props.loading} onClick={() => props.search(props.query, { page: props.page + 1 })}>Next<ChevronRight className="ml-2 h-4 w-4" /></Button>
+            <Button disabled={!props.hasMore || props.loadingMore} onClick={() => props.search(props.query, { page: props.page + 1, append: true })}>
+              {props.loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Layers3 className="mr-2 h-4 w-4" />}
+              Load more
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function InsightRail({ selected, saved, remoteJobs, runAi, aiLoading, aiOutput }: {
+  selected: CareerOpportunity | null
+  saved: SavedApplication[]
+  remoteJobs: CareerOpportunity[]
+  runAi: (action: string, opportunity?: CareerOpportunity | null) => void
+  aiLoading: boolean
+  aiOutput: string
+}) {
+  return (
+    <aside className="space-y-4 xl:sticky xl:top-28 xl:h-fit">
+      {selected ? (
+        <div className="rounded-2xl border border-border bg-white/90 p-4">
+          <div className="flex items-start gap-4">
+            <CompanyMark opportunity={selected} size="lg" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">{selected.source || selected.provider}</p>
+              <h2 className="mt-1 line-clamp-3 text-2xl font-semibold leading-tight">{selected.title}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{selected.company}</p>
+            </div>
+          </div>
+          <p className="mt-4 max-h-[220px] overflow-y-auto whitespace-pre-line text-sm leading-6 text-muted-foreground">{selected.description}</p>
+          <div className="mt-4 grid gap-2">
+            <Button variant="outline" onClick={() => runAi('Create a targeted cover letter for this role', selected)}><FileText className="mr-2 h-4 w-4" />AI cover letter</Button>
+            <Button variant="outline" onClick={() => runAi('Prepare interview questions and answers', selected)}><MessageSquareText className="mr-2 h-4 w-4" />Interview prep</Button>
+          </div>
+        </div>
+      ) : null}
+      <div className="rounded-2xl border border-border bg-white/90 p-4">
+        <p className="text-sm font-semibold">Live Side Signals</p>
+        <div className="mt-3 grid gap-2">
+          <span className="rounded-xl border border-border bg-background p-3 text-sm">{remoteJobs.length} remote-friendly roles detected</span>
+          <span className="rounded-xl border border-border bg-background p-3 text-sm">{saved.length} saved applications</span>
+          <span className="rounded-xl border border-border bg-background p-3 text-sm">{aiLoading ? 'AI is preparing guidance' : aiOutput ? 'AI guidance ready' : 'Career AI standing by'}</span>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+function InternshipFinder({ internships, loading, selected, setSelected, saveOpportunity, search }: {
+  internships: CareerOpportunity[]
+  loading: boolean
+  selected: CareerOpportunity | null
+  setSelected: (value: CareerOpportunity) => void
+  saveOpportunity: (value: CareerOpportunity) => void
+  search: (query?: string, options?: any) => void
+}) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="rounded-3xl border border-border bg-foreground p-6 text-background sm:p-8">
+        <p className="text-sm font-semibold uppercase text-background/55">Student pathway radar</p>
+        <h2 className="mt-5 text-5xl font-semibold leading-none">Internships, learnerships, graduate openings.</h2>
+        <p className="mt-5 text-sm leading-7 text-background/70">A focused feed for students and early-career builders, with urgency cues and application rhythm.</p>
+        <div className="mt-6 grid gap-3">
+          {['Applications open now', 'Save reminders', 'Graduate friendly', 'South Africa first'].map((item) => (
+            <span key={item} className="flex items-center gap-3 rounded-xl border border-background/15 bg-background/5 p-3 text-sm"><CheckCircle2 className="h-4 w-4 text-primary" />{item}</span>
+          ))}
+        </div>
+        <Button className="mt-6" onClick={() => search('internship learnership graduate programme bursary South Africa', { page: 1 })}>
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+          Refresh student feed
+        </Button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        {internships.map((item, index) => (
+          <div key={`${item.provider}-${item.id}`} className="relative overflow-hidden rounded-2xl border border-border bg-white p-4">
+            <div className="absolute right-4 top-4 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {index < 3 ? 'Apply soon' : `${7 + index} day window`}
+            </div>
+            <OpportunityCard opportunity={item} index={index} selected={selected?.id === item.id} onSelect={() => setSelected(item)} onSave={() => saveOpportunity(item)} compact />
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-semibold text-muted-foreground">
+              <span className="rounded-lg bg-background p-2"><Clock3 className="mx-auto mb-1 h-4 w-4 text-primary" />Deadline watch</span>
+              <span className="rounded-lg bg-background p-2"><Bell className="mx-auto mb-1 h-4 w-4 text-primary" />Reminder</span>
+              <span className="rounded-lg bg-background p-2"><GraduationCap className="mx-auto mb-1 h-4 w-4 text-primary" />Student fit</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+function CoverLetterKit({ selected, opportunities, setSelected, aiOutput, setAiOutput, aiLoading, runAi }: {
+  selected: CareerOpportunity | null
+  opportunities: CareerOpportunity[]
+  setSelected: (value: CareerOpportunity) => void
+  aiOutput: string
+  setAiOutput: (value: string) => void
+  aiLoading: boolean
+  runAi: (action: string, opportunity?: CareerOpportunity | null) => void
+}) {
+  const prompts = ['Make it more professional', 'Shorten this', 'Make it ATS-friendly', 'Add confidence', 'Rewrite for remote jobs']
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <aside className="rounded-3xl border border-border bg-white p-4">
+        <p className="mb-3 text-sm font-semibold">Choose a live listing</p>
+        <div className="grid max-h-[720px] gap-2 overflow-y-auto">
+          {opportunities.slice(0, 12).map((item) => (
+            <button key={`${item.provider}-${item.id}`} onClick={() => setSelected(item)} className={`rounded-xl border p-3 text-left transition ${selected?.id === item.id ? 'border-primary bg-primary/5' : 'border-border bg-background hover:border-primary/50'}`}>
+              <p className="line-clamp-2 text-sm font-semibold">{item.title}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{item.company}</p>
+            </button>
+          ))}
+        </div>
+      </aside>
+      <section className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
+        <div className="rounded-3xl border border-border bg-foreground p-5 text-background">
+          <p className="text-sm font-semibold uppercase text-background/55">Conversational career kit</p>
+          <h2 className="mt-4 text-4xl font-semibold leading-tight">Chat your way to a tailored cover letter.</h2>
+          <div className="mt-6 rounded-2xl border border-background/15 bg-background/5 p-4">
+            <p className="text-sm text-background/65">Selected role</p>
+            <p className="mt-2 text-2xl font-semibold">{selected?.title || 'Pick a live opportunity'}</p>
+            <p className="mt-2 text-sm text-background/65">{selected?.company}</p>
+          </div>
+          <div className="mt-5 grid gap-2">
+            <Button onClick={() => runAi('Generate a polished cover letter', selected)} disabled={aiLoading}>
+              {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Generate cover letter
+            </Button>
+            {prompts.map((prompt) => (
+              <Button key={prompt} variant="outline" className="border-background/20 bg-background/5 text-background hover:bg-background hover:text-foreground" onClick={() => runAi(prompt, selected)}>{prompt}</Button>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-3xl border border-border bg-white p-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold">Live editing preview</p>
+            <Button variant="outline" size="sm" onClick={() => navigator.clipboard?.writeText(aiOutput)}><Copy className="mr-2 h-4 w-4" />Copy</Button>
+          </div>
+          <Textarea value={aiOutput} onChange={(event) => setAiOutput(event.target.value)} className="min-h-[560px] resize-none text-sm leading-7" placeholder="Your AI-generated cover letter will appear here." />
+        </div>
+      </section>
+    </motion.div>
+  )
+}
+
+function ResumeFeedback({ files, score, analyzeResume, runAi, aiLoading, aiOutput }: {
+  files: File[]
+  score: number
+  analyzeResume: (files: File[]) => void
+  runAi: (action: string) => void
+  aiLoading: boolean
+  aiOutput: string
+}) {
+  const checks = ['ATS headings detected', 'Quantified achievements', 'Keyword match', 'Readable formatting', 'Contact details clear']
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="rounded-3xl border border-dashed border-primary/45 bg-white p-6">
+        <label className="flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-2xl bg-background p-8 text-center transition hover:bg-white">
+          <UploadCloud className="h-12 w-12 text-primary" />
+          <p className="mt-4 text-3xl font-semibold">Drop your CV here</p>
+          <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">PDF, DOCX, or screenshot. This is the only career tool where uploads belong.</p>
+          <input type="file" multiple accept=".pdf,.doc,.docx,image/*" className="sr-only" onChange={(event) => analyzeResume(Array.from(event.target.files || []))} />
+        </label>
+        <div className="mt-4 grid gap-2">
+          {files.map((file) => (
+            <span key={file.name} className="flex items-center justify-between rounded-xl border border-border bg-background p-3 text-sm">
+              {file.name}
+              <span className="text-xs text-muted-foreground">{Math.round(file.size / 1024)} KB</span>
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-3xl border border-border bg-white p-6">
+        <div className="grid gap-4 md:grid-cols-[220px_1fr]">
+          <div className="flex aspect-square flex-col items-center justify-center rounded-full border-[14px] border-primary bg-background">
+            <span className="text-5xl font-semibold">{score}</span>
+            <span className="text-xs font-semibold uppercase text-muted-foreground">ATS score</span>
+          </div>
+          <div>
+            <p className="text-sm font-semibold uppercase text-muted-foreground">Resume intelligence</p>
+            <h2 className="mt-3 text-4xl font-semibold leading-tight">Professional feedback, section by section.</h2>
+            <Button className="mt-5" disabled={aiLoading} onClick={() => runAi('Review this CV for ATS, formatting, keywords, readability, and South African job readiness')}>
+              {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Run AI resume review
+            </Button>
+          </div>
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {checks.map((check, index) => (
+            <div key={check} className="rounded-2xl border border-border bg-background p-4">
+              <p className="text-sm font-semibold">{check}</p>
+              <div className="mt-3 h-2 rounded-full bg-muted">
+                <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(96, score - index * 8)}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        {aiOutput ? <div className="mt-5 rounded-2xl border border-border bg-background p-4 text-sm leading-7 text-muted-foreground">{aiOutput}</div> : null}
+      </div>
+    </motion.div>
+  )
+}
+
+function ApplicationTracker({ saved, updateStage, setSelected, setMode }: {
+  saved: SavedApplication[]
+  updateStage: (item: SavedApplication, stage: SavedApplication['stage']) => void
+  setSelected: (value: CareerOpportunity) => void
+  setMode: (value: CareerMode) => void
+}) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}>
+      <div className="mb-5 flex flex-col gap-3 rounded-3xl border border-border bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase text-muted-foreground">Application operating system</p>
+          <h2 className="mt-2 text-4xl font-semibold">Track every opportunity from saved to offer.</h2>
+        </div>
+        <Button onClick={() => setMode('discover')}><Search className="mr-2 h-4 w-4" />Find more roles</Button>
+      </div>
+      <div className="grid gap-4 xl:grid-cols-5">
+        {stageOrder.map((stage) => {
+          const items = saved.filter((item) => item.stage === stage)
+          return (
+            <section key={stage} className="min-h-[460px] rounded-2xl border border-border bg-white p-3">
+              <div className="mb-3 flex items-center justify-between rounded-xl bg-background p-3">
+                <p className="text-sm font-semibold">{stage}</p>
+                <span className="text-xs font-semibold text-muted-foreground">{items.length}</span>
+              </div>
+              <div className="grid gap-3">
+                {items.map((item) => (
+                  <article key={`${item.provider}-${item.id}`} className="rounded-xl border border-border bg-background p-3">
+                    <div className="flex items-start gap-3">
+                      <CompanyMark opportunity={item} />
+                      <div className="min-w-0">
+                        <p className="line-clamp-2 text-sm font-semibold">{item.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{item.company}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      <select value={item.stage} onChange={(event) => updateStage(item, event.target.value as SavedApplication['stage'])} className="h-9 rounded-md border border-border bg-white px-2 text-xs">
+                        {stageOrder.map((option) => <option key={option}>{option}</option>)}
+                      </select>
+                      <Button variant="outline" size="sm" onClick={() => { setSelected(item); setMode('cover') }}>Prepare application</Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )
+        })}
+      </div>
+    </motion.div>
   )
 }

@@ -112,6 +112,7 @@ export async function fetchAdzunaOpportunities(params: CareerSearchParams): Prom
     ...resolveCompanyBrand(item.company?.display_name || 'Unknown company'),
     location: item.location?.display_name || params.location,
     country: country.toUpperCase(),
+    countryCode: country,
     remote: /remote/i.test(`${item.title} ${item.description} ${item.location?.display_name || ''}`),
     salary: formatSalary(item),
     description: item.description || '',

@@ -59,6 +59,7 @@ export async function fetchJSearchOpportunities(params: CareerSearchParams): Pro
     ...resolveCompanyBrand(item.employer_name || 'Unknown company', item.employer_logo),
     location: formatLocation(item, params.location),
     country: item.job_country,
+    countryCode: item.job_country?.toLowerCase() || params.country,
     remote: Boolean(item.job_is_remote),
     salary: formatSalary(item),
     description: item.job_description || '',
