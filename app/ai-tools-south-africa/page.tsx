@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SitePageShell } from '@/components/site-layout'
+import { buildMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'AI Tools South Africa | SONKE Studio',
-  description: 'Discover SONKE Studio, a South African AI tools ecosystem by BDL Corp and Zama Shange for students, creators, developers, and businesses.',
+  description: 'Discover SONKE Studio, a South African AI tools ecosystem by BDL Corp and Zama Shange for students, creators, developers, businesses, and everyday users.',
+  path: '/ai-tools-south-africa',
   keywords: ['AI tools South Africa', 'South African AI tools', 'SONKE Studio', 'BDL Corp', 'Zama Shange'],
-}
+})
 
 export default function Page() {
   return (

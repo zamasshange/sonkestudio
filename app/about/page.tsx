@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { SitePageShell } from '@/components/site-layout'
+import { buildMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'About SONKE Studio',
-  description:
-    'SONKE Studio is a South African AI ecosystem founded by Zama Shange under BDL Corp, built to make AI useful, human, and practical for real people.',
-}
+export const metadata: Metadata = buildMetadata({
+  title: 'About SONKE Studio | BDL Corp & Zama Shange',
+  description: 'Learn about SONKE Studio, the South African AI productivity ecosystem founded by Zama Shange under BDL Corp for students, creators, developers, and businesses.',
+  path: '/about',
+  keywords: ['SONKE Studio', 'BDL Corp', 'Zama Shange', 'South African AI platform', 'AI productivity ecosystem'],
+})
 
 export default function AboutPage() {
   return (

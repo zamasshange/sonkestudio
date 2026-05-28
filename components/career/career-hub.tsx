@@ -187,10 +187,18 @@ function OpportunityCard({
   )
 }
 
-export function CareerHub() {
-  const [mode, setMode] = useState<CareerMode>('discover')
-  const [query, setQuery] = useState('internship graduate program learnership entry level')
-  const [location, setLocation] = useState('South Africa')
+export function CareerHub({
+  initialMode = 'discover',
+  initialQuery = 'internship graduate program learnership entry level',
+  initialLocation = 'South Africa',
+}: {
+  initialMode?: CareerMode
+  initialQuery?: string
+  initialLocation?: string
+}) {
+  const [mode, setMode] = useState<CareerMode>(initialMode)
+  const [query, setQuery] = useState(initialQuery)
+  const [location, setLocation] = useState(initialLocation)
   const [country, setCountry] = useState('za')
   const [remoteOnly, setRemoteOnly] = useState(false)
   const [company, setCompany] = useState('')

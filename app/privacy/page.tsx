@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { SitePageShell } from '@/components/site-layout'
+import { buildMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'Privacy Policy | SONKE Studio',
-  description: 'Privacy Policy for SONKE Studio by BDL Corp.',
-}
+  description: 'Privacy Policy for SONKE Studio by BDL Corp, covering account data, analytics, tool usage, storage, and platform security.',
+  path: '/privacy',
+  keywords: ['SONKE Studio privacy policy', 'BDL Corp privacy', 'AI tools privacy'],
+})
 
 export default function PrivacyPage() {
   return (

@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SitePageShell } from '@/components/site-layout'
+import { buildMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'AI Tools for Students | SONKE Studio',
-  description: 'Discover AI tools for students in SONKE Studio, including tutoring, flashcards, homework help, and exam prep workflows.',
+  description: 'Discover AI tools for students including tutoring, flashcards, homework help, citation tools, quiz generation, exam prep, and study planning.',
+  path: '/ai-tools-for-students',
   keywords: ['AI tools for students', 'student AI tools South Africa', 'SONKE student tools', 'flashcard generator'],
-}
+})
 
 export default function Page() {
   return (

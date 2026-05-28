@@ -4,12 +4,20 @@ const siteUrl = 'https://sonkestudio.co.za'
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/api/', '/account/'],
-    },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/api/', '/account/', '/onboarding/', '/sign-in/', '/sign-up/'],
+      },
+    ],
+    sitemap: [
+      `${siteUrl}/sitemap.xml`,
+      `${siteUrl}/sitemap-pages.xml`,
+      `${siteUrl}/sitemap-tools.xml`,
+      `${siteUrl}/sitemap-categories.xml`,
+      `${siteUrl}/sitemap-careers.xml`,
+    ],
     host: siteUrl,
   }
 }

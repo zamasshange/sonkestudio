@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SitePageShell } from '@/components/site-layout'
+import { buildMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'AI Tools for Creators | SONKE Studio',
-  description: 'SONKE Studio offers AI tools for creators including captions, hooks, content ideas, and platform-specific creative workflows.',
+  description: 'Explore AI tools for creators including caption generators, hooks, hashtags, content calendars, LinkedIn posts, TikTok ideas, and YouTube title tools.',
+  path: '/ai-tools-for-creators',
   keywords: ['AI tools for creators', 'creator AI tools', 'SONKE creator tools', 'caption generator AI'],
-}
+})
 
 export default function Page() {
   return (
