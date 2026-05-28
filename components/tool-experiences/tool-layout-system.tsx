@@ -20,6 +20,7 @@ import { LinkShortenerLayout } from './layouts/link-shortener-layout'
 import { TempNotesLayout } from './layouts/temp-notes-layout'
 import { EmailWorkspaceLayout } from './layouts/email-workspace-layout'
 import { DocumentAiWorkspaceLayout } from './layouts/document-ai-workspace-layout'
+import { SouthAfricanIdValidatorLayout } from './layouts/sa-id-validator-layout'
 import {
   CitationWorkbenchLayout,
   ExamPrepSprintLayout,
@@ -95,6 +96,10 @@ export function ToolExperienceSystem({ tool }: ToolExperienceProps) {
 
   if (tool.id === 'temp-notes') {
     return <TempNotesLayout tool={tool} />
+  }
+
+  if (tool.id === 'south-african-id-validator') {
+    return <SouthAfricanIdValidatorLayout tool={tool} />
   }
 
   const utilityPurposeIds = new Set([

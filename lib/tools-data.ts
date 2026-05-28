@@ -272,6 +272,7 @@ export const tools: Tool[] = [
   { id: 'unit-converter', name: 'Unit Converter', description: 'Convert any unit instantly', icon: FaRuler, iconColor: '#16A34A', iconBg: '#f0fdf4', category: 'everyday', tags: ['unit', 'convert', 'measurement'], href: '/tools/utility/unit', usageCount: 167000 },
   { id: 'currency-converter', name: 'Currency Converter', description: 'Convert currencies in real-time', icon: FaDollarSign, iconColor: '#16A34A', iconBg: '#f0fdf4', category: 'everyday', tags: ['currency', 'convert', 'money'], href: '/tools/utility/currency', usageCount: 145000 },
   { id: 'timezone-converter', name: 'Time Zone Converter', description: 'Convert time zones easily', icon: FaClock, iconColor: '#2563EB', iconBg: '#eff6ff', category: 'everyday', tags: ['timezone', 'time', 'convert'], href: '/tools/utility/timezone', usageCount: 89000 },
+  { id: 'south-african-id-validator', name: 'South African ID Validator', description: 'Validate SA ID numbers, age, gender, citizenship, and checksum locally', icon: FaFingerprint, iconColor: '#0F766E', iconBg: '#ecfdf5', category: 'everyday', tags: ['south african id checker', 'sa id validator', 'id verification', 'age checker'], trending: true, featured: true, href: '/tools/south-african-id-validator', usageCount: 118000 },
   { id: 'random-generator', name: 'Random Generator', description: 'Generate random numbers/text', icon: FaRandom, iconColor: '#DB2777', iconBg: '#fdf2f8', category: 'everyday', tags: ['random', 'generator'], href: '/tools/utility/random', usageCount: 67000 },
   { id: 'text-compare', name: 'Text Compare', description: 'Compare two texts side by side', icon: FaExchangeAlt, iconColor: '#0891B2', iconBg: '#ecfeff', category: 'everyday', tags: ['text', 'compare', 'diff'], href: '/tools/utility/compare', usageCount: 78000 },
   { id: 'case-converter', name: 'Case Converter', description: 'Convert text case instantly', icon: FaFont, iconColor: '#111827', iconBg: '#f3f4f6', category: 'everyday', tags: ['case', 'convert', 'text'], href: '/tools/utility/case', usageCount: 98000 },
@@ -330,6 +331,7 @@ export const newTools = tools.filter(t => t.new)
 export const southAfricaPriorityToolIds = [
   'currency-converter',
   'timezone-converter',
+  'south-african-id-validator',
   'ai-humanizer',
   'ai-email',
   'ai-paraphraser',
