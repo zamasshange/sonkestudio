@@ -3,6 +3,7 @@ import { fetchAdzunaOpportunities, getAdzunaMissingConfig, hasAdzunaConfig } fro
 import { fetchJSearchOpportunities, hasJSearchConfig } from '@/lib/apis/jsearch'
 import {
   CareerOpportunity,
+  CareerProvider,
   CareerSearchParams,
   localFallbackOpportunities,
   normalizeCountry,
@@ -50,20 +51,34 @@ function mergeOpportunities(live: CareerOpportunity[]) {
     .sort((a, b) => scoreOpportunity(b) - scoreOpportunity(a))
 }
 
+async function loadProvider(
+  provider: Exclude<CareerProvider, 'sonke'>,
+  loader: () => Promise<CareerOpportunity[]>,
+) {
+  try {
+    return { provider, opportunities: await loader(), error: null }
+  } catch (error) {
+    console.error(`[career:provider:${provider}]`, error)
+    return {
+      provider,
+      opportunities: [],
+      error: error instanceof Error ? error.message : `${provider} failed`,
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   const params = parseSearch(request)
-  const settled = await Promise.allSettled([fetchJSearchOpportunities(params), fetchAdzunaOpportunities(params)])
+  const [jsearchResult, adzunaResult] = await Promise.all([
+    loadProvider('jsearch', () => fetchJSearchOpportunities(params)),
+    loadProvider('adzuna', () => fetchAdzunaOpportunities(params)),
+  ])
   const providerCounts = {
-    jsearch: settled[0].status === 'fulfilled' ? settled[0].value.length : 0,
-    adzuna: settled[1].status === 'fulfilled' ? settled[1].value.length : 0,
+    jsearch: jsearchResult.opportunities.length,
+    adzuna: adzunaResult.opportunities.length,
   }
-  const live = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
+  const live = [...jsearchResult.opportunities, ...adzunaResult.opportunities]
   const opportunities = mergeOpportunities(live)
-  settled.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      console.error(`[career:provider:${index === 0 ? 'jsearch' : 'adzuna'}]`, result.reason)
-    }
-  })
 
   return NextResponse.json({
     opportunities: opportunities.length ? opportunities : localFallbackOpportunities(params),
@@ -73,10 +88,10 @@ export async function GET(request: NextRequest) {
       adzunaMissing: getAdzunaMissingConfig(),
     },
     providerErrors: process.env.NODE_ENV === 'development' ? {
-      jsearch: settled[0].status === 'rejected' ? settled[0].reason?.message || 'JSearch failed' : null,
+      jsearch: jsearchResult.error,
       adzuna: getAdzunaMissingConfig().length
         ? `Missing ${getAdzunaMissingConfig().join(', ')}`
-        : settled[1].status === 'rejected' ? settled[1].reason?.message || 'Adzuna failed' : null,
+        : adzunaResult.error,
     } : undefined,
     source: opportunities.length ? 'live' : 'fallback',
     meta: {
@@ -89,6 +104,10 @@ export async function GET(request: NextRequest) {
     requiredEnv: {
       jsearch: 'JSEARCH_API_KEY + JSEARCH_API_HOST',
       adzuna: 'ADZUNA_APP_ID + ADZUNA_API_KEY',
+    },
+  }, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
     },
   })
 }

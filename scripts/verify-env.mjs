@@ -15,6 +15,9 @@ const env = Object.fromEntries(
 const isPlaceholder = (value) =>
   !value || /^YOUR_/i.test(value) || /placeholder/i.test(value)
 
+const hasNoWrapperWhitespace = (value) =>
+  typeof value === 'string' && value === value.trim() && !/^["']|["']$/.test(value)
+
 const checks = [
   {
     name: 'Clerk publishable key',
@@ -44,6 +47,22 @@ const checks = [
       (env.SUPABASE_SECRET_KEY ?? '').startsWith('sb_secret_') ||
       (env.SUPABASE_SERVICE_ROLE_KEY ?? '').startsWith('eyJ'),
     optional: true,
+  },
+  {
+    name: 'JSearch API key',
+    ok: hasNoWrapperWhitespace(env.JSEARCH_API_KEY) && env.JSEARCH_API_KEY === '789a6d18c5msh284a5e1ca0f6be7p1d98adjsn6c442662cbaa',
+  },
+  {
+    name: 'JSearch API host',
+    ok: hasNoWrapperWhitespace(env.JSEARCH_API_HOST) && env.JSEARCH_API_HOST === 'jsearch.p.rapidapi.com',
+  },
+  {
+    name: 'Adzuna app ID',
+    ok: hasNoWrapperWhitespace(env.ADZUNA_APP_ID) && env.ADZUNA_APP_ID === 'a4ffdb8a',
+  },
+  {
+    name: 'Adzuna API key',
+    ok: hasNoWrapperWhitespace(env.ADZUNA_API_KEY) && env.ADZUNA_API_KEY === 'f664298cb06676b5be2bb1281aca7e4e',
   },
 ]
 

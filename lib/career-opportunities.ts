@@ -73,6 +73,20 @@ const knownCompanyDomains: Record<string, string> = {
   'fidelity services group': 'fidelity-services.com',
 }
 
+function inferSouthAfricanDomain(company: string) {
+  const slug = company
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9 ]+/g, '')
+    .trim()
+    .split(/\s+/)
+    .filter((part) => !['pty', 'ltd', 'limited', 'group', 'company', 'the'].includes(part))
+    .slice(0, 2)
+    .join('')
+
+  return slug.length > 2 ? `${slug}.co.za` : undefined
+}
+
 export function getCompanyInitials(company: string) {
   return company
     .split(/\s+/)
@@ -84,7 +98,7 @@ export function getCompanyInitials(company: string) {
 
 export function inferCompanyDomain(company: string) {
   const normalized = company.toLowerCase().replace(/[^a-z0-9 ]+/g, '').trim()
-  return knownCompanyDomains[normalized] || knownCompanyDomains[normalized.split(' ')[0]]
+  return knownCompanyDomains[normalized] || knownCompanyDomains[normalized.split(' ')[0]] || inferSouthAfricanDomain(company)
 }
 
 export function resolveCompanyBrand(company: string, logoUrl?: string) {

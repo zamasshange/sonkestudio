@@ -313,6 +313,49 @@ Return a practical, encouraging, South Africa-aware response for students, gradu
       <section className="px-5 pb-12 sm:px-8">
         <div className="mx-auto grid max-w-[1720px] gap-5 xl:grid-cols-[360px_minmax(0,1fr)_360px]">
           <aside className="space-y-4 xl:sticky xl:top-28 xl:h-fit">
+            {selected ? (
+              <div className="rounded-2xl border border-border bg-white/90 p-4 backdrop-blur">
+                <div className="flex items-start gap-4">
+                  <CompanyMark opportunity={selected} size="lg" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase text-muted-foreground">{selected.source || selected.provider}</p>
+                    <h2 className="mt-1 line-clamp-3 text-2xl font-semibold leading-tight">{selected.title}</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">{selected.company}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-2 text-sm">
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><MapPin className="h-4 w-4 text-primary" /> {selected.location}</span>
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><BriefcaseBusiness className="h-4 w-4 text-primary" /> {selected.employmentType || 'Opportunity'}</span>
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><CalendarDays className="h-4 w-4 text-primary" /> {formatPostedDate(selected.postedAt)}</span>
+                  {selected.salary && <span className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2"><Wallet className="h-4 w-4 text-primary" /> {selected.salary}</span>}
+                </div>
+
+                <div className="mt-4 rounded-xl border border-border bg-background p-3">
+                  <p className="text-sm font-semibold">Full opportunity brief</p>
+                  <p className="mt-2 max-h-[280px] overflow-y-auto whitespace-pre-line text-sm leading-6 text-muted-foreground">
+                    {selected.description || 'No detailed description was provided by the source. Use the apply link for the full listing.'}
+                  </p>
+                </div>
+
+                <div className="mt-4 grid gap-2">
+                  {selected.url && (
+                    <Button asChild>
+                      <a href={selected.url} target="_blank" rel="noreferrer">Apply now <ExternalLink className="ml-2 h-4 w-4" /></a>
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={() => runAi('Create a targeted cover letter for this opportunity', selected)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    AI cover letter
+                  </Button>
+                  <Button variant="outline" onClick={() => runAi('Prepare interview questions and answers for this opportunity', selected)}>
+                    <Video className="mr-2 h-4 w-4" />
+                    Interview prep
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
             <div className="rounded-2xl border border-border bg-white/85 p-4 backdrop-blur">
               <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><Search className="h-4 w-4" /> Opportunity Search</p>
               <div className="grid gap-2">

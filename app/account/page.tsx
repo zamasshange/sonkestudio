@@ -4,8 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Loader2 } from 'lucide-react'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { AccountWorkspace } from '@/components/account/account-workspace'
 import type { PreferenceDraft } from '@/components/auth/preference-picker'
 
@@ -56,9 +54,7 @@ export default function AccountPage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background">
-      <Navbar />
       <AccountWorkspace user={user} onSaveDesk={saveDesk} saving={saving} error={error} />
-      <Footer />
     </main>
   )
 }

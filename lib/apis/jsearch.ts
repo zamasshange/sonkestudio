@@ -40,7 +40,7 @@ export async function fetchJSearchOpportunities(params: CareerSearchParams): Pro
       'x-rapidapi-host': host,
       'x-rapidapi-key': key,
     },
-    next: { revalidate: 900 },
+    cache: 'no-store',
   })
 
   if (!response.ok) {

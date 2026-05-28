@@ -52,7 +52,7 @@ async function fetchWithRetry(urls: URL[]) {
       try {
         const response = await fetch(url, {
           headers: { Accept: 'application/json' },
-          next: { revalidate: 900 },
+          cache: 'no-store',
         })
 
         if (!response.ok) {

@@ -148,7 +148,7 @@ export default function OnboardingPage() {
   const progress = step === 'persona' ? 33 : step === 'details' ? 66 : 100
 
   return (
-    <main className="min-h-screen bg-background px-5 py-10 sm:px-8">
+    <main className="min-h-screen bg-background px-5 pb-16 pt-32 sm:px-8 lg:pt-36">
       <div className="mx-auto max-w-[760px]">
         <Link href="/" className="inline-flex h-14 w-40 items-center">
           <Image src={logoImage} alt="SONKE logo" className="h-full w-full object-contain object-left" />

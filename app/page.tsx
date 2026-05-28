@@ -1,5 +1,3 @@
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { SmartRecommendations } from '@/components/smart-recommendations'
 import {
   HeroSection,
@@ -15,8 +13,6 @@ import {
 export default function HomePage() {
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background">
-      <Navbar />
-      
       {/* Avoora-inspired Hero */}
       <HeroSection />
       
@@ -43,8 +39,6 @@ export default function HomePage() {
 
       {/* About + Vision (kept lower priority) */}
       <BrandStorySection />
-      
-      <Footer />
     </main>
   )
 }

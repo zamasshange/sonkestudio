@@ -7,6 +7,7 @@ import { ScrollRestoration } from '@/components/scroll-restoration'
 import { PostHogProvider } from '@/components/posthog-provider'
 import { OneSignalProvider } from '@/components/onesignal-provider'
 import { StreakBadge } from '@/components/streak-badge'
+import { SiteShell } from '@/components/site-layout'
 import './globals.css'
 
 const inter = Inter({
@@ -243,7 +244,7 @@ export default function RootLayout({
                 crossOrigin="anonymous"
                 strategy="afterInteractive"
               />
-              {children}
+              <SiteShell>{children}</SiteShell>
               <StreakBadge />
               {process.env.NODE_ENV === 'production' && <Analytics />}
             </body>

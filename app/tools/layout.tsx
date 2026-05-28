@@ -1,5 +1,3 @@
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
 import { Suspense } from 'react'
 import { Metadata } from 'next'
 
@@ -48,7 +46,6 @@ export default function ToolsLayout({
 }) {
   return (
     <div className="relative flex min-h-screen flex-col bg-background">
-      <Navbar />
       <main className="flex-1 pt-24">
         <Suspense fallback={
           <div className="min-h-screen flex items-center justify-center">
@@ -58,7 +55,6 @@ export default function ToolsLayout({
           {children}
         </Suspense>
       </main>
-      <Footer />
     </div>
   )
 }
