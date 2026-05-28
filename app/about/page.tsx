@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SitePageShell } from '@/components/site-layout'
 
 export const metadata: Metadata = {
   title: 'About SONKE Studio',
@@ -8,11 +9,13 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="bg-background px-5 py-28 sm:px-8">
-      <div className="mx-auto max-w-[1200px] space-y-6">
-        <section className="border border-border bg-white p-8 sm:p-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">About SONKE</p>
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">Together, powered by AI.</h1>
+    <SitePageShell
+      eyebrow="About SONKE"
+      title="Together, powered by AI."
+      maxWidth="max-w-[1200px]"
+    >
+      <div className="space-y-6">
+        <section>
           <p className="mt-5 max-w-4xl text-base leading-7 text-muted-foreground">
             SONKE means "together" in isiZulu. That meaning is our core philosophy: bringing people, productivity,
             creativity, education, and AI together in one intelligent ecosystem. SONKE was created because many AI
@@ -53,6 +56,6 @@ export default function AboutPage() {
           </article>
         </section>
       </div>
-    </main>
+    </SitePageShell>
   )
 }

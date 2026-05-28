@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { SitePageShell } from '@/components/site-layout'
 
 export const metadata: Metadata = {
   title: 'South African AI Platform | SONKE Studio',
@@ -9,16 +10,13 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="bg-background px-5 py-24 sm:px-8">
-      <div className="mx-auto max-w-5xl rounded-3xl border border-border bg-white p-8 sm:p-10">
-        <h1 className="text-4xl font-semibold text-foreground sm:text-5xl">South African AI Platform</h1>
-        <p className="mt-4 text-base leading-7 text-muted-foreground">SONKE Studio is built in South Africa for a global generation. The platform is designed to make AI useful, accessible, and workflow-ready.</p>
+    <SitePageShell eyebrow="SONKE Studio" title="South African AI Platform" maxWidth="max-w-5xl">
+        <p className="text-base leading-7 text-muted-foreground">SONKE Studio is built in South Africa for a global generation. The platform is designed to make AI useful, accessible, and workflow-ready.</p>
         <p className="mt-3 text-base leading-7 text-muted-foreground">Founded by Zama Shange and developed under BDL Corp, SONKE focuses on real outcomes through specialized systems, not random tool overload.</p>
-        <div className="mt-8 flex gap-3">
-          <Link href="/tools" className="rounded-full bg-foreground px-5 py-3 text-sm font-semibold text-background">Open Platform</Link>
-          <Link href="/about" className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground">Founder + Company</Link>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/tools" className="rounded-sm bg-foreground px-5 py-3 text-sm font-semibold text-background">Open Platform</Link>
+          <Link href="/about" className="rounded-sm border border-border px-5 py-3 text-sm font-semibold text-foreground">Founder + Company</Link>
         </div>
-      </div>
-    </main>
+    </SitePageShell>
   )
 }
