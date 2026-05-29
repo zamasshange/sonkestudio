@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/json-ld'
 import { ToolRuntimePage } from '@/components/tool-pages/tool-runtime-page'
 import { tools } from '@/lib/tools-data'
-import { absoluteUrl, breadcrumbJsonLd, toolJsonLd, toolMetadata, toolPathSegments } from '@/lib/seo'
+import { absoluteUrl, breadcrumbJsonLd, faqPageJsonLd, toolCanonicalPath, toolJsonLd, toolMetadata, toolPathSegments } from '@/lib/seo'
+import { buildToolSeoContent } from '@/lib/tool-seo-content'
 
 type ToolPageProps = {
   params: Promise<{ slug?: string[] }>
@@ -43,11 +44,12 @@ export default async function ToolFallbackPage({ params }: ToolPageProps) {
   return (
     <>
       <JsonLd data={toolJsonLd(tool)} />
+      <JsonLd data={faqPageJsonLd(buildToolSeoContent(tool).faqs)} />
       <JsonLd
         data={breadcrumbJsonLd([
           { name: 'SONKE Studio', url: absoluteUrl('/') },
           { name: 'Tools', url: absoluteUrl('/tools') },
-          { name: tool.name, url: absoluteUrl(tool.href) },
+          { name: tool.name, url: absoluteUrl(toolCanonicalPath(tool)) },
         ])}
       />
       <ToolRuntimePage toolId={tool.id} />

@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { JsonLd } from '@/components/json-ld'
 import { ToolRuntimePage } from '@/components/tool-pages/tool-runtime-page'
-import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo'
+import { tools } from '@/lib/tools-data'
+import { buildToolSeoContent } from '@/lib/tool-seo-content'
+import { absoluteUrl, breadcrumbJsonLd, faqPageJsonLd, toolJsonLd } from '@/lib/seo'
 
 const title = 'South African ID Validator - SA ID Checker'
 const description = 'Check South African ID number format locally. Validate birth date, exact age, gender, citizenship, and SA ID Luhn checksum without connecting to Home Affairs.'
 const url = absoluteUrl('/tools/south-african-id-validator')
+const tool = tools.find((item) => item.id === 'south-african-id-validator')
 
 export const metadata: Metadata = {
   title,
@@ -42,7 +45,7 @@ export default function SouthAfricanIdValidatorPage() {
   return (
     <>
       <JsonLd
-        data={{
+        data={tool ? toolJsonLd(tool) : {
           '@context': 'https://schema.org',
           '@type': 'SoftwareApplication',
           name: 'South African ID Validator',
@@ -51,14 +54,9 @@ export default function SouthAfricanIdValidatorPage() {
           url,
           description,
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'ZAR' },
-          featureList: [
-            'South African ID checker',
-            'SA ID age checker',
-            'Local SA ID checksum validation',
-            'Birth date, gender, and citizenship extraction',
-          ],
         }}
       />
+      {tool && <JsonLd data={faqPageJsonLd(buildToolSeoContent(tool).faqs)} />}
       <JsonLd
         data={breadcrumbJsonLd([
           { name: 'SONKE Studio', url: absoluteUrl('/') },

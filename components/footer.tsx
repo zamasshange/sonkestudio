@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, ArrowUp, Check, Sparkles, Zap } from 'lucide-react'
-import { SiInstagram, SiX } from 'react-icons/si'
+import { SiInstagram, SiTiktok, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 import { categories, tools, trendingTools } from '@/lib/tools-data'
 import faviconImage from '@/app/images/favicon.png'
@@ -188,13 +188,21 @@ export function Footer() {
           <p className="text-base text-muted-foreground">Copyright - SONKE Studio by BDL Corp | Built in South Africa for a global generation.</p>
           <div className="flex flex-wrap items-center gap-3">
             {[
-              { icon: SiInstagram, label: 'Instagram', color: '#E4405F' },
-              { icon: FaLinkedin, label: 'LinkedIn', color: '#0A66C2' },
-              { icon: SiX, label: 'X', color: '#111111' },
-            ].map(({ icon: Icon, label, color }) => (
-              <span key={label} className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border bg-background text-foreground" aria-label={label}>
+              { icon: SiInstagram, label: 'Instagram', color: '#E4405F', href: 'https://www.instagram.com/sonkestudio.co.za/' },
+              { icon: FaLinkedin, label: 'LinkedIn', color: '#0A66C2', href: 'https://www.linkedin.com/in/zama-shange-344166298/' },
+              { icon: SiTiktok, label: 'TikTok', color: '#111111', href: 'https://www.tiktok.com/@sonkestudio' },
+              { icon: SiX, label: 'X', color: '#111111', href: 'https://x.com/sonkestudio' },
+            ].map(({ icon: Icon, label, color, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border bg-background text-foreground transition hover:border-primary"
+                aria-label={`SONKE Studio on ${label}`}
+              >
                 <Icon className="h-5 w-5" style={{ color }} />
-              </span>
+              </a>
             ))}
             <Link href="/" className="inline-flex items-center gap-3 text-sm font-semibold uppercase text-foreground">
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-sm bg-primary text-primary-foreground">

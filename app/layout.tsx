@@ -10,6 +10,7 @@ import { PostHogProvider } from '@/components/posthog-provider'
 import { OneSignalProvider } from '@/components/onesignal-provider'
 import { StreakBadge } from '@/components/streak-badge'
 import { SiteShell } from '@/components/site-layout'
+import { sonkeSocialProfiles } from '@/lib/seo'
 import './globals.css'
 
 const inter = Inter({
@@ -17,7 +18,7 @@ const inter = Inter({
   variable: '--font-geist-sans',
 })
 
-const siteUrl = 'https://sonkestudio.co.za'
+const siteUrl = 'https://www.sonkestudio.co.za'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -199,11 +200,7 @@ export default async function RootLayout({
           '@type': 'Brand',
           name: 'SONKE Studio',
         },
-        sameAs: [
-          'https://twitter.com/sonkestudio',
-          'https://www.instagram.com/sonkestudio',
-          'https://www.linkedin.com/company/sonkestudio',
-        ],
+        sameAs: sonkeSocialProfiles,
         contactPoint: {
           '@type': 'ContactPoint',
           telephone: '+27-XX-XXX-XXXX',

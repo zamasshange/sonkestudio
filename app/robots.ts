@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const siteUrl = 'https://sonkestudio.co.za'
+const siteUrl = 'https://www.sonkestudio.co.za'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
       `${siteUrl}/sitemap-tools.xml`,
       `${siteUrl}/sitemap-categories.xml`,
       `${siteUrl}/sitemap-careers.xml`,
+      `${siteUrl}/sitemap-blog.xml`,
     ],
     host: siteUrl,
   }

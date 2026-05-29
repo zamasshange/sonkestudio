@@ -6,5 +6,6 @@ export function GET() {
     '/sitemap-tools.xml',
     '/sitemap-categories.xml',
     '/sitemap-careers.xml',
+    '/sitemap-blog.xml',
   ]))
 }

@@ -1,21 +1,21 @@
 import { Suspense } from 'react'
 import { Metadata } from 'next'
 
-const siteUrl = 'https://sonkestudio.co.za'
+const siteUrl = 'https://www.sonkestudio.co.za'
 
 export const metadata: Metadata = {
   title: {
-    default: 'SONKE Tools',
+    default: 'AI Productivity Tools, Developer Tools & Student Tools | SONKE Studio',
     template: '%s | SONKE Tools',
   },
-  description: 'Free AI-powered utility tools for students, creators, developers, and businesses. Convert files, generate content, and boost productivity.',
+  description: 'Browse SONKE Studio AI productivity tools, developer tools, student tools, business tools, document tools, creator tools, career tools, and everyday utilities built in South Africa.',
   openGraph: {
     type: 'website',
     locale: 'en_ZA',
     url: `${siteUrl}/tools`,
     siteName: 'SONKE',
-    title: 'SONKE Tools - AI-Powered Utility Tools',
-    description: 'Free AI-powered utility tools for students, creators, developers, and businesses. Convert files, generate content, and boost productivity.',
+    title: 'SONKE Studio Tools - AI Productivity, Developer, Student & Business Tools',
+    description: 'Free AI-powered utility tools for students, creators, developers, businesses, careers, and documents.',
     images: [
       {
         url: `${siteUrl}/og-image.png`,
@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SONKE Tools - AI-Powered Utility Tools',
-    description: 'Free AI-powered utility tools for students, creators, developers, and businesses.',
+    title: 'SONKE Studio Tools - AI Productivity Tools',
+    description: 'Browse AI productivity tools, developer tools, student tools, business tools, and document tools.',
   },
   alternates: {
     canonical: `${siteUrl}/tools`,

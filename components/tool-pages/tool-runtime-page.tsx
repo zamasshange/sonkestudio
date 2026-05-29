@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { ToolExperienceSystem } from '@/components/tool-experiences/tool-layout-system'
+import { ToolSeoSections } from '@/components/tool-seo-sections'
 import { tools } from '@/lib/tools-data'
 import { trackToolOpen } from '@/lib/gamification'
 
@@ -34,5 +35,10 @@ export function ToolRuntimePage({ toolId }: { toolId?: string }) {
     )
   }
 
-  return <ToolExperienceSystem tool={tool} />
+  return (
+    <>
+      <ToolExperienceSystem tool={tool} />
+      <ToolSeoSections tool={tool} />
+    </>
+  )
 }

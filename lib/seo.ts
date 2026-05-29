@@ -1,14 +1,23 @@
 import type { Metadata } from 'next'
 import { categories, tools, type Category, type Tool } from '@/lib/tools-data'
 
-export const siteUrl = 'https://sonkestudio.co.za'
+export const siteUrl = 'https://www.sonkestudio.co.za'
 export const defaultOgImage = `${siteUrl}/og-image.png`
+
+export const sonkeSocialProfiles = [
+  'https://www.instagram.com/sonkestudio.co.za/',
+  'https://x.com/sonkestudio',
+  'https://www.tiktok.com/@sonkestudio',
+  'https://www.linkedin.com/in/zama-shange-344166298/',
+] as const
 
 export const staticSeoPages = [
   { path: '/', title: 'SONKE Studio | South African AI Productivity Platform', priority: 1, changeFrequency: 'weekly' },
   { path: '/about', title: 'About SONKE Studio', priority: 0.9, changeFrequency: 'monthly' },
   { path: '/tools', title: 'SONKE Tools', priority: 0.95, changeFrequency: 'daily' },
   { path: '/career', title: 'Career Opportunity Hub', priority: 0.92, changeFrequency: 'daily' },
+  { path: '/blog', title: 'SONKE Blog', priority: 0.84, changeFrequency: 'weekly' },
+  { path: '/learn', title: 'SONKE Learn', priority: 0.84, changeFrequency: 'weekly' },
   { path: '/ai-tools-south-africa', title: 'AI Tools South Africa', priority: 0.85, changeFrequency: 'weekly' },
   { path: '/south-african-ai-platform', title: 'South African AI Platform', priority: 0.85, changeFrequency: 'weekly' },
   { path: '/ai-productivity-platform', title: 'AI Productivity Platform', priority: 0.85, changeFrequency: 'weekly' },
@@ -99,18 +108,35 @@ export function absoluteUrl(path: string) {
   return `${siteUrl}${path === '/' ? '' : path}`
 }
 
+export function toolCanonicalPath(tool: Tool) {
+  return tool.href.startsWith('/tools/') ? `/tools/${tool.id}` : tool.href
+}
+
 export function toolPathSegments(tool: Tool) {
-  return tool.href.replace(/^\/tools\//, '').split('/').filter(Boolean)
+  return toolCanonicalPath(tool).replace(/^\/tools\//, '').split('/').filter(Boolean)
 }
 
 export function toolSeoTitle(tool: Tool) {
-  const suffix = tool.category === 'career' ? 'Jobs in South Africa' : 'SONKE Studio'
-  return `${tool.name} | ${suffix}`
+  const titleOverrides: Record<string, string> = {
+    'json-formatter': 'JSON Formatter & Validator Online | SONKE Studio',
+    'pdf-to-word': 'PDF to Word Converter Online | SONKE Studio',
+    'word-to-pdf': 'Word to PDF Converter Online | SONKE Studio',
+    'south-african-id-validator': 'South African ID Validator | SONKE Studio',
+    'ai-resume-feedback': 'AI Resume Feedback Tool | SONKE Studio',
+    'internship-finder': 'Internship Finder for Students & Graduates | SONKE Studio',
+    'cover-letter': 'AI Cover Letter Generator | SONKE Studio',
+    'explain-code': 'Explain Code Online with AI | SONKE Studio',
+    'api-tester': 'API Tester Online for Developers | SONKE Studio',
+    'base64-encode': 'Base64 Encoder Online | SONKE Studio',
+  }
+  if (titleOverrides[tool.id]) return titleOverrides[tool.id]
+  const suffix = tool.category === 'career' ? 'South African Career Tools' : 'SONKE Studio'
+  return `${tool.name} Online | ${suffix}`
 }
 
 export function toolSeoDescription(tool: Tool) {
   const category = categories.find((item) => item.id === tool.category)?.name || 'AI tool'
-  return `${tool.description}. Use ${tool.name} inside SONKE Studio, a fast ${category.toLowerCase()} workspace built for students, creators, developers, businesses, and South African users.`
+  return `${tool.description}. Use SONKE Studio's ${tool.name} to complete ${category.toLowerCase()} work faster with focused features, related tools, and mobile-friendly workflows built in South Africa by BDL Corp.`
 }
 
 export function buildMetadata({
@@ -164,13 +190,17 @@ export function toolMetadata(tool: Tool): Metadata {
   return buildMetadata({
     title: toolSeoTitle(tool),
     description: toolSeoDescription(tool),
-    path: tool.href,
+    path: toolCanonicalPath(tool),
     keywords: [
       tool.name,
       ...tool.tags,
       category?.name || '',
       'SONKE Studio',
       'AI tools South Africa',
+      'AI productivity tools',
+      'developer tools online',
+      'student productivity tools',
+      'business tools online',
       'free online tool',
     ].filter(Boolean),
   })
@@ -178,10 +208,10 @@ export function toolMetadata(tool: Tool): Metadata {
 
 export function categoryMetadata(category: Category): Metadata {
   return buildMetadata({
-    title: `${category.name} | SONKE Studio`,
-    description: `${category.description}. Browse ${category.name.toLowerCase()} in SONKE Studio with purpose-built workflows, related tools, and fast mobile-friendly pages.`,
+    title: `${category.name} Online | SONKE Studio`,
+    description: `${category.description}. Browse indexable ${category.name.toLowerCase()} on SONKE Studio with related tools, search-focused workflows, and South African-built AI productivity features.`,
     path: `/tools/category/${category.id}`,
-    keywords: [category.name, category.description, 'SONKE Studio', 'AI productivity tools', 'South African AI tools'],
+    keywords: [category.name, category.description, 'SONKE Studio', 'AI productivity tools', 'South African AI tools', 'online productivity tools'],
   })
 }
 
@@ -200,21 +230,17 @@ export function organizationJsonLd() {
       '@type': 'Person',
       name: 'Zama Shange',
     },
-    sameAs: [
-      'https://twitter.com/sonkestudio',
-      'https://www.instagram.com/sonkestudio',
-      'https://www.linkedin.com/company/sonkestudio',
-    ],
+    sameAs: sonkeSocialProfiles,
   }
 }
 
 export function toolJsonLd(tool: Tool) {
   return {
     '@context': 'https://schema.org',
-    '@type': 'WebApplication',
+    '@type': 'SoftwareApplication',
     name: tool.name,
     description: toolSeoDescription(tool),
-    url: absoluteUrl(tool.href),
+    url: absoluteUrl(toolCanonicalPath(tool)),
     applicationCategory: categories.find((item) => item.id === tool.category)?.name || 'ProductivityApplication',
     operatingSystem: 'Web',
     offers: {
@@ -223,6 +249,51 @@ export function toolJsonLd(tool: Tool) {
       priceCurrency: 'ZAR',
     },
     publisher: organizationJsonLd(),
+  }
+}
+
+export function faqPageJsonLd(faqs: Array<{ question: string; answer: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  }
+}
+
+export function articleJsonLd({
+  title,
+  description,
+  path,
+  datePublished,
+  dateModified = datePublished,
+}: {
+  title: string
+  description: string
+  path: string
+  datePublished: string
+  dateModified?: string
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    url: absoluteUrl(path),
+    datePublished,
+    dateModified,
+    author: {
+      '@type': 'Person',
+      name: 'Zama Shange',
+    },
+    publisher: organizationJsonLd(),
+    mainEntityOfPage: absoluteUrl(path),
   }
 }
 

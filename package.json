@@ -7,7 +7,6 @@
     "dev:turbo": "next dev",
     "dev:webpack": "next dev --webpack",
     "build": "next build",
-    "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "eslint .",
     "verify:env": "node scripts/verify-env.mjs",

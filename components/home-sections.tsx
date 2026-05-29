@@ -12,7 +12,7 @@ import { useLocation } from '@/hooks/use-location'
 import { getHeroMessage } from '@/lib/smart-recommendations'
 import { isSouthAfricanUser } from '@/lib/sa-intelligence'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
-import { SiFacebook, SiInstagram, SiX } from 'react-icons/si'
+import { SiInstagram, SiTiktok, SiX } from 'react-icons/si'
 import { FaLinkedin } from 'react-icons/fa6'
 
 const imageBank = {
@@ -189,20 +189,24 @@ export function HeroSection() {
             <div className="pointer-events-none absolute right-5 top-12 hidden sm:block lg:right-8 lg:top-16">
               <div className="flex flex-col gap-2">
                 {[
-                  { icon: SiInstagram, label: 'Instagram' },
-                  { icon: FaLinkedin, label: 'LinkedIn' },
-                  { icon: SiFacebook, label: 'Facebook' },
-                  { icon: SiX, label: 'X' },
-                ].map(({ icon: Icon, label }, index) => (
-                  <motion.span
+                  { icon: SiInstagram, label: 'Instagram', href: 'https://www.instagram.com/sonkestudio.co.za/' },
+                  { icon: FaLinkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/in/zama-shange-344166298/' },
+                  { icon: SiTiktok, label: 'TikTok', href: 'https://www.tiktok.com/@sonkestudio' },
+                  { icon: SiX, label: 'X', href: 'https://x.com/sonkestudio' },
+                ].map(({ icon: Icon, label, href }, index) => (
+                  <motion.a
                     key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`SONKE Studio on ${label}`}
                     initial={{ opacity: 0, x: 22 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.35 + index * 0.08, duration: 0.55, ease: 'easeOut' }}
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#e4e0dc] text-foreground shadow-sm"
+                    className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#e4e0dc] text-foreground shadow-sm transition hover:bg-background"
                   >
                     <Icon className="h-5 w-5" style={{ color: '#1a1a1a' }} />
-                  </motion.span>
+                  </motion.a>
                 ))}
               </div>
             </div>
