@@ -151,17 +151,68 @@ Return 5 caption options with viralScore and engagement estimates.`
       if (!response.ok) throw new Error(data.error || 'Generation failed.')
 
       const content = data.result || data.choices?.[0]?.message?.content || ''
-      const mockOptions: CaptionOption[] = [
-        { id: '1', text: content.split('\n')[0] || content, score: 92, viralScore: 85, engagementEstimate: '45-65% likely to get 100+ interactions', bestFor: 'Maximum reach' },
-        { id: '2', text: 'Generated option 2', score: 88, viralScore: 78, engagementEstimate: '35-50% likely to get 50+ interactions', bestFor: 'Good balance' },
-        { id: '3', text: 'Generated option 3', score: 85, viralScore: 72, engagementEstimate: '30-45% likely to get 50+ interactions', bestFor: 'Community focus' },
-        { id: '4', text: 'Generated option 4', score: 81, viralScore: 68, engagementEstimate: '25-40% likely to get 30+ interactions', bestFor: 'Subtle approach' },
-        { id: '5', text: 'Generated option 5', score: 78, viralScore: 65, engagementEstimate: '20-35% likely to get 30+ interactions', bestFor: 'Experimental' },
-      ]
 
-      setCaptionOptions(mockOptions)
-      setSelectedOptionId(mockOptions[0].id)
-      setOutput(mockOptions[0].text)
+      if (!content || !content.trim()) {
+        throw new Error('No content was returned. Please try again.')
+      }
+
+      // Parse AI response to extract multiple options
+      const lines = content.split('\n').filter(line => line.trim())
+      let options: CaptionOption[] = []
+
+      // Try to parse numbered options (1., 2., etc.) or bullet points
+      const optionRegex = /^(?:\d+[\.)]|[-*•])\s*(.+)/g
+      const parsedOptions: string[] = []
+
+      lines.forEach(line => {
+        const match = line.match(/^(?:\d+[\.)]|[-*•])\s*(.+)/)
+        if (match && match[1]) {
+          parsedOptions.push(match[1].trim())
+        }
+      })
+
+      // If we found multiple options, use them
+      if (parsedOptions.length >= 2) {
+        options = parsedOptions.slice(0, 5).map((text, idx) => ({
+          id: String(idx + 1),
+          text: text,
+          score: Math.max(70, 95 - idx * 5),
+          viralScore: Math.max(60, 90 - idx * 7),
+          engagementEstimate: idx === 0 ? '45-65% likely to get 100+ interactions' : idx === 1 ? '35-50% likely to get 50+ interactions' : '25-40% likely to get 30+ interactions',
+          bestFor: idx === 0 ? 'Maximum reach' : idx === 1 ? 'Good balance' : idx === 2 ? 'Community focus' : 'Subtle approach'
+        }))
+      } else {
+        // If AI didn't return structured options, try to split by sentences or paragraphs
+        const contentOptions = content.split(/\n\n|\r\n\r\n/).filter(o => o.trim().length > 10)
+        if (contentOptions.length >= 2) {
+          options = contentOptions.slice(0, 5).map((text, idx) => ({
+            id: String(idx + 1),
+            text: text.trim(),
+            score: Math.max(70, 95 - idx * 5),
+            viralScore: Math.max(60, 90 - idx * 7),
+            engagementEstimate: idx === 0 ? '45-65% likely to get 100+ interactions' : idx === 1 ? '35-50% likely to get 50+ interactions' : '25-40% likely to get 30+ interactions',
+            bestFor: idx === 0 ? 'Maximum reach' : idx === 1 ? 'Good balance' : idx === 2 ? 'Community focus' : 'Subtle approach'
+          }))
+        } else {
+          // Fallback: use the full content as single option
+          options = [{
+            id: '1',
+            text: content,
+            score: 92,
+            viralScore: 85,
+            engagementEstimate: '45-65% likely to get 100+ interactions',
+            bestFor: 'Maximum reach'
+          }]
+        }
+      }
+
+      if (options.length === 0 || !options[0].text) {
+        throw new Error('No content was returned. Please try again.')
+      }
+
+      setCaptionOptions(options)
+      setSelectedOptionId(options[0].id)
+      setOutput(options[0].text)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed.')
     } finally {

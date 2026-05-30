@@ -380,8 +380,8 @@ Use the selected context to shape the result. If any context is blank, make a se
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to process text')
 
-      const content = data.result || data.choices?.[0]?.message?.content
-      if (!content) throw new Error('Invalid response format')
+      const content = data.result || data.choices?.[0]?.message?.content || ''
+      if (!content || !content.trim()) throw new Error('No content was returned. Please try again.')
 
       const key = `${toneToUse}-${modeToUse}`
       setOutputs((prev) => ({ ...prev, [key]: content }))

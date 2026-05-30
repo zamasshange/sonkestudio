@@ -53,8 +53,16 @@ Return:
         body: JSON.stringify({ tool: tool.id, text: prompt }),
       })
       const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Generation failed.')
+
       const content = data.result || data.choices?.[0]?.message?.content || ''
+      if (!content || !content.trim()) {
+        throw new Error('No content was returned. Please try again.')
+      }
+
       setAnalysis(content)
+    } catch (err) {
+      setAnalysis(err instanceof Error ? err.message : 'Generation failed.')
     } finally {
       setLoading(false)
     }
@@ -76,7 +84,16 @@ ${resumeText}`
         body: JSON.stringify({ tool: tool.id, text: prompt }),
       })
       const data = await response.json()
-      setImproved(data.result || data.choices?.[0]?.message?.content || '')
+      if (!response.ok) throw new Error(data.error || 'Generation failed.')
+
+      const content = data.result || data.choices?.[0]?.message?.content || ''
+      if (!content || !content.trim()) {
+        throw new Error('No content was returned. Please try again.')
+      }
+
+      setImproved(content)
+    } catch (err) {
+      setImproved(err instanceof Error ? err.message : 'Generation failed.')
     } finally {
       setLoading(false)
     }

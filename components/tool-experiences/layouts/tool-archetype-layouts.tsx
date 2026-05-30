@@ -17,7 +17,18 @@ async function runAi(tool: Tool, text: string) {
     body: JSON.stringify({ tool: tool.id, text, toolTitle: tool.name, toolDescription: tool.description }),
   })
   const data = await res.json()
-  return data.result || data.choices?.[0]?.message?.content || ''
+
+  if (!res.ok) {
+    throw new Error(data.error || 'Generation failed.')
+  }
+
+  const content = data.result || data.choices?.[0]?.message?.content || ''
+
+  if (!content || !content.trim()) {
+    throw new Error('No content was returned. Please try again.')
+  }
+
+  return content
 }
 
 export function UtilityArchetypeLayout({ tool }: { tool: Tool }) {

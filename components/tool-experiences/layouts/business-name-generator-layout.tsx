@@ -93,7 +93,13 @@ Return:
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Generation failed.')
-      setOutput(data.result || data.choices?.[0]?.message?.content || '')
+
+      const content = data.result || data.choices?.[0]?.message?.content || ''
+      if (!content || !content.trim()) {
+        throw new Error('No content was returned. Please try again.')
+      }
+
+      setOutput(content)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed.')
     } finally {
