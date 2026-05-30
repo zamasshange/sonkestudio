@@ -247,7 +247,7 @@ export default async function RootLayout({
                 />
                 <SiteShell>{children}</SiteShell>
                 <StreakBadge />
-                {process.env.NODE_ENV === 'production' && <Analytics />}
+                <Analytics />
               </body>
             </html>
           </OneSignalProvider>
@@ -278,7 +278,7 @@ export default async function RootLayout({
                   />
                   <SiteShell>{children}</SiteShell>
                   <StreakBadge />
-                  {process.env.NODE_ENV === 'production' && <Analytics />}
+                  <Analytics />
                 </body>
               </html>
             </OneSignalProvider>
