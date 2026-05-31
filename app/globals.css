@@ -268,8 +268,13 @@
     animation-delay: var(--caret-delay), calc(var(--caret-delay) + 0.82s);
   }
 
+  .sonke-rotating-line {
+    line-height: 1.2;
+  }
+
   .sonke-rotating-stack {
     animation: sonke-task-rotate 7.5s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+    will-change: transform;
   }
 
   /* Avoora-style button */

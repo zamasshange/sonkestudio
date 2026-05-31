@@ -46,13 +46,24 @@ type SavedApplication = CareerOpportunity & {
 
 type CareerApiResponse = {
   opportunities?: CareerOpportunity[]
-  source?: 'live' | 'fallback'
-  providers?: { jsearch: boolean; adzuna: boolean; adzunaMissing?: string[] }
+  source?: 'live' | 'empty'
+  error?: string | null
+  warning?: string | null
+  providers?: { jsearch: boolean; adzuna: boolean; jsearchPaused?: boolean; adzunaMissing?: string[] }
   providerErrors?: { jsearch?: string | null; adzuna?: string | null }
+  diagnostics?: {
+    jsearchConfigured?: boolean
+    adzunaConfigured?: boolean
+    jsearchReturned?: number
+    adzunaReturned?: number
+    mergedPool?: number
+  }
   meta?: {
     page: number
     perPage: number
     returned: number
+    livePoolSize?: number
+    totalLive?: number
     providerCounts: { jsearch: number; adzuna: number }
     hasMore: boolean
     refreshedAt?: string
@@ -208,7 +219,9 @@ export function CareerHub({
   const [saved, setSaved] = useState<SavedApplication[]>([])
   const [meta, setMeta] = useState<CareerApiResponse['meta']>()
   const [providers, setProviders] = useState<CareerApiResponse['providers']>({ jsearch: false, adzuna: false })
-  const [source, setSource] = useState<'live' | 'fallback'>('fallback')
+  const [source, setSource] = useState<'live' | 'empty'>('empty')
+  const [feedError, setFeedError] = useState<string | null>(null)
+  const [feedWarning, setFeedWarning] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [page, setPage] = useState(1)
@@ -223,8 +236,15 @@ export function CareerHub({
   const refreshTickRef = useRef(0)
 
   useEffect(() => {
-    const tool = new URLSearchParams(window.location.search).get('tool') as CareerMode | null
+    const params = new URLSearchParams(window.location.search)
+    const tool = params.get('tool') as CareerMode | null
     if (tool && modes.some((item) => item.id === tool)) setMode(tool)
+    const urlQuery = params.get('query')?.trim()
+    if (urlQuery) {
+      setQuery(urlQuery)
+      search(urlQuery, { page: 1 })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -249,13 +269,14 @@ export function CareerHub({
 
   const search = async (
     nextQuery = query,
-    options: { page?: number; append?: boolean; location?: string; remoteOnly?: boolean; company?: string; seed?: number; recent?: string[] } = {},
+    options: { page?: number; append?: boolean; location?: string; remoteOnly?: boolean; company?: string; seed?: number; recent?: string[]; fresh?: boolean } = {},
   ) => {
     const targetPage = options.page || 1
     const append = Boolean(options.append)
     if (append) setLoadingMore(true)
     else setLoading(true)
     try {
+      const fresh = Boolean(options.fresh)
       const params = new URLSearchParams({
         query: nextQuery,
         location: options.location ?? location,
@@ -263,15 +284,21 @@ export function CareerHub({
         remoteOnly: String(options.remoteOnly ?? remoteOnly),
         page: String(targetPage),
         perPage: '20',
-        seed: String(options.seed ?? Math.floor(Date.now() / 300000) + refreshTickRef.current),
+        seed: String(options.seed ?? Date.now() + refreshTickRef.current),
       })
-      const recent = options.recent ?? recentKeysRef.current
+      if (fresh) params.set('fresh', 'true')
+      const recent = fresh ? [] : (options.recent ?? recentKeysRef.current)
       if (recent.length) params.set('recent', recent.slice(0, 18).join(','))
       const nextCompany = options.company ?? company
       if (nextCompany) params.set('company', nextCompany)
       const response = await fetch(`/api/career/opportunities?${params}`, { cache: 'no-store' })
+      if (!response.ok) {
+        throw new Error(`Career feed returned ${response.status}`)
+      }
       const data: CareerApiResponse = await response.json()
       const nextOpportunities = data.opportunities || []
+      setFeedError(nextOpportunities.length ? null : (data.error || null))
+      setFeedWarning(nextOpportunities.length ? (data.warning || null) : null)
       if (nextOpportunities.length) {
         setRecentKeys((current) => {
           const rotated = [
@@ -287,15 +314,31 @@ export function CareerHub({
         return [...current, ...nextOpportunities.filter((item) => !seen.has(`${item.provider}-${item.id}`))]
       })
       setProviders(data.providers || { jsearch: false, adzuna: false })
-      setSource(data.source || 'fallback')
+      setSource(data.source === 'live' ? 'live' : 'empty')
       setMeta(data.meta)
       setPage(data.meta?.page || targetPage)
-      setHasMore(data.meta?.hasMore ?? nextOpportunities.length > 0)
+      setHasMore(Boolean(data.meta?.hasMore) && nextOpportunities.length > 0)
       if (!append) setSelected(nextOpportunities[0] || null)
+      if (!nextOpportunities.length && data.error) setFeedError(data.error)
+    } catch (error) {
+      setFeedError(error instanceof Error ? error.message : 'Unable to fetch opportunities. Try again in a moment.')
+      setFeedWarning(null)
+      setSource('empty')
+      if (!append) setOpportunities([])
     } finally {
       setLoading(false)
       setLoadingMore(false)
     }
+  }
+
+  const refreshFeed = () => {
+    refreshTickRef.current += 1
+    setRefreshTick(refreshTickRef.current)
+    search(query, {
+      page: 1,
+      fresh: true,
+      seed: Date.now() + refreshTickRef.current,
+    })
   }
 
   useEffect(() => {
@@ -303,8 +346,8 @@ export function CareerHub({
     const timer = window.setInterval(() => {
       refreshTickRef.current += 1
       setRefreshTick(refreshTickRef.current)
-      search(query, { page: 1, seed: Math.floor(Date.now() / 60000) + refreshTickRef.current, recent: recentKeysRef.current })
-    }, 120000)
+      search(query, { page: 1, fresh: true, seed: Date.now() + refreshTickRef.current })
+    }, 90000)
     return () => window.clearInterval(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, location, country, remoteOnly, company])
@@ -387,22 +430,45 @@ Return a practical, polished, job-ready response.`
                   <Sparkles className="h-8 w-8" />
                 </div>
                 <div>
-                  <p className="text-5xl font-semibold">{opportunities.length || 'AI'} roles</p>
+                  <p className="text-5xl font-semibold">{source === 'live' ? meta?.livePoolSize ?? opportunities.length : 0}</p>
+                  <p className="mt-1 text-sm text-background/60">live roles in current pool</p>
                   <p className="mt-3 text-sm leading-6 text-background/75">
-                    JSearch {providers?.jsearch ? 'connected' : 'offline'} / Adzuna {providers?.adzuna ? 'connected' : 'offline'} / {source === 'live' ? 'live feed' : 'fallback active'}
+                    JSearch {providers?.jsearch ? `on · ${meta?.providerCounts?.jsearch ?? 0}` : providers?.jsearchPaused ? 'paused (quota)' : 'off'}
+                    {' / '}
+                    Adzuna {providers?.adzuna ? `on · ${meta?.providerCounts?.adzuna ?? 0}` : 'off'}
                   </p>
                   <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                    {(meta?.trends?.categories || []).slice(0, 4).map(([label, count]) => (
-                      <span key={label} className="rounded-sm border border-background/15 bg-background/5 px-3 py-2 text-xs font-semibold uppercase text-background/70">
-                        {label} / {count}
+                    {source === 'live' && (meta?.trends?.categories || []).length ? (
+                      (meta?.trends?.categories || []).slice(0, 4).map(([label, count]) => (
+                        <span key={label} className="rounded-sm border border-background/15 bg-background/5 px-3 py-2 text-xs font-semibold uppercase text-background/70">
+                          {label} / {count}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="col-span-2 rounded-sm border border-background/15 bg-background/5 px-3 py-2 text-xs font-semibold uppercase text-background/70">
+                        No live aggregate yet
                       </span>
-                    ))}
+                    )}
                   </div>
                   <p className="mt-4 text-xs text-background/55">Refreshed {formatPostedDate(meta?.refreshedAt)}</p>
                 </div>
               </div>
             </motion.div>
           </div>
+
+          {feedWarning && source === 'live' ? (
+            <div className="mt-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950">
+              <p className="font-semibold">One provider is resting — listings still live</p>
+              <p className="mt-1 leading-6">{feedWarning}</p>
+            </div>
+          ) : null}
+
+          {(feedError && source === 'empty') ? (
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              <p className="font-semibold">No live opportunities available right now</p>
+              <p className="mt-1 leading-6">{feedError}</p>
+            </div>
+          ) : null}
 
           <div className="mt-5 grid gap-2 md:grid-cols-5">
             {modes.map((item) => (
@@ -420,8 +486,8 @@ Return a practical, polished, job-ready response.`
           <AnimatePresence mode="wait">
             {mode === 'discover' && (
               <motion.div key="discover" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)_360px]">
-                <SearchRail query={query} setQuery={setQuery} company={company} setCompany={setCompany} location={location} setLocation={setLocation} country={country} setCountry={setCountry} remoteOnly={remoteOnly} setRemoteOnly={setRemoteOnly} loading={loading} search={search} activeTrack={activeTrack} setActiveTrack={setActiveTrack} />
-                <OpportunityFeed loading={loading} opportunities={opportunities} selected={selected} setSelected={setSelected} saveOpportunity={saveOpportunity} page={page} hasMore={hasMore} loadingMore={loadingMore} search={search} query={query} />
+                <SearchRail query={query} setQuery={setQuery} company={company} setCompany={setCompany} location={location} setLocation={setLocation} country={country} setCountry={setCountry} remoteOnly={remoteOnly} setRemoteOnly={setRemoteOnly} loading={loading} search={search} activeTrack={activeTrack} setActiveTrack={setActiveTrack} refreshFeed={refreshFeed} source={source} feedError={feedError} />
+                <OpportunityFeed loading={loading} opportunities={opportunities} selected={selected} setSelected={setSelected} saveOpportunity={saveOpportunity} page={page} hasMore={hasMore} loadingMore={loadingMore} search={search} query={query} feedError={feedError} source={source} refreshFeed={refreshFeed} />
                 <InsightRail selected={selected} saved={saved} remoteJobs={remoteJobs} runAi={runAi} aiLoading={aiLoading} aiOutput={aiOutput} />
               </motion.div>
             )}
@@ -463,11 +529,28 @@ function SearchRail(props: {
   search: (query?: string, options?: any) => void
   activeTrack: string
   setActiveTrack: (value: string) => void
+  refreshFeed: () => void
+  source: 'live' | 'empty'
+  feedError: string | null
 }) {
   return (
     <aside className="space-y-4 xl:sticky xl:top-28 xl:h-fit">
       <div className="rounded-2xl border border-border bg-white/90 p-4 backdrop-blur">
-        <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><Search className="h-4 w-4" /> Live Search</p>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <p className="flex items-center gap-2 text-sm font-semibold"><Search className="h-4 w-4" /> Live Search</p>
+          <button
+            type="button"
+            onClick={props.refreshFeed}
+            disabled={props.loading}
+            className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground transition hover:border-primary hover:text-foreground disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 ${props.loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+        <p className="mb-3 text-xs text-muted-foreground">
+          {props.source === 'live' ? 'Live JSearch + Adzuna feed' : 'Real data only — no listings until providers respond'}
+        </p>
         <div className="grid gap-2">
           <Input value={props.query} onChange={(event) => props.setQuery(event.target.value)} placeholder="Role, keyword, category" />
           <Input value={props.company} onChange={(event) => props.setCompany(event.target.value)} placeholder="Company optional" />
@@ -522,12 +605,28 @@ function OpportunityFeed(props: {
   loadingMore: boolean
   search: (query?: string, options?: any) => void
   query: string
+  feedError: string | null
+  source: 'live' | 'empty'
+  refreshFeed: () => void
 }) {
   return (
     <section className="space-y-4">
       {props.loading && props.opportunities.length === 0 ? (
         <div className="grid gap-3">
           {Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-44 animate-pulse rounded-2xl border border-border bg-white" />)}
+        </div>
+      ) : null}
+      {!props.loading && props.opportunities.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-white/90 p-8 text-center">
+          <BriefcaseBusiness className="mx-auto h-10 w-10 text-muted-foreground" />
+          <p className="mt-4 text-lg font-semibold">No live opportunities available right now</p>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+            {props.feedError || 'Unable to fetch opportunities from live providers. Adjust your search or refresh the feed.'}
+          </p>
+          <Button className="mt-5" onClick={props.refreshFeed}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh live feed
+          </Button>
         </div>
       ) : null}
       <AnimatePresence mode="popLayout">
@@ -623,6 +722,16 @@ function InternshipFinder({ internships, loading, selected, setSelected, saveOpp
         </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
+        {!loading && internships.length === 0 ? (
+          <div className="col-span-2 rounded-2xl border border-dashed border-border bg-white p-8 text-center">
+            <p className="text-lg font-semibold">No live internships or learnerships right now</p>
+            <p className="mt-2 text-sm text-muted-foreground">Refresh the feed or broaden your search — only real API listings are shown.</p>
+            <Button className="mt-4" variant="outline" onClick={() => search('internship learnership graduate programme bursary South Africa', { page: 1, fresh: true })}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh student feed
+            </Button>
+          </div>
+        ) : null}
         {internships.map((item, index) => (
           <div key={`${item.provider}-${item.id}`} className="relative overflow-hidden rounded-2xl border border-border bg-white p-4">
             <div className="absolute right-4 top-4 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">

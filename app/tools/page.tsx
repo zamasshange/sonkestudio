@@ -234,6 +234,8 @@ export default function ToolsPage() {
 
   useEffect(() => {
     setActiveCategory(searchParams.get('category'))
+    const q = searchParams.get('q')?.trim()
+    if (q) setSearchQuery(q)
     if (searchParams.get('desk') === '1') {
       setShowMyDesk(true)
     }

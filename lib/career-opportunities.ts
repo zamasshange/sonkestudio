@@ -1,4 +1,4 @@
-export type CareerProvider = 'jsearch' | 'adzuna' | 'sonke'
+export type CareerProvider = 'jsearch' | 'adzuna'
 
 export type CareerOpportunity = {
   id: string
@@ -74,6 +74,38 @@ const knownCompanyDomains: Record<string, string> = {
   transnet: 'transnet.net',
   eskom: 'eskom.co.za',
   'fidelity services group': 'fidelity-services.com',
+  mtn: 'mtn.co.za',
+  'mtn group': 'mtn.com',
+  shoprite: 'shoprite.co.za',
+  checkers: 'shoprite.co.za',
+  picknpay: 'pnp.co.za',
+  'pick n pay': 'pnp.co.za',
+  woolworths: 'woolworths.co.za',
+  discovery: 'discovery.co.za',
+  nedbank: 'nedbank.co.za',
+  absa: 'absa.co.za',
+  fnb: 'fnb.co.za',
+  'first national bank': 'fnb.co.za',
+  capitec: 'capitecbank.co.za',
+  multichoice: 'multichoice.com',
+  naspers: 'naspers.com',
+  takealot: 'takealot.com',
+  outsurance: 'outsurance.co.za',
+  oldmutual: 'oldmutual.com',
+  'old mutual': 'oldmutual.com',
+  sasol: 'sasol.com',
+  angloamerican: 'angloamerican.com',
+  'anglo american': 'angloamerican.com',
+  dimensiondata: 'dimensiondata.com',
+  'dimension data': 'dimensiondata.com',
+  deloitte: 'deloitte.co.za',
+  kpmg: 'kpmg.co.za',
+  ey: 'ey.com',
+  'ernst young': 'ey.com',
+  mckinsey: 'mckinsey.com',
+  amazon: 'amazon.com',
+  google: 'google.com',
+  microsoft: 'microsoft.com',
 }
 
 function inferSouthAfricanDomain(company: string) {
@@ -100,8 +132,14 @@ export function getCompanyInitials(company: string) {
 }
 
 export function inferCompanyDomain(company: string) {
-  const normalized = company.toLowerCase().replace(/[^a-z0-9 ]+/g, '').trim()
-  return knownCompanyDomains[normalized] || knownCompanyDomains[normalized.split(' ')[0]] || inferSouthAfricanDomain(company)
+  const normalized = company.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim()
+  if (knownCompanyDomains[normalized]) return knownCompanyDomains[normalized]
+  const firstToken = normalized.split(' ')[0]
+  if (knownCompanyDomains[firstToken]) return knownCompanyDomains[firstToken]
+  for (const [key, domain] of Object.entries(knownCompanyDomains)) {
+    if (normalized.includes(key) || key.includes(normalized)) return domain
+  }
+  return inferSouthAfricanDomain(company)
 }
 
 export function resolveCompanyBrand(company: string, logoUrl?: string) {
@@ -153,34 +191,3 @@ export function buildCareerQuery(params: CareerSearchParams) {
   return parts.join(' ')
 }
 
-export function localFallbackOpportunities(params: CareerSearchParams): CareerOpportunity[] {
-  const query = params.query || 'student opportunity'
-  const location = params.location || 'South Africa'
-  const tracks = [
-    ['Graduate Software Developer Internship', 'SONKE Career Signal', 'Remote / Johannesburg', 'digital-skills'],
-    ['Marketing Graduate Programme', 'SA Growth Studio', 'Cape Town', 'graduate'],
-    ['Junior Creator Fellowship', 'Creator Economy Lab', 'Remote Africa', 'creator-economy'],
-    ['Data Analyst Learnership', 'Insight Skills Network', 'Pretoria', 'learnerships'],
-    ['Admin Assistant Entry Role', 'Mzansi Careers Desk', 'Durban', 'retail-admin'],
-    ['Youth Public Sector Internship', 'Civic Talent Network', 'Pretoria', 'government'],
-    ['Customer Support Learnership', 'SA Contact Centre Academy', 'Johannesburg', 'call-centre'],
-    ['Student Bursary Research Assistant', 'Campus Opportunity Signal', 'South Africa', 'bursaries'],
-  ] as const
-
-  return tracks.map(([title, company, place, category], index) => ({
-    id: `fallback-${category}-${index}`,
-    provider: 'sonke',
-    source: 'SONKE',
-    title,
-    company,
-    ...resolveCompanyBrand(company),
-    location: params.remoteOnly ? 'Remote Africa' : location || place,
-    country: 'ZA',
-    countryCode: 'za',
-    remote: params.remoteOnly || place.toLowerCase().includes('remote'),
-    salary: 'Market related',
-    description: `Curated ${query} pathway for students, graduates, junior talent, freelancers, and early-career builders. Use AI prep to tailor your CV and cover letter before applying.`,
-    employmentType: index === 0 ? 'Internship' : 'Graduate / Entry-level',
-    category,
-  }))
-}

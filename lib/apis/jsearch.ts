@@ -1,4 +1,5 @@
 import { buildCareerQuery, CareerOpportunity, CareerSearchParams, resolveCompanyBrand } from '@/lib/career-opportunities'
+import { isJSearchPaused, pauseJSearch } from '@/lib/apis/career-provider-state'
 
 function env(...names: string[]) {
   for (const name of names) {
@@ -21,7 +22,30 @@ function formatLocation(item: any, fallback: string) {
   return [item.job_city, item.job_state, item.job_country].filter(Boolean).join(', ') || fallback
 }
 
+function mapJSearchResults(data: any, params: CareerSearchParams): CareerOpportunity[] {
+  return (data.data || []).map((item: any): CareerOpportunity => ({
+    id: String(item.job_id || item.job_apply_link || item.job_title),
+    provider: 'jsearch',
+    source: 'JSearch',
+    title: item.job_title || 'Untitled role',
+    company: item.employer_name || 'Unknown company',
+    ...resolveCompanyBrand(item.employer_name || 'Unknown company', item.employer_logo),
+    location: formatLocation(item, params.location),
+    country: item.job_country,
+    countryCode: item.job_country?.toLowerCase() || params.country,
+    remote: Boolean(item.job_is_remote),
+    salary: formatSalary(item),
+    description: item.job_description || '',
+    url: item.job_apply_link || item.job_google_link,
+    postedAt: item.job_posted_at_datetime_utc,
+    employmentType: item.job_employment_type,
+    category: item.job_employment_type,
+  }))
+}
+
 export async function fetchJSearchOpportunities(params: CareerSearchParams): Promise<CareerOpportunity[]> {
+  if (isJSearchPaused()) return []
+
   const key = env('JSEARCH_API_KEY', 'JSEARCH_RAPIDAPI_KEY', 'RAPIDAPI_KEY', 'RAPID_API_KEY', 'X_RAPIDAPI_KEY')
   const host = env('JSEARCH_API_HOST', 'JSEARCH_RAPIDAPI_HOST') || 'jsearch.p.rapidapi.com'
   if (!key) return []
@@ -41,7 +65,14 @@ export async function fetchJSearchOpportunities(params: CareerSearchParams): Pro
       'x-rapidapi-key': key,
     },
     cache: 'no-store',
+    signal: AbortSignal.timeout(22_000),
   })
+
+  if (response.status === 429 || response.status === 403) {
+    pauseJSearch()
+    console.warn('[career:jsearch] rate limited — pausing JSearch for 1 hour, using Adzuna only')
+    return []
+  }
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '')
@@ -49,23 +80,5 @@ export async function fetchJSearchOpportunities(params: CareerSearchParams): Pro
   }
 
   const data = await response.json()
-
-  return (data.data || []).map((item: any): CareerOpportunity => ({
-    id: String(item.job_id || item.job_apply_link || item.job_title),
-    provider: 'jsearch',
-    source: 'JSearch',
-    title: item.job_title || 'Untitled role',
-    company: item.employer_name || 'Unknown company',
-    ...resolveCompanyBrand(item.employer_name || 'Unknown company', item.employer_logo),
-    location: formatLocation(item, params.location),
-    country: item.job_country,
-    countryCode: item.job_country?.toLowerCase() || params.country,
-    remote: Boolean(item.job_is_remote),
-    salary: formatSalary(item),
-    description: item.job_description || '',
-    url: item.job_apply_link || item.job_google_link,
-    postedAt: item.job_posted_at_datetime_utc,
-    employmentType: item.job_employment_type,
-    category: item.job_employment_type,
-  }))
+  return mapJSearchResults(data, params)
 }

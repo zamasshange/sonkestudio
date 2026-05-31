@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { sortToolsForUser } from '@/lib/filter-tools'
 import { useUserPreferences } from '@/hooks/use-user-preferences'
 import { useLocation } from '@/hooks/use-location'
+import { HeroStudioSearch } from '@/components/hero-studio-search'
 import { getHeroMessage } from '@/lib/smart-recommendations'
 import { isSouthAfricanUser } from '@/lib/sa-intelligence'
 import { categories, southAfricaPopularTools, tools } from '@/lib/tools-data'
@@ -65,14 +66,6 @@ const heroTileVisuals = [
   'from-[#1f6f72] via-[#9aa7a0] to-[#cf9152]',
   'from-[#135f72] via-[#9c8f9c] to-[#c8613f]',
   'from-[#174b78] via-[#8ea0a2] to-[#d28a41]',
-]
-
-const avatarImages = [
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=80',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
-  'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=160&q=80',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=160&q=80',
 ]
 
 const toolboxWorkflows = [
@@ -132,7 +125,7 @@ export function HeroSection() {
 
   return (
     // Navbar is fixed (`components/navbar.tsx`), so we need enough top padding here to avoid overlap.
-    <section className="bg-background px-4 pb-6 pt-28 sm:px-8 sm:pt-32 lg:pt-32">
+    <section className="bg-background px-4 pb-5 pt-24 sm:px-8 sm:pt-28">
       <motion.div
         variants={container}
         initial="hidden"
@@ -180,89 +173,62 @@ export function HeroSection() {
 
         <motion.div
           variants={item}
-          className="sonke-hero-field relative mt-3 min-h-[360px] overflow-hidden rounded-[1.25rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] sm:min-h-[400px] lg:min-h-[420px]"
+          className="sonke-hero-field relative mt-3 min-h-[340px] overflow-hidden rounded-[1.25rem] border border-border bg-foreground text-background shadow-[0_35px_90px_-65px_rgba(15,23,42,0.6)] sm:min-h-[380px] lg:min-h-[400px]"
         >
           <div className="sonke-hero-mesh absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground/18 via-foreground/5 to-foreground/10" />
 
-          <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-8 lg:p-10">
-            <div className="pointer-events-none absolute right-5 top-12 hidden sm:block lg:right-8 lg:top-16">
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-between p-5 sm:min-h-[380px] sm:p-6 lg:min-h-[400px] lg:p-8">
+            <div className="pointer-events-none absolute right-5 top-5 hidden sm:block lg:right-8 lg:top-6">
               <div className="flex flex-col gap-2">
                 {[
                   { icon: SiInstagram, label: 'Instagram', href: 'https://www.instagram.com/sonkestudio.co.za/' },
                   { icon: FaLinkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/in/zama-shange-344166298/' },
                   { icon: SiTiktok, label: 'TikTok', href: 'https://www.tiktok.com/@sonkestudio' },
                   { icon: SiX, label: 'X', href: 'https://x.com/sonkestudio' },
-                ].map(({ icon: Icon, label, href }, index) => (
-                  <motion.a
+                ].map(({ icon: Icon, label, href }) => (
+                  <a
                     key={label}
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`SONKE Studio on ${label}`}
-                    initial={{ opacity: 0, x: 22 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 + index * 0.08, duration: 0.55, ease: 'easeOut' }}
-                    className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#e4e0dc] text-foreground shadow-sm transition hover:bg-background"
+                    className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#e4e0dc] text-foreground shadow-sm transition hover:bg-background"
                   >
-                    <Icon className="h-5 w-5" style={{ color: '#1a1a1a' }} />
-                  </motion.a>
+                    <Icon className="h-4 w-4" style={{ color: '#1a1a1a' }} />
+                  </a>
                 ))}
               </div>
             </div>
 
-            <div className="max-w-[800px] pt-6 sm:pt-10 lg:pt-10">
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.18, duration: 0.6, ease: 'easeOut' }}
-                className="mb-6 flex -space-x-3"
-              >
-                {avatarImages.map((src, index) => (
-                  <motion.img
-                    key={src}
-                    src={src}
-                    alt={`SONKE user ${index + 1}`}
-                    initial={{ opacity: 0, x: -14, scale: 0.92 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    transition={{ delay: 0.25 + index * 0.05, duration: 0.45, ease: 'easeOut' }}
-                    className="h-9 w-9 rounded-full border-2 border-background object-cover sm:h-10 sm:w-10"
-                  />
-                ))}
-              </motion.div>
-              <h2 className="max-w-[800px] text-[2.2rem] font-bold leading-[1.05] tracking-tight sm:text-[2.8rem] lg:text-[3.4rem]">
-                <span className="block">We Build Digital Service with</span>
-                <span className="sonke-rotating-line mt-1 block h-[1.2em] overflow-hidden text-background">
-                  <span className="sonke-rotating-stack block">
+            <div className="max-w-[800px] pr-0 sm:pr-24 lg:pr-28">
+              <h2 className="text-[2rem] font-bold tracking-tight sm:text-[2.6rem] lg:text-[3.2rem]">
+                <span className="block leading-[1.1]">Your studio for</span>
+                <span className="sonke-rotating-line mt-2 block h-[1.2em] overflow-hidden leading-[1.2] text-background">
+                  <span className="sonke-rotating-stack block leading-[1.2]">
                     {heroRotatingTasks.map((task) => (
-                      <span key={task} className="block h-[1.2em]">
+                      <span key={task} className="block h-[1.2em] leading-[1.2]">
                         {task}
                       </span>
                     ))}
-                    <span className="block h-[1.2em]">{heroRotatingTasks[0]}</span>
+                    <span className="block h-[1.2em] leading-[1.2]">{heroRotatingTasks[0]}</span>
                   </span>
                 </span>
               </h2>
-              {heroMessage && (
-                <motion.p
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                  className="mt-3 text-sm text-background/70"
-                >
-                  {heroMessage}
-                </motion.p>
-              )}
-              {isSA && (
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.72, duration: 0.5 }}
-                  className="mt-2 text-xs text-background/70"
-                >
-                  Popular in {location?.city || 'South Africa'}: CAPS study tools, ZAR-ready business docs, and local creator workflows.
-                </motion.p>
-              )}
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.45 }}
+                className="mt-5 max-w-[620px] text-sm leading-relaxed text-background/78 sm:text-base"
+              >
+                {isSA
+                  ? `SONKE is built for South African students, creators, and teams — search ${tools.length}+ tools, live careers, and workflows in one place.`
+                  : `SONKE helps students, creators, and teams search ${tools.length}+ tools, live careers, and AI workflows in one focused studio.`}
+              </motion.p>
+              {heroMessage ? (
+                <p className="mt-2 text-sm text-background/65">{heroMessage}</p>
+              ) : null}
+              <HeroStudioSearch compact />
             </div>
 
             <motion.div
@@ -270,7 +236,7 @@ export function HeroSection() {
               animate="visible"
               variants={{
                 hidden: {},
-                visible: { transition: { delayChildren: 1.02, staggerChildren: 0.07 } },
+                visible: { transition: { delayChildren: 0.55, staggerChildren: 0.06 } },
               }}
               className="grid gap-3 pt-5 sm:grid-cols-2 lg:grid-cols-5"
             >
@@ -280,8 +246,8 @@ export function HeroSection() {
                   <motion.div
                     key={tool.id}
                     variants={{
-                      hidden: { opacity: 0, y: 24 },
-                      visible: { opacity: 1, y: 0, transition: { duration: 0.58, ease: 'easeOut' } },
+                      hidden: { opacity: 0, y: 16 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
                     }}
                   >
                     <Link
@@ -871,15 +837,20 @@ export function FeaturedWorkSection() {
   )
 }
 
-const fallbackCareerSignals = [
-  { title: 'Graduate Software Intern', company: 'Fintech studio', place: 'Johannesburg', tag: 'Featured internship', provider: 'SONKE' },
-  { title: 'Remote Junior Data Analyst', company: 'Analytics partner', place: 'Remote Africa', tag: 'Trending', provider: 'SONKE' },
-  { title: 'Marketing Graduate Programme', company: 'Growth team', place: 'Cape Town', tag: 'Graduate program', provider: 'SONKE' },
-]
+type CareerSignal = {
+  title: string
+  company: string
+  place: string
+  tag: string
+  provider: string
+  href?: string
+}
 
 export function CareersSection() {
-  const [careerSignals, setCareerSignals] = useState(fallbackCareerSignals)
+  const [careerSignals, setCareerSignals] = useState<CareerSignal[]>([])
   const [careerLive, setCareerLive] = useState(false)
+  const [careerLoading, setCareerLoading] = useState(true)
+  const [careerError, setCareerError] = useState<string | null>(null)
   const recentSignalsRef = useRef<string[]>([])
   const refreshTickRef = useRef(0)
 
@@ -895,6 +866,7 @@ export function CareersSection() {
 
     let active = true
     const loadSignals = async () => {
+      setCareerLoading(true)
       try {
         refreshTickRef.current += 1
         const params = new URLSearchParams({
@@ -902,31 +874,44 @@ export function CareersSection() {
           location: 'South Africa',
           country: 'za',
           perPage: '12',
-          seed: String(Math.floor(Date.now() / 300000) + refreshTickRef.current),
+          fresh: 'true',
+          seed: String(Date.now() + refreshTickRef.current),
         })
-        if (recentSignalsRef.current.length) {
-          params.set('recent', recentSignalsRef.current.slice(0, 12).join(','))
-        }
         const response = await fetch(`/api/career/opportunities?${params}`, { cache: 'no-store' })
+        if (!response.ok) throw new Error(`Feed ${response.status}`)
         const data = await response.json()
         const opportunities = Array.isArray(data.opportunities) ? data.opportunities : []
-        if (!active || !opportunities.length) return
+        if (!active) return
+        if (data.source !== 'live' || !opportunities.length) {
+          setCareerSignals([])
+          setCareerLive(false)
+          setCareerError(data.error || data.warning || 'No live opportunities available right now.')
+          return
+        }
+        setCareerError(null)
         const top = opportunities.slice(0, 3)
         setCareerSignals(top.map((item: any, index: number) => ({
           title: item.title || 'Career opportunity',
           company: item.company || 'Hiring company',
           place: item.location || 'South Africa',
-          tag: item.remote ? 'Remote signal' : index === 0 ? 'Latest live role' : /intern|learnership|graduate/i.test(`${item.title} ${item.description}`) ? 'Student pathway' : 'Trending now',
+          tag: item.remote ? 'Remote' : index === 0 ? 'Latest live' : /intern|learnership|graduate/i.test(`${item.title} ${item.description}`) ? 'Student pathway' : 'Live role',
           provider: item.source || item.provider || 'Live',
+          href: item.url || '/career',
         })))
-        setCareerLive(data.source === 'live')
+        setCareerLive(true)
         recentSignalsRef.current = [
-          ...top.map((item: any) => `${item.provider || 'live'}-${item.id || item.title}`.toLowerCase()),
+          ...top.map((item: any) => `${item.provider}-${item.id}`.toLowerCase()),
           ...recentSignalsRef.current,
         ].filter((value, index, array) => array.indexOf(value) === index).slice(0, 16)
         window.localStorage.setItem('sonke-career-home-recent', JSON.stringify(recentSignalsRef.current))
       } catch {
-        setCareerLive(false)
+        if (active) {
+          setCareerLive(false)
+          setCareerSignals([])
+          setCareerError('Unable to fetch live opportunities.')
+        }
+      } finally {
+        if (active) setCareerLoading(false)
       }
     }
     loadSignals()
@@ -964,7 +949,7 @@ export function CareersSection() {
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
               {[
-                [careerLive ? 'Live jobs' : 'Career feed', careerLive ? 'JSearch + Adzuna' : 'Fallback ready'],
+                [careerLive ? 'Live jobs' : 'Awaiting feed', careerLive ? 'JSearch + Adzuna' : 'Real data only'],
                 ['SA context', 'Local signals'],
                 ['AI assist', 'CV, cover, interview'],
               ].map(([value, label]) => (
@@ -1011,13 +996,18 @@ export function CareersSection() {
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase text-muted-foreground">Trending opportunities</p>
-                <h3 className="mt-2 text-3xl font-semibold">{careerLive ? 'Live roles moving right now.' : 'Built for browsing, not uploading.'}</h3>
+                <h3 className="mt-2 text-3xl font-semibold">{careerLive ? 'Live roles moving right now.' : careerLoading ? 'Loading live feed…' : 'No live roles to show yet'}</h3>
               </div>
               <Sparkles className="hidden h-8 w-8 text-primary sm:block" />
             </div>
             <div className="grid gap-3">
+              {!careerLoading && !careerSignals.length ? (
+                <div className="rounded-md border border-dashed border-border bg-background p-6 text-sm leading-6 text-muted-foreground">
+                  {careerError || 'No live opportunities available right now. Open Career Hub to search when providers are connected.'}
+                </div>
+              ) : null}
               {careerSignals.map((role, index) => (
-                <Link key={role.title} href="/career" className="group grid gap-4 rounded-md border border-border bg-background p-4 transition hover:border-primary/50 hover:bg-white md:grid-cols-[48px_1fr_auto] md:items-center">
+                <Link key={`${role.title}-${index}`} href={role.href || '/career'} className="group grid gap-4 rounded-md border border-border bg-background p-4 transition hover:border-primary/50 hover:bg-white md:grid-cols-[48px_1fr_auto] md:items-center">
                   <span className="flex h-12 w-12 items-center justify-center bg-foreground text-background">{String(index + 1).padStart(2, '0')}</span>
                   <span>
                     <span className="block text-lg font-semibold">{role.title}</span>
